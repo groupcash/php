@@ -19,16 +19,16 @@ class ValidateTransactionSpec {
         $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
 
         $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
-        $transferred = $app->transferCoins($coins, 'public first', 'backer');
+        $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
 
-        $validated = $app->validateTransaction($transferred[0], 'public backer', 'backer encrypted with foo', 'foo');
-        $this->assert->equals($app->decode([$validated]), [[
+        $validated = $app->validateTransaction($transferred, 'public backer', 'backer encrypted with foo', 'foo');
+        $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
                 'to' => 'public first'
             ],
             'signer' => 'public backer',
-            'signature' => 'a018ff97fcccb75ee63ab14019499033 signed with backer'
-        ]]);
+            'signature' => '512c0d1af5c18acc57ee88d89d55394d signed with backer'
+        ]);
     }
 }

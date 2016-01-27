@@ -18,12 +18,12 @@ class IssueCoinsSpec {
 
     function fake() {
         $app = new Application(new FakeKeyService('my key'), new FakeCryptoService());
-        $privatePublic = $app->generateKey('foo');
+        $key = $app->generateKey('foo');
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, $privatePublic['private'], 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, $key, 'foo');
 
         $this->assert->size($coins, 3);
-        $this->assert->equals($app->decode($coins), [
+        $this->assert->equals($coins, [
             [
                 'content' => [
                     'promise' => 'my promise',
@@ -60,8 +60,8 @@ class IssueCoinsSpec {
         }
 
         $app = new Application(new EccKeyService(), new McryptCryptoService());
-        $keys = $app->generateKey('foo');
-        $coins = $app->issueCoins('my promise', 'backer key', 1, 1, $keys['private'], 'foo');
+        $key = $app->generateKey('foo');
+        $coins = $app->issueCoins('my promise', 'backer key', 1, 1, $key, 'foo');
 
         $this->assert->isTrue($app->verifySignature($coins[0]));
     }

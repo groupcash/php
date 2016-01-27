@@ -14,14 +14,6 @@ class Application {
         $this->crypto = $crypto;
     }
 
-    private function sign(array $content, $key) {
-        return base64_encode(json_encode([
-            'content' => $content,
-            'signer' => $this->key->publicKey($key),
-            'signature' => $this->key->sign(json_encode($content), $key)
-        ]));
-    }
-
     /**
      * @param null|string $passPhrase
      * @return string
@@ -33,10 +25,20 @@ class Application {
         if ($passPhrase) {
             $key = $this->crypto->encrypt($key, $passPhrase);
         }
-        return [
-            'private' => $key,
-            'public' => $this->key->publicKey($privateKey)
-        ];
+        return $key;
+    }
+
+    /**
+     * @param string $key
+     * @param null|string $passPhrase
+     * @return string
+     */
+    public function publicKey($key, $passPhrase = null) {
+        if ($passPhrase) {
+            $key = $this->crypto->decrypt($key, $passPhrase);
+        }
+
+        return $this->key->publicKey($key);
     }
 
     /**
@@ -46,7 +48,7 @@ class Application {
      * @param int $count
      * @param string $key
      * @param null|string $passPhrase
-     * @return \string[]
+     * @return array[]
      */
     public function issueCoins($promise, $backerPublicKey, $serialStart, $count, $key, $passPhrase = null) {
         if ($passPhrase) {
@@ -64,65 +66,54 @@ class Application {
         return $coins;
     }
 
-    /**
-     * @param string $signedContent
-     * @return bool
-     */
-    public function verifySignature($signedContent) {
-        $signedContent = $this->decode([$signedContent])[0];
-
-        $content = json_encode($signedContent['content']);
-        $signature = $signedContent['signature'];
-        $publicKey = $signedContent['signer'];
-
-        return $this->key->verify($content, $signature, $publicKey);
+    private function sign(array $content, $key) {
+        return [
+            'content' => $content,
+            'signer' => $this->key->publicKey($key),
+            'signature' => $this->key->sign(json_encode($content), $key)
+        ];
     }
 
     /**
-     * @param string[] $coins
+     * @param array $signedContent
+     * @return bool
+     */
+    public function verifySignature(array $signedContent) {
+        $content = $signedContent['content'];
+        $signature = $signedContent['signature'];
+        $publicKey = $signedContent['signer'];
+
+        return $this->key->verify(json_encode($content), $signature, $publicKey);
+    }
+
+    /**
+     * @param array $coin
      * @param string $newOwnerPublicKey
      * @param string $key
      * @param null|string $passPhrase
-     * @return string[]
+     * @return array
      */
-    public function transferCoins(array $coins, $newOwnerPublicKey, $key, $passPhrase = null) {
+    public function transferCoin($coin, $newOwnerPublicKey, $key, $passPhrase = null) {
         if ($passPhrase) {
             $key = $this->crypto->decrypt($key, $passPhrase);
         }
 
-        $transferred = [];
-        foreach ($coins as $coin) {
-            $content = [
-                'coin' => $coin,
-                'to' => $newOwnerPublicKey
-            ];
-            $transferred[] = $this->sign($content, $key);
-        }
-        return $transferred;
+        return $this->sign([
+            'coin' => $coin,
+            'to' => $newOwnerPublicKey
+        ], $key);
     }
 
     /**
-     * @param string[] $encoded
-     * @return string
-     */
-    public function decode($encoded) {
-        return array_map(function ($encoded) {
-            return json_decode(base64_decode($encoded), true);
-        }, $encoded);
-    }
-
-    /**
-     * @param string $coin
+     * @param array $coin
      * @param string $ownerPublicKey
      * @param string $key
      * @param null|string $passPhrase
-     * @return string
+     * @return array
      * @throws \Exception if invalid
      */
-    public function validateTransaction($coin, $ownerPublicKey, $key, $passPhrase = null) {
-        $decoded = $this->decode([$coin])[0];
-
-        if (!$this->verifySignature($coin) || $decoded['signer'] != $ownerPublicKey) {
+    public function validateTransaction(array $coin, $ownerPublicKey, $key, $passPhrase = null) {
+        if (!$this->verifySignature($coin) || $coin['signer'] != $ownerPublicKey) {
             throw new \Exception('Invalid');
         }
 
@@ -130,7 +121,7 @@ class Application {
             $key = $this->crypto->decrypt($key, $passPhrase);
         }
 
-        if ($decoded['signer'] == $this->key->publicKey($key)) {
+        if ($coin['signer'] == $this->key->publicKey($key)) {
             return $coin;
         }
 
