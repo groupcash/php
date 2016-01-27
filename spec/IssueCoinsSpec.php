@@ -20,19 +20,49 @@ class IssueCoinsSpec {
         $app = new Application(new FakeKeyService('my key'), new FakeCryptoService());
         $privatePublic = $app->generateKey('foo');
 
-        $coins = $app->issueCoins('my promise', 'backer key', 42, 3, $privatePublic['private'], 'foo');
-        $this->assert->equals($coins, [
-            '{"content":{"promise":"my promise","serial":42,"backer":"backer key","issuer":"public my key"},"signature":"{\\"promise\\":\\"my promise\\",\\"serial\\":42,\\"backer\\":\\"backer key\\",\\"issuer\\":\\"public my key\\"} signed with my key"}',
-            '{"content":{"promise":"my promise","serial":43,"backer":"backer key","issuer":"public my key"},"signature":"{\\"promise\\":\\"my promise\\",\\"serial\\":43,\\"backer\\":\\"backer key\\",\\"issuer\\":\\"public my key\\"} signed with my key"}',
-            '{"content":{"promise":"my promise","serial":44,"backer":"backer key","issuer":"public my key"},"signature":"{\\"promise\\":\\"my promise\\",\\"serial\\":44,\\"backer\\":\\"backer key\\",\\"issuer\\":\\"public my key\\"} signed with my key"}',
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, $privatePublic['private'], 'foo');
+
+        $this->assert->size($coins, 3);
+        $this->assert->equals($app->decode($coins), [
+            [
+                'content' => [
+                    'promise' => 'my promise',
+                    'serial' => 42,
+                    'backer' => 'public backer',
+                ],
+                'signer' => 'public my key',
+                'signature' => '5aff16eda33e2f13591102378cc8dae0 signed with my key'
+            ],
+            [
+                'content' => [
+                    'promise' => 'my promise',
+                    'serial' => 43,
+                    'backer' => 'public backer',
+                ],
+                'signer' => 'public my key',
+                'signature' => 'b6e6a67975ddc41ec33eddd34bad9847 signed with my key'
+            ],
+            [
+                'content' => [
+                    'promise' => 'my promise',
+                    'serial' => 44,
+                    'backer' => 'public backer',
+                ],
+                'signer' => 'public my key',
+                'signature' => 'a1a80079245247b2ec34cafe8c351a18 signed with my key'
+            ]
         ]);
     }
 
     function real() {
+        if (!getenv('REAL')) {
+            $this->assert->incomplete('Skipped. Set REAL environment variable to execute');
+        }
+
         $app = new Application(new EccKeyService(), new McryptCryptoService());
         $keys = $app->generateKey('foo');
         $coins = $app->issueCoins('my promise', 'backer key', 1, 1, $keys['private'], 'foo');
 
-        $this->assert->isTrue($app->verifySignature($coins[0], $keys['public']));
+        $this->assert->isTrue($app->verifySignature($coins[0]));
     }
 }

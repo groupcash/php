@@ -33,6 +33,7 @@ class FakeKeyService implements KeyService {
      * @return string
      */
     public function sign($content, $key) {
+        $content = md5($content);
         return "$content signed with $key";
     }
 
