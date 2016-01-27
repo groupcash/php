@@ -21,10 +21,10 @@ class TransferCoinsSpec {
         $this->assert->equals($transferred, [
             'content' => [
                 'coin' => $coins[0],
-                'to' => 'new owner'
+                'owner' => 'new owner'
             ],
             'signer' => 'public backer',
-            'signature' => '7cb62b67ed7ce3cb55fa470f3bf5f33a signed with backer'
+            'signature' => 'b86f3e35332e07fba465d5d386c2e3ac signed with backer'
         ]);
     }
 
@@ -38,10 +38,10 @@ class TransferCoinsSpec {
         $this->assert->equals($twice, [
             'content' => [
                 'coin' => $transferred,
-                'to' => 'public second'
+                'owner' => 'public second'
             ],
             'signer' => 'public first',
-            'signature' => 'bb0f20e570e386304eaf5eb345492bed signed with first'
+            'signature' => '9e57cad83cc4d6db69d4639b16b07653 signed with first'
         ]);
     }
 }

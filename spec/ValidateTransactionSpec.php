@@ -27,11 +27,11 @@ class ValidateTransactionSpec {
         $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
-                'to' => 'public first',
-                'prev' => 'ac3ac68a2fdd56b0f2887bd5cb29c984fe5c59eb9fa34fa0273ddd0df552ea1e'
+                'owner' => 'public first',
+                'prev' => 'a38ea3096857b49949c114971513bb7189aa9d1986147a64f1912ee5dc22f007'
             ],
             'signer' => 'public backer',
-            'signature' => '27353f33d6656ad00140ecb388b37412 signed with backer'
+            'signature' => '6dd34c53acfcc2dffdb361906e17bf3e signed with backer'
         ]);
     }
 
@@ -96,11 +96,11 @@ class ValidateTransactionSpec {
         $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
-                'to' => 'public second',
-                'prev' => 'fb9ed23d23f05cee8e75bf7dd1b45bcf5637447523e96c7c291f148cea120ca3'
+                'owner' => 'public second',
+                'prev' => 'e18a2130819a0a4dc79d3eff80dc4f55131194518dac8f34566e803c90d9aaa9'
             ],
             'signer' => 'public backer',
-            'signature' => 'bf348668a52ffc2809578711f932fd2a signed with backer'
+            'signature' => '740281a7078d11f90564b44ffda47d74 signed with backer'
         ]);
     }
 
@@ -145,11 +145,11 @@ class ValidateTransactionSpec {
         $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
-                'to' => 'public third',
-                'prev' => '64bb925b3796ab044a946e586f54c0ff8fe85a5ec138b51275d7c35afbd1d088'
+                'owner' => 'public third',
+                'prev' => 'a51483ee09d618700ffc86c56f388dcb48a9b971927e223af75873841523c2d3'
             ],
             'signer' => 'public backer',
-            'signature' => '86660f808b475a4abeefe206734bd0ff signed with backer'
+            'signature' => 'be91202e0df56fb59523b40752827bac signed with backer'
         ]);
     }
 
