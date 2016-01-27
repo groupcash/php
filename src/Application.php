@@ -110,4 +110,30 @@ class Application {
             return json_decode(base64_decode($encoded), true);
         }, $encoded);
     }
+
+    /**
+     * @param string $coin
+     * @param string $ownerPublicKey
+     * @param string $key
+     * @param null|string $passPhrase
+     * @return string
+     * @throws \Exception if invalid
+     */
+    public function validateTransaction($coin, $ownerPublicKey, $key, $passPhrase = null) {
+        $decoded = $this->decode([$coin])[0];
+
+        if (!$this->verifySignature($coin) || $decoded['signer'] != $ownerPublicKey) {
+            throw new \Exception('Invalid');
+        }
+
+        if ($passPhrase) {
+            $key = $this->crypto->decrypt($key, $passPhrase);
+        }
+
+        if ($decoded['signer'] == $this->key->publicKey($key)) {
+            return $coin;
+        }
+
+        return null;
+    }
 }
