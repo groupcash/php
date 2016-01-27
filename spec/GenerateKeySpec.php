@@ -1,5 +1,6 @@
 <?php
 namespace spec\groupcash\php;
+
 use groupcash\php\Application;
 use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeCryptoService;
@@ -19,11 +20,17 @@ class GenerateKeySpec {
 
     function withoutPassPhrase() {
         $key = $this->app->generateKey();
-        $this->assert->equals($key, 'my key');
+        $this->assert->equals($key, [
+            'private' => 'my key',
+            'public' => 'public my key'
+        ]);
     }
 
     function withPassPhrase() {
         $key = $this->app->generateKey('secret');
-        $this->assert->equals($key, 'my key encrypted with secret');
+        $this->assert->equals($key, [
+            'private' => 'my key encrypted with secret',
+            'public' => 'public my key'
+        ]);
     }
 }

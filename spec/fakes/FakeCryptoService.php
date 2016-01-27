@@ -13,4 +13,13 @@ class FakeCryptoService implements CryptoService {
     public function encrypt($text, $key) {
         return "$text encrypted with $key";
     }
+
+    /**
+     * @param string $encrypted
+     * @param string $key
+     * @return string
+     */
+    public function decrypt($encrypted, $key) {
+        return str_replace(" encrypted with $key", "", $encrypted);
+    }
 }

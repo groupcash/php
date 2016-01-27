@@ -18,4 +18,32 @@ class FakeKeyService implements KeyService {
     public function generate() {
         return $this->key;
     }
+
+    /**
+     * @param string $key
+     * @return string
+     */
+    public function publicKey($key) {
+        return "public $key";
+    }
+
+    /**
+     * @param string $content
+     * @param string $key
+     * @return string
+     */
+    public function sign($content, $key) {
+        return "$content signed with $key";
+    }
+
+    /**
+     * @param string $content
+     * @param string $signature
+     * @param string $publicKey
+     * @return boolean
+     */
+    public function verify($content, $signature, $publicKey) {
+        $key = str_replace("public ", "", $publicKey);
+        return str_replace(" signed with $key", "", $signature) == $content;
+    }
 }
