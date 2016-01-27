@@ -14,6 +14,10 @@ class Application {
         $this->crypto = $crypto;
     }
 
+    /**
+     * @param null|string $passPhrase
+     * @return string
+     */
     public function generateKey($passPhrase = null) {
         $key = $this->key->generate();
         if ($passPhrase) {
