@@ -113,18 +113,40 @@ class Application {
      * @throws \Exception if invalid
      */
     public function validateTransaction(array $coin, $ownerPublicKey, $key, $passPhrase = null) {
-        if (!$this->verifySignature($coin) || $coin['signer'] != $ownerPublicKey) {
-            throw new \Exception('Invalid');
+        if (!$this->verifySignature($coin)) {
+            throw new \Exception('Invalid signature.');
+        }
+
+        $newOwner = $coin['content']['to'];
+
+        if (!isset($coin['content']['coin']['content']['promise'])) {
+            if ($coin['content']['coin']['content']['to'] != $coin['signer']) {
+                throw new \Exception('Broken transaction.');
+            }
+
+            $coin = $this->validateTransaction($coin['content']['coin'], $ownerPublicKey, $key, $passPhrase);
+        } else if ($coin['content']['to'] != $ownerPublicKey) {
+            throw new \Exception('Invalid transaction.');
+        } else if ($coin['signer'] != $coin['content']['coin']['content']['backer']) {
+            throw new \Exception('Invalid validation.');
         }
 
         if ($passPhrase) {
             $key = $this->crypto->decrypt($key, $passPhrase);
         }
 
-        if ($coin['signer'] == $this->key->publicKey($key)) {
-            return $coin;
+        if ($coin['content']['coin']['content']['backer'] != $this->key->publicKey($key)) {
+            throw new \Exception('Invalid key.');
         }
 
-        return null;
+        if (!$this->verifySignature($coin['content']['coin'])) {
+            throw new \Exception('Invalid coin.');
+        }
+
+        return $this->sign([
+            'coin' => $coin['content']['coin'],
+            'to' => $newOwner,
+            'prev' => hash('sha256', json_encode($coin))
+        ], $key);
     }
 }
