@@ -45,6 +45,6 @@ class FakeKeyService implements KeyService {
      */
     public function verify($content, $signature, $publicKey) {
         $key = str_replace("public ", "", $publicKey);
-        return str_replace(" signed with $key", "", $signature) == $content;
+        return str_replace(" signed with $key", "", $signature) == md5($content);
     }
 }
