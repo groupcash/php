@@ -23,9 +23,7 @@ class Base64Renderer implements Renderer {
      * @return string
      */
     public function render($value) {
-        return $value .
-        "\n\n" .
-        base64_encode(serialize($value));
+        return (string)base64_encode(serialize($value));
     }
 }
 
@@ -37,7 +35,7 @@ class Base64Field implements CliField {
      * @throws Exception
      */
     public function decode($encoded) {
-        return unserialize(base64_decode($encoded));
+        return (string)$this->_decode($encoded);
     }
 
     /**
@@ -62,7 +60,11 @@ class Base64Field implements CliField {
      * @return mixed
      */
     public function inflate(Parameter $parameter, $serialized) {
-        return $this->decode($serialized);
+        return $this->_decode($serialized);
+    }
+
+    private function _decode($encoded) {
+        return unserialize(base64_decode($encoded));
     }
 }
 
