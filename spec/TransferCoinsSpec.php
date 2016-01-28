@@ -2,6 +2,7 @@
 namespace spec\groupcash\php;
 
 use groupcash\php\Application;
+use groupcash\php\model\Transference;
 use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
@@ -15,33 +16,24 @@ class TransferCoinsSpec {
 
     function originalCoin() {
         $app = new Application(new FakeKeyService());
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'my key');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
 
         $transferred = $app->transferCoin($coins[0], 'new owner', 'backer');
-        $this->assert->equals($transferred, [
-            'content' => [
-                'coin' => $coins[0],
-                'owner' => 'new owner'
-            ],
-            'signer' => 'public backer',
-            'signature' => 'b86f3e35332e07fba465d5d386c2e3ac signed with backer'
-        ]);
+
+        $this->assert->equals($transferred->getTransaction(), new Transference($coins[0], 'new owner'));
+        $this->assert->equals($transferred->getSignature()->getSigner(), 'public backer');
+        $this->assert->isTrue($app->verifyCoin($transferred, ['public issuer']));
     }
 
     function transferredCoin() {
         $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'my key');
-        $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
-        $twice = $app->transferCoin($transferred, 'public second', 'first');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
+        $first = $app->transferCoin($coins[0], 'public first', 'backer');
+        $second = $app->transferCoin($first, 'public second', 'first');
 
-        $this->assert->equals($twice, [
-            'content' => [
-                'coin' => $transferred,
-                'owner' => 'public second'
-            ],
-            'signer' => 'public first',
-            'signature' => '9e57cad83cc4d6db69d4639b16b07653 signed with first'
-        ]);
+        $this->assert->equals($second->getTransaction(), new Transference($first, 'public second'));
+        $this->assert->equals($second->getSignature()->getSigner(), 'public first');
+        $this->assert->isTrue($app->verifyCoin($second, ['public issuer']));
     }
 }

@@ -2,7 +2,7 @@
 namespace spec\groupcash\php;
 
 use groupcash\php\Application;
-use groupcash\php\impl\EccKeyService;
+use groupcash\php\model\Promise;
 use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
@@ -14,53 +14,25 @@ use spec\groupcash\php\fakes\FakeKeyService;
  */
 class IssueCoinsSpec {
 
-    function fake() {
+    function singleCoin() {
         $app = new Application(new FakeKeyService());
-        $key = $app->generateKey();
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, $key);
+        $this->assert->size($coins, 1);
 
-        $this->assert->size($coins, 3);
-        $this->assert->equals($coins, [
-            [
-                'content' => [
-                    'promise' => 'my promise',
-                    'serial' => 42,
-                    'backer' => 'public backer',
-                ],
-                'signer' => 'public my key',
-                'signature' => '5aff16eda33e2f13591102378cc8dae0 signed with my key'
-            ],
-            [
-                'content' => [
-                    'promise' => 'my promise',
-                    'serial' => 43,
-                    'backer' => 'public backer',
-                ],
-                'signer' => 'public my key',
-                'signature' => 'b6e6a67975ddc41ec33eddd34bad9847 signed with my key'
-            ],
-            [
-                'content' => [
-                    'promise' => 'my promise',
-                    'serial' => 44,
-                    'backer' => 'public backer',
-                ],
-                'signer' => 'public my key',
-                'signature' => 'a1a80079245247b2ec34cafe8c351a18 signed with my key'
-            ]
-        ]);
+        $this->assert->equals($coins[0]->getTransaction(), new Promise('public backer', 'my promise', 42));
+        $this->assert->equals($coins[0]->getSignature()->getSigner(), 'public issuer');
+        $this->assert->isTrue($app->verifyCoin($coins[0], ['public issuer']));
     }
 
-    function real() {
-        if (!getenv('REAL')) {
-            $this->assert->incomplete('Skipped. Set REAL environment variable to execute');
-        }
+    function multipleCoins() {
+        $app = new Application(new FakeKeyService());
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, 'issuer');
 
-        $app = new Application(new EccKeyService());
-        $key = $app->generateKey();
-        $coins = $app->issueCoins('my promise', 'backer key', 1, 1, $key);
+        $this->assert->size($coins, 3);
 
-        $this->assert->isTrue($app->verifySignature($coins[0]));
+        $this->assert->equals($coins[0]->getTransaction(), new Promise('public backer', 'my promise', 42));
+        $this->assert->equals($coins[1]->getTransaction(), new Promise('public backer', 'my promise', 43));
+        $this->assert->equals($coins[2]->getTransaction(), new Promise('public backer', 'my promise', 44));
     }
 }

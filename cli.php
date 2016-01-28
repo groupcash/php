@@ -2,6 +2,7 @@
 
 use groupcash\php\Application;
 use groupcash\php\impl\EccKeyService;
+use groupcash\php\model\Coin;
 use rtens\domin\delivery\cli\CliApplication;
 use rtens\domin\delivery\cli\CliField;
 use rtens\domin\delivery\Renderer;
@@ -14,19 +15,17 @@ require_once __DIR__ . '/vendor/autoload.php';
 class Base64Renderer implements Renderer {
 
     public function handles($value) {
-        return is_array($value) && !empty($value);
+        return $value instanceof Coin;
     }
 
+    /**
+     * @param Coin $value
+     * @return string
+     */
     public function render($value) {
-        $keys = array_keys($value);
-        if (!is_int($keys[0])) {
-            $value = [$value];
-        }
-        return json_encode($value, JSON_PRETTY_PRINT) .
-        "\n\n------------------\n\n" .
-        implode("\n\n", array_map(function ($array) {
-            return base64_encode(json_encode($array));
-        }, $value));
+        return $value .
+        "\n\n" .
+        base64_encode(serialize($value));
     }
 }
 
@@ -38,7 +37,7 @@ class Base64Field implements CliField {
      * @throws Exception
      */
     public function decode($encoded) {
-        return json_encode($this->_decode($encoded), JSON_PRETTY_PRINT);
+        return unserialize(base64_decode($encoded));
     }
 
     /**
@@ -63,11 +62,7 @@ class Base64Field implements CliField {
      * @return mixed
      */
     public function inflate(Parameter $parameter, $serialized) {
-        return $this->_decode($serialized);
-    }
-
-    private function _decode($encoded) {
-        return json_decode(base64_decode($encoded), true);
+        return $this->decode($serialized);
     }
 }
 

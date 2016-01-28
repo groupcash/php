@@ -6,26 +6,26 @@ interface KeyService {
     /**
      * @return string
      */
-    public function generate();
+    public function generatePrivateKey();
 
     /**
-     * @param string $key
+     * @param string $privateKey
      * @return string
      */
-    public function publicKey($key);
+    public function publicKey($privateKey);
 
     /**
      * @param string $content
-     * @param string $key
+     * @param string $privateKey
      * @return string
      */
-    public function sign($content, $key);
+    public function sign($content, $privateKey);
 
     /**
      * @param string $content
-     * @param string $signature
+     * @param string $signed
      * @param string $publicKey
      * @return boolean
      */
-    public function verify($content, $signature, $publicKey);
+    public function verify($content, $signed, $publicKey);
 }

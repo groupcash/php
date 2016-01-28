@@ -1,6 +1,11 @@
 <?php
 namespace groupcash\php;
 
+use groupcash\php\model\Coin;
+use groupcash\php\model\Promise;
+use groupcash\php\model\Signer;
+use groupcash\php\model\Transference;
+
 class Application {
 
     /** @var KeyService */
@@ -14,7 +19,7 @@ class Application {
      * @return string
      */
     public function generateKey() {
-        return $this->key->generate();
+        return $this->key->generatePrivateKey();
     }
 
     /**
@@ -30,92 +35,85 @@ class Application {
      * @param string $backerAddress
      * @param int $serialStart
      * @param int $count
-     * @param string $key
-     * @return array[]
+     * @param string $issuerKey
+     * @return Coin[]
      */
-    public function issueCoins($promise, $backerAddress, $serialStart, $count, $key) {
+    public function issueCoins($promise, $backerAddress, $serialStart, $count, $issuerKey) {
         $coins = [];
         for ($i = $serialStart; $i < $serialStart + $count; $i++) {
-            $coins[] = $this->sign([
-                'promise' => $promise,
-                'serial' => $i,
-                'backer' => $backerAddress,
-            ], $key);
+            $coins[] = Coin::issue(new Promise($backerAddress, $promise, $i), new Signer($this->key, $issuerKey));
         }
         return $coins;
     }
 
-    private function sign(array $content, $key) {
-        return [
-            'content' => $content,
-            'signer' => $this->key->publicKey($key),
-            'signature' => $this->key->sign(json_encode($content), $key)
-        ];
+    /**
+     * @param Coin $coin
+     * @param string $targetAddress
+     * @param string $ownerKey
+     * @return Coin
+     */
+    public function transferCoin(Coin $coin, $targetAddress, $ownerKey) {
+        return $coin->transfer($targetAddress, new Signer($this->key, $ownerKey));
     }
 
     /**
-     * @param array $signedContent
+     * @param Coin $coin
+     * @param array|null $knownIssuerAddresses
      * @return bool
      */
-    public function verifySignature(array $signedContent) {
-        $content = $signedContent['content'];
-        $signature = $signedContent['signature'];
-        $publicKey = $signedContent['signer'];
+    public function verifyCoin(Coin $coin, array $knownIssuerAddresses = null) {
+        $transaction = $coin->getTransaction();
+        $signature = $coin->getSignature();
 
-        return $this->key->verify(json_encode($content), $signature, $publicKey);
+        if (!$this->key->verify($transaction->fingerprint(), $signature->getSigned(), $signature->getSigner())) {
+            return false;
+        }
+
+        if ($transaction instanceof Promise) {
+            if (!is_null($knownIssuerAddresses) && !in_array($coin->getSignature()->getSigner(), $knownIssuerAddresses)) {
+                return false;
+            }
+            return true;
+
+        } else if ($transaction instanceof Transference) {
+            if ($coin->getSignature()->getSigner() != $transaction->getCoin()->getTransaction()->getTarget()) {
+                return false;
+            }
+            return $this->verifyCoin($transaction->getCoin(), $knownIssuerAddresses);
+
+        } else {
+            return false;
+        }
     }
 
     /**
-     * @param array $coin
-     * @param string $newOwnerAddress
-     * @param string $key
-     * @return array
-     */
-    public function transferCoin(array $coin, $newOwnerAddress, $key) {
-        return $this->sign([
-            'coin' => $coin,
-            'owner' => $newOwnerAddress
-        ], $key);
-    }
-
-    /**
-     * @param array $coin
+     * @param Coin $coin
      * @param string $validatedOwnerAddress
-     * @param string $key
-     * @return array
+     * @param string $backerKey
+     * @return Coin
      * @throws \Exception if invalid
      */
-    public function validateTransaction(array $coin, $validatedOwnerAddress, $key) {
-        if (!$this->verifySignature($coin)) {
-            throw new \Exception('Invalid signature.');
-        }
+    public function validateTransference(Coin $coin, $validatedOwnerAddress, $backerKey) {
+        $transference = $coin->getTransaction();
 
-        $newOwner = $coin['content']['owner'];
+        if ($transference instanceof Promise) {
+            if ($transference->getBacker() != $this->key->publicKey($backerKey)) {
+                throw new \Exception('Only the backer of a coin can validate it.');
+            }
+            return $coin;
 
-        if (!isset($coin['content']['coin']['content']['promise'])) {
-            if ($coin['content']['coin']['content']['owner'] != $coin['signer']) {
-                throw new \Exception('Broken transaction.');
+        } else if ($transference instanceof Transference) {
+            if ($transference->getCoin()->getTransaction() instanceof Transference) {
+                $validatedCoin = $this->validateTransference($transference->getCoin(), $validatedOwnerAddress, $backerKey);
+                $transference = $validatedCoin->getTransaction();
+            } else if ($transference->getTarget() != $validatedOwnerAddress) {
+                throw new \Exception('Invalid transference.');
             }
 
-            $coin = $this->validateTransaction($coin['content']['coin'], $validatedOwnerAddress, $key);
-        } else if ($coin['content']['owner'] != $validatedOwnerAddress) {
-            throw new \Exception('Invalid transaction.');
-        } else if ($coin['signer'] != $coin['content']['coin']['content']['backer']) {
-            throw new \Exception('Invalid validation.');
+            $backer = new Signer($this->key, $backerKey);
+            return $transference->getCoin()->transfer($coin->getTransaction()->getTarget(), $backer, 'hash');
         }
 
-        if ($coin['content']['coin']['content']['backer'] != $this->key->publicKey($key)) {
-            throw new \Exception('Invalid key.');
-        }
-
-        if (!$this->verifySignature($coin['content']['coin'])) {
-            throw new \Exception('Invalid coin.');
-        }
-
-        return $this->sign([
-            'coin' => $coin['content']['coin'],
-            'owner' => $newOwner,
-            'prev' => hash('sha256', json_encode($coin))
-        ], $key);
+        throw new \Exception('Invalid coin.');
     }
 }

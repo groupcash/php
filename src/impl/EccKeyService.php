@@ -2,14 +2,19 @@
 namespace groupcash\php\impl;
 
 use groupcash\php\KeyService;
+use Mdanter\Ecc\Crypto\Key\PrivateKeyInterface;
+use Mdanter\Ecc\Crypto\Key\PublicKeyInterface;
 use Mdanter\Ecc\Crypto\Signature\Signature;
 use Mdanter\Ecc\Crypto\Signature\Signer;
 use Mdanter\Ecc\EccFactory;
 use Mdanter\Ecc\Math\MathAdapterFactory;
+use Mdanter\Ecc\Math\MathAdapterInterface;
 use Mdanter\Ecc\Message\MessageFactory;
 use Mdanter\Ecc\Random\RandomGeneratorFactory;
 use Mdanter\Ecc\Serializer\PrivateKey\DerPrivateKeySerializer;
+use Mdanter\Ecc\Serializer\PrivateKey\PrivateKeySerializerInterface;
 use Mdanter\Ecc\Serializer\PublicKey\DerPublicKeySerializer;
+use Mdanter\Ecc\Serializer\PublicKey\PublicKeySerializerInterface;
 
 class EccKeyService implements KeyService {
 
@@ -18,7 +23,7 @@ class EccKeyService implements KeyService {
     /**
      * @return string
      */
-    public function generate() {
+    public function generatePrivateKey() {
         $generator = EccFactory::getNistCurves()->generator256();
         $key = $generator->createPrivateKey();
 
@@ -29,14 +34,14 @@ class EccKeyService implements KeyService {
     }
 
     /**
-     * @param string $key
+     * @param string $privateKey
      * @return string
      */
-    public function publicKey($key) {
-        $serializer = new DerPrivateKeySerializer();
-        $key = $serializer->parse(base64_decode($key));
+    public function publicKey($privateKey) {
+        $math = MathAdapterFactory::getAdapter();
+        $privateKey = $this->deserializePrivate($privateKey, $math);
 
-        $publicKey = $key->getPublicKey();
+        $publicKey = $privateKey->getPublicKey();
 
         $publicSerializer = new DerPublicKeySerializer();
         $serialized = $publicSerializer->serialize($publicKey);
@@ -46,14 +51,12 @@ class EccKeyService implements KeyService {
 
     /**
      * @param string $content
-     * @param string $key
+     * @param string $privateKey
      * @return string
      */
-    public function sign($content, $key) {
+    public function sign($content, $privateKey) {
         $math = MathAdapterFactory::getAdapter();
-
-        $serializer = new DerPrivateKeySerializer($math);
-        $key = $serializer->parse(base64_decode($key));
+        $privateKey = $this->deserializePrivate($privateKey, $math);
 
         $rng = RandomGeneratorFactory::getRandomGenerator();
 
@@ -61,29 +64,52 @@ class EccKeyService implements KeyService {
         $hash = $messages->plaintext($content, 'sha256')->getHash();
 
         $signer = new Signer($math);
-        $signature = $signer->sign($key, $hash, $rng->generate($key->getPoint()->getOrder()));
+        $signature = $signer->sign($privateKey, $hash, $rng->generate($privateKey->getPoint()->getOrder()));
 
         return $signature->getR() . self::SIGNATURE_GLUE . $signature->getS();
     }
 
     /**
      * @param string $content
-     * @param string $signature
+     * @param string $signed
      * @param string $publicKey
-     * @return boolean
+     * @return bool
+     * @throws \Exception
      */
-    public function verify($content, $signature, $publicKey) {
-        list($r, $s) = explode(self::SIGNATURE_GLUE, $signature);
+    public function verify($content, $signed, $publicKey) {
+        if (!strpos($signed, self::SIGNATURE_GLUE)) {
+            throw new \Exception('Invalid signature.');
+        }
+        list($r, $s) = explode(self::SIGNATURE_GLUE, $signed);
 
         $math = MathAdapterFactory::getAdapter();
 
         $serializer = new DerPublicKeySerializer($math);
-        $publicKey = $serializer->parse(base64_decode($publicKey));
+        $publicKey = $this->deserialize($publicKey, $serializer);
 
         $messages = new MessageFactory($math);
         $hash = $messages->plaintext($content, 'sha256')->getHash();
 
         $signer = new Signer($math);
         return $signer->verify($publicKey, new Signature($r, $s), $hash);
+    }
+
+    private function deserializePrivate($privateKey, MathAdapterInterface $math) {
+        $serializer = new DerPrivateKeySerializer($math);
+        return $this->deserialize($privateKey, $serializer);
+    }
+
+    /**
+     * @param string $key
+     * @param PrivateKeySerializerInterface|PublicKeySerializerInterface $serializer
+     * @return PrivateKeyInterface|PublicKeyInterface
+     * @throws \Exception
+     */
+    private function deserialize($key, $serializer) {
+        try {
+            return $serializer->parse(base64_decode($key));
+        } catch (\Exception $e) {
+            throw new \Exception('Invalid key.');
+        }
     }
 }
