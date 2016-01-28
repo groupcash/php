@@ -2,8 +2,10 @@
 namespace groupcash\php\cli;
 
 use groupcash\php\model\Coin;
+use groupcash\php\model\Fraction;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signature;
+use groupcash\php\model\SplitCoin;
 use groupcash\php\model\Transaction;
 use groupcash\php\model\Transference;
 
@@ -56,17 +58,30 @@ class CoinSerializer {
     }
 
     private function arrayCoin(Coin $coin) {
-        return [
+        $array = [
             'trans' => $this->arrayTransaction($coin->getTransaction()),
             'sig' => $this->arraySignature($coin->getSignature())
         ];
+        if ($coin instanceof SplitCoin) {
+            $fraction = $coin->getFraction();
+            $array['fraction'] = $fraction->getNominator() . '|' . $fraction->getDenominator();
+        }
+        return $array;
     }
 
     private function objectCoin(array $array) {
-        return new Coin(
-            $this->objectTransaction($array['trans']),
-            $this->objectSignature($array['sig'])
-        );
+        if (isset($array['fraction'])) {
+            list($nom, $den) = explode('|', $array['fraction']);
+            return new SplitCoin(
+                $this->objectTransaction($array['trans']),
+                $this->objectSignature($array['sig']),
+                new Fraction($nom, $den));
+        } else {
+            return new Coin(
+                $this->objectTransaction($array['trans']),
+                $this->objectSignature($array['sig'])
+            );
+        }
     }
 
     private function arrayTransaction(Transaction $transaction) {

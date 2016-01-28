@@ -1,0 +1,63 @@
+<?php
+namespace groupcash\php\model;
+
+class Fraction {
+
+    /** @var int */
+    private $nominator;
+
+    /** @var int */
+    private $denominator;
+
+    /**
+     * @param int $nominator
+     * @param int $denominator
+     */
+    public function __construct($nominator, $denominator) {
+        if (function_exists('gmp_gcd')) {
+            $gcd = gmp_intval(gmp_gcd((string)$nominator, (string)$denominator));
+            $nominator /= $gcd;
+            $denominator /= $gcd;
+        }
+        $this->denominator = $denominator;
+        $this->nominator = $nominator;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDenominator() {
+        return $this->denominator;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNominator() {
+        return $this->nominator;
+    }
+
+    /**
+     * @return float
+     */
+    public function getFloat() {
+        return $this->nominator / $this->denominator;
+    }
+
+    function __toString() {
+        return $this->nominator . '/' . $this->denominator;
+    }
+
+    public function times(Fraction $fraction) {
+        return new Fraction(
+            $this->nominator * $fraction->nominator,
+            $this->denominator * $fraction->denominator);
+    }
+
+    public function plus(Fraction $fraction) {
+        return new Fraction(
+            $this->nominator * $fraction->denominator + $fraction->nominator * $this->denominator,
+            $this->denominator * $fraction->denominator
+        );
+    }
+}

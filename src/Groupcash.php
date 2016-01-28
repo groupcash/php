@@ -2,8 +2,10 @@
 namespace groupcash\php;
 
 use groupcash\php\model\Coin;
+use groupcash\php\model\Fraction;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signer;
+use groupcash\php\model\SplitCoin;
 use groupcash\php\model\Transference;
 
 class Groupcash {
@@ -48,6 +50,18 @@ class Groupcash {
 
     /**
      * @param Coin $coin
+     * @param int[] $parts
+     * @return SplitCoin[]
+     */
+    public function splitCoin(Coin $coin, array $parts) {
+        if (count($parts) <= 1) {
+            return $coin;
+        }
+        return $coin->split($parts);
+    }
+
+    /**
+     * @param Coin $coin
      * @param string $targetAddress
      * @param string $ownerKey
      * @return Coin
@@ -88,12 +102,56 @@ class Groupcash {
 
     /**
      * @param Coin $coin
-     * @param string $validatedOwnerAddress
+     * @return array|Fraction[] indexed by addresses
+     */
+    public function resolveTransactions(Coin $coin) {
+        /** @var Transference[] $transferences */
+        $transferences = [];
+
+        $transaction = $coin->getTransaction();
+        while ($transaction instanceof Transference) {
+            $transferences[] = $transaction;
+            $transaction = $transaction->getCoin()->getTransaction();
+        }
+
+        $transferences = array_reverse($transferences);
+
+        $fractions = [];
+        $lastOwner = null;
+        foreach ($transferences as $transference) {
+            if ($lastOwner) {
+                $fraction = new Fraction(1, 1);
+
+                $transferredCoin = $transference->getCoin();
+                if ($transferredCoin instanceof SplitCoin) {
+                    $fraction = $transferredCoin->getFraction();
+                }
+
+                $fractions[$lastOwner][] = $fraction->times(new Fraction(-1, 1));
+                $fractions[$transference->getTarget()][] = $fraction;
+            }
+
+            $lastOwner = $transference->getTarget();
+        }
+
+        /** @var Fraction[] $balances */
+        $balances = [];
+        foreach ($fractions as $member => $theirFractions) {
+            $balances[$member] = new Fraction(0, 1);
+            foreach ($theirFractions as $fraction) {
+                $balances[$member] = $balances[$member]->plus($fraction);
+            }
+        }
+        return $balances;
+    }
+
+    /**
+     * @param Coin $coin
      * @param string $backerKey
      * @return Coin
      * @throws \Exception if invalid
      */
-    public function validateTransference(Coin $coin, $validatedOwnerAddress, $backerKey) {
+    public function validateCoin(Coin $coin, $backerKey) {
         $transference = $coin->getTransaction();
 
         if ($transference instanceof Promise) {
@@ -104,10 +162,8 @@ class Groupcash {
 
         } else if ($transference instanceof Transference) {
             if ($transference->getCoin()->getTransaction() instanceof Transference) {
-                $validatedCoin = $this->validateTransference($transference->getCoin(), $validatedOwnerAddress, $backerKey);
+                $validatedCoin = $this->validateCoin($transference->getCoin(), $backerKey);
                 $transference = $validatedCoin->getTransaction();
-            } else if ($transference->getTarget() != $validatedOwnerAddress) {
-                throw new \Exception('Invalid transference.');
             }
 
             $backer = new Signer($this->key, $backerKey);

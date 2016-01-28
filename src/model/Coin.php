@@ -31,6 +31,17 @@ class Coin {
     }
 
     /**
+     * @param int[] $parts
+     * @return SplitCoin[]
+     */
+    public function split(array $parts) {
+        $sum = array_sum($parts);
+        return array_map(function ($part) use ($sum) {
+            return new SplitCoin($this->transaction, $this->signature, new Fraction($part, $sum));
+        }, $parts);
+    }
+
+    /**
      * @return Transaction
      */
     public function getTransaction() {

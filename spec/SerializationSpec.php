@@ -36,7 +36,31 @@ class SerializationSpec {
 
         $this->assert->equals($this->serializeToArray($coin), $array);
         $this->assert->equals($this->serializeUnserialize($coin), $coin);
+    }
 
+    function splitCoin() {
+        $coin = new Coin(
+            new Promise('public backer', 'a promise', 1),
+            new Signature('issuer', 'my signature')
+        );
+        list($half,) = $coin->split([1, 1]);
+
+        $array =
+
+        $array = [
+            'ver' => '1.0',
+            'coin' => [
+                'trans' => [
+                    'promise' => [
+                        'descr' => 'a promise',
+                        'serial' => 1,
+                        'backer' => 'public backer']],
+                'sig' => [
+                    'signer' => 'issuer',
+                    'signed' => 'my signature'],
+                'fraction' => '1|2']];
+        $this->assert->equals($this->serializeToArray($half), $array);
+        $this->assert->equals($this->serializeUnserialize($half), $half);
     }
 
     function transferredCoin() {
