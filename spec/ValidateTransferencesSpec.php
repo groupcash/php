@@ -16,7 +16,7 @@ use spec\groupcash\php\fakes\FakeKeyService;
  * @property ExceptionFixture try <-
  * @property Groupcash lib
  */
-class ValidateCoinSpec {
+class ValidateTransferencesSpec {
 
     function before() {
         $this->lib = new Groupcash(new FakeKeyService());
