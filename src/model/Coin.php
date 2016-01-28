@@ -13,7 +13,7 @@ class Coin {
      * @param Transaction $transaction
      * @param Signature $signature
      */
-    private function __construct(Transaction $transaction, Signature $signature) {
+    public function __construct(Transaction $transaction, Signature $signature) {
         $this->transaction = $transaction;
         $this->signature = $signature;
     }

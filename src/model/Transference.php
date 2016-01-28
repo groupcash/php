@@ -45,6 +45,13 @@ class Transference implements Transaction{
     }
 
     /**
+     * @return null|string
+     */
+    public function getPrev() {
+        return $this->prev;
+    }
+
+    /**
      * @return string
      */
     public function __toString() {
