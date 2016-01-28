@@ -4,7 +4,6 @@ namespace spec\groupcash\php;
 use groupcash\php\Application;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
-use spec\groupcash\php\fakes\FakeCryptoService;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
@@ -18,12 +17,12 @@ use spec\groupcash\php\fakes\FakeKeyService;
 class ValidateTransactionSpec {
 
     function firstTransaction() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
 
-        $validated = $app->validateTransaction($transferred, 'public first', 'backer encrypted with foo', 'foo');
+        $validated = $app->validateTransaction($transferred, 'public first', 'backer');
         $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
@@ -36,9 +35,9 @@ class ValidateTransactionSpec {
     }
 
     function failIfNotTransferredByBacker() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $transferred = $app->transferCoin($coins[0], 'public first', 'not backer');
 
         $this->try->tryTo(function () use ($app, $transferred) {
@@ -48,9 +47,9 @@ class ValidateTransactionSpec {
     }
 
     function failIfNotBacker() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admi');
         $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
 
         $this->try->tryTo(function () use ($app, $transferred) {
@@ -60,9 +59,9 @@ class ValidateTransactionSpec {
     }
 
     function failIfAdminSignatureIsInvalid() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $coins[0]['signer'] = 'other';
         $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
 
@@ -73,9 +72,9 @@ class ValidateTransactionSpec {
     }
 
     function failIfFirstSignatureIsInvalid() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
         $transferred['signer'] = 'other';
 
@@ -86,13 +85,13 @@ class ValidateTransactionSpec {
     }
 
     function secondTransaction() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $first = $app->transferCoin($coins[0], 'public first', 'backer');
         $second = $app->transferCoin($first, 'public second', 'first');
 
-        $validated = $app->validateTransaction($second, 'public first', 'backer encrypted with foo', 'foo');
+        $validated = $app->validateTransaction($second, 'public first', 'backer');
         $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
@@ -105,43 +104,43 @@ class ValidateTransactionSpec {
     }
 
     function failIfWrongOwner() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $first = $app->transferCoin($coins[0], 'public first', 'backer');
         $second = $app->transferCoin($first, 'public second', 'first');
 
         $this->try->tryTo(function () use ($app, $second) {
-            $app->validateTransaction($second, 'public not first', 'backer encrypted with foo', 'foo');
+            $app->validateTransaction($second, 'public not first', 'backer');
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid transaction.');
     }
 
 
     function failIfSecondSignatureIsInvalid() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $first = $app->transferCoin($coins[0], 'public first', 'backer');
         $second = $app->transferCoin($first, 'public second', 'first');
 
         $second['signer'] = 'other';
 
         $this->try->tryTo(function () use ($app, $second) {
-            $app->validateTransaction($second, 'public first', 'backer encrypted with foo', 'foo');
+            $app->validateTransaction($second, 'public first', 'backer');
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid signature.');
     }
 
     function thirdTransaction() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $first = $app->transferCoin($coins[0], 'public first', 'backer');
         $second = $app->transferCoin($first, 'public second', 'first');
         $third = $app->transferCoin($second, 'public third', 'second');
 
-        $validated = $app->validateTransaction($third, 'public first', 'backer encrypted with foo', 'foo');
+        $validated = $app->validateTransaction($third, 'public first', 'backer');
         $this->assert->equals($validated, [
             'content' => [
                 'coin' => $coins[0],
@@ -154,15 +153,15 @@ class ValidateTransactionSpec {
     }
 
     function failIfChainIsBroken() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin encrypted with foo', 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'admin');
         $first = $app->transferCoin($coins[0], 'public first', 'backer');
         $second = $app->transferCoin($first, 'public second', 'first');
         $third = $app->transferCoin($second, 'public third', 'other');
 
         $this->try->tryTo(function () use ($app, $third) {
-            $app->validateTransaction($third, 'public first', 'backer encrypted with foo', 'foo');
+            $app->validateTransaction($third, 'public first', 'backer');
         });
         $this->try->thenTheException_ShouldBeThrown('Broken transaction.');
     }

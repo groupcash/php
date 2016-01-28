@@ -3,9 +3,7 @@ namespace spec\groupcash\php;
 
 use groupcash\php\Application;
 use groupcash\php\impl\EccKeyService;
-use groupcash\php\impl\McryptCryptoService;
 use rtens\scrut\Assert;
-use spec\groupcash\php\fakes\FakeCryptoService;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
@@ -17,10 +15,10 @@ use spec\groupcash\php\fakes\FakeKeyService;
 class IssueCoinsSpec {
 
     function fake() {
-        $app = new Application(new FakeKeyService('my key'), new FakeCryptoService());
-        $key = $app->generateKey('foo');
+        $app = new Application(new FakeKeyService());
+        $key = $app->generateKey();
 
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, $key, 'foo');
+        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, $key);
 
         $this->assert->size($coins, 3);
         $this->assert->equals($coins, [
@@ -59,9 +57,9 @@ class IssueCoinsSpec {
             $this->assert->incomplete('Skipped. Set REAL environment variable to execute');
         }
 
-        $app = new Application(new EccKeyService(), new McryptCryptoService());
-        $key = $app->generateKey('foo');
-        $coins = $app->issueCoins('my promise', 'backer key', 1, 1, $key, 'foo');
+        $app = new Application(new EccKeyService());
+        $key = $app->generateKey();
+        $coins = $app->issueCoins('my promise', 'backer key', 1, 1, $key);
 
         $this->assert->isTrue($app->verifySignature($coins[0]));
     }

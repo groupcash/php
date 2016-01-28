@@ -1,8 +1,8 @@
 <?php
 namespace spec\groupcash\php;
+
 use groupcash\php\Application;
 use rtens\scrut\Assert;
-use spec\groupcash\php\fakes\FakeCryptoService;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
@@ -14,10 +14,10 @@ use spec\groupcash\php\fakes\FakeKeyService;
 class TransferCoinsSpec {
 
     function originalCoin() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
         $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'my key');
 
-        $transferred = $app->transferCoin($coins[0], 'new owner', 'backer encrypted with foo', 'foo');
+        $transferred = $app->transferCoin($coins[0], 'new owner', 'backer');
         $this->assert->equals($transferred, [
             'content' => [
                 'coin' => $coins[0],
@@ -29,11 +29,11 @@ class TransferCoinsSpec {
     }
 
     function transferredCoin() {
-        $app = new Application(new FakeKeyService('key'), new FakeCryptoService());
+        $app = new Application(new FakeKeyService());
 
         $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'my key');
-        $transferred = $app->transferCoin($coins[0], 'public first', 'backer encrypted with foo', 'foo');
-        $twice = $app->transferCoin($transferred, 'public second', 'first encrypted with foo', 'foo');
+        $transferred = $app->transferCoin($coins[0], 'public first', 'backer');
+        $twice = $app->transferCoin($transferred, 'public second', 'first');
 
         $this->assert->equals($twice, [
             'content' => [

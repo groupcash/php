@@ -2,7 +2,6 @@
 
 use groupcash\php\Application;
 use groupcash\php\impl\EccKeyService;
-use groupcash\php\impl\McryptCryptoService;
 use rtens\domin\delivery\cli\CliApplication;
 use rtens\domin\delivery\cli\CliField;
 use rtens\domin\delivery\Renderer;
@@ -73,7 +72,7 @@ class Base64Field implements CliField {
 }
 
 CliApplication::run(CliApplication::init(function (CliApplication $app) {
-    $groupcash = new Application(new EccKeyService(), new McryptCryptoService());
+    $groupcash = new Application(new EccKeyService());
     $field = new Base64Field();
 
     $app->fields->add($field);

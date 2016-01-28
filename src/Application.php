@@ -6,61 +6,40 @@ class Application {
     /** @var KeyService */
     private $key;
 
-    /** @var CryptoService */
-    private $crypto;
-
-    public function __construct(KeyService $key, CryptoService $crypto) {
+    public function __construct(KeyService $key) {
         $this->key = $key;
-        $this->crypto = $crypto;
     }
 
     /**
-     * @param null|string $passPhrase
      * @return string
      */
-    public function generateKey($passPhrase = null) {
-        $privateKey = $this->key->generate();
-
-        $key = $privateKey;
-        if ($passPhrase) {
-            $key = $this->crypto->encrypt($key, $passPhrase);
-        }
-        return $key;
+    public function generateKey() {
+        return $this->key->generate();
     }
 
     /**
      * @param string $key
-     * @param null|string $passPhrase
      * @return string
      */
-    public function publicKey($key, $passPhrase = null) {
-        if ($passPhrase) {
-            $key = $this->crypto->decrypt($key, $passPhrase);
-        }
-
+    public function getAddress($key) {
         return $this->key->publicKey($key);
     }
 
     /**
      * @param string $promise
-     * @param string $backerPublicKey
+     * @param string $backerAddress
      * @param int $serialStart
      * @param int $count
      * @param string $key
-     * @param null|string $passPhrase
      * @return array[]
      */
-    public function issueCoins($promise, $backerPublicKey, $serialStart, $count, $key, $passPhrase = null) {
-        if ($passPhrase) {
-            $key = $this->crypto->decrypt($key, $passPhrase);
-        }
-
+    public function issueCoins($promise, $backerAddress, $serialStart, $count, $key) {
         $coins = [];
         for ($i = $serialStart; $i < $serialStart + $count; $i++) {
             $coins[] = $this->sign([
                 'promise' => $promise,
                 'serial' => $i,
-                'backer' => $backerPublicKey,
+                'backer' => $backerAddress,
             ], $key);
         }
         return $coins;
@@ -88,31 +67,25 @@ class Application {
 
     /**
      * @param array $coin
-     * @param string $newOwnerPublicKey
+     * @param string $newOwnerAddress
      * @param string $key
-     * @param null|string $passPhrase
      * @return array
      */
-    public function transferCoin(array $coin, $newOwnerPublicKey, $key, $passPhrase = null) {
-        if ($passPhrase) {
-            $key = $this->crypto->decrypt($key, $passPhrase);
-        }
-
+    public function transferCoin(array $coin, $newOwnerAddress, $key) {
         return $this->sign([
             'coin' => $coin,
-            'owner' => $newOwnerPublicKey
+            'owner' => $newOwnerAddress
         ], $key);
     }
 
     /**
      * @param array $coin
-     * @param string $ownerPublicKey
+     * @param string $validatedOwnerAddress
      * @param string $key
-     * @param null|string $passPhrase
      * @return array
      * @throws \Exception if invalid
      */
-    public function validateTransaction(array $coin, $ownerPublicKey, $key, $passPhrase = null) {
+    public function validateTransaction(array $coin, $validatedOwnerAddress, $key) {
         if (!$this->verifySignature($coin)) {
             throw new \Exception('Invalid signature.');
         }
@@ -124,15 +97,11 @@ class Application {
                 throw new \Exception('Broken transaction.');
             }
 
-            $coin = $this->validateTransaction($coin['content']['coin'], $ownerPublicKey, $key, $passPhrase);
-        } else if ($coin['content']['owner'] != $ownerPublicKey) {
+            $coin = $this->validateTransaction($coin['content']['coin'], $validatedOwnerAddress, $key);
+        } else if ($coin['content']['owner'] != $validatedOwnerAddress) {
             throw new \Exception('Invalid transaction.');
         } else if ($coin['signer'] != $coin['content']['coin']['content']['backer']) {
             throw new \Exception('Invalid validation.');
-        }
-
-        if ($passPhrase) {
-            $key = $this->crypto->decrypt($key, $passPhrase);
         }
 
         if ($coin['content']['coin']['content']['backer'] != $this->key->publicKey($key)) {
