@@ -112,4 +112,12 @@ class EccKeyService implements KeyService {
             throw new \Exception('Invalid key.');
         }
     }
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    public function hash($content) {
+        return hash('sha256', $content);
+    }
 }

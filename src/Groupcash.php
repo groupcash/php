@@ -111,7 +111,8 @@ class Groupcash {
             }
 
             $backer = new Signer($this->key, $backerKey);
-            return $transference->getCoin()->transfer($coin->getTransaction()->getTarget(), $backer, 'hash');
+            $hash = $this->key->hash($coin->getTransaction()->fingerprint());
+            return $transference->getCoin()->transfer($coin->getTransaction()->getTarget(), $backer, $hash);
         }
 
         throw new \Exception('Invalid coin.');

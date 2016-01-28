@@ -47,4 +47,12 @@ class FakeKeyService implements KeyService {
         $key = str_replace("public ", "", $publicKey);
         return str_replace(" signed with $key", "", $signed) == md5($content);
     }
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    public function hash($content) {
+        return "($content)";
+    }
 }

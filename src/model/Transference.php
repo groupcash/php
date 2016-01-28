@@ -41,7 +41,11 @@ class Transference implements Transaction{
      * @return string
      */
     public function fingerprint() {
-        return implode('--', [$this->coin->getTransaction()->fingerprint(), $this->target, $this->prev]);
+        $pieces = [$this->coin->getTransaction()->fingerprint(), $this->target];
+        if ($this->prev) {
+            $pieces[] = $this->prev;
+        }
+        return implode("\0", $pieces);
     }
 
     /**

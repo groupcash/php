@@ -55,7 +55,7 @@ class Promise implements Transaction{
      * @return string
      */
     public function fingerprint() {
-        return implode('--', [$this->description, $this->serial, $this->backer]);
+        return implode("\0", [$this->description, $this->serial, $this->backer]);
     }
 
     /**
