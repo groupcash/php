@@ -1,7 +1,7 @@
 <?php
 namespace spec\groupcash\php;
 
-use groupcash\php\Application;
+use groupcash\php\Groupcash;
 use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
@@ -10,20 +10,20 @@ use spec\groupcash\php\fakes\FakeKeyService;
  * identifies the holder of the key.
  *
  * @property Assert assert <-
- * @property Application app
+ * @property Groupcash lib
  */
 class GenerateKeySpec {
 
     function before() {
-        $this->app = new Application(new FakeKeyService());
+        $this->lib = new Groupcash(new FakeKeyService());
     }
 
     function generate() {
-        $key = $this->app->generateKey();
+        $key = $this->lib->generateKey();
         $this->assert->equals($key, 'my key');
     }
 
     function getAddress() {
-        $this->assert->equals($this->app->getAddress('key'), 'public key');
+        $this->assert->equals($this->lib->getAddress('key'), 'public key');
     }
 }

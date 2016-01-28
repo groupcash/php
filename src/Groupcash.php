@@ -6,7 +6,7 @@ use groupcash\php\model\Promise;
 use groupcash\php\model\Signer;
 use groupcash\php\model\Transference;
 
-class Application {
+class Groupcash {
 
     /** @var KeyService */
     private $key;

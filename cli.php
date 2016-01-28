@@ -1,6 +1,6 @@
 <?php
 
-use groupcash\php\Application;
+use groupcash\php\Groupcash;
 use groupcash\php\impl\EccKeyService;
 use groupcash\php\model\Coin;
 use rtens\domin\delivery\cli\CliApplication;
@@ -69,7 +69,7 @@ class Base64Field implements CliField {
 }
 
 CliApplication::run(CliApplication::init(function (CliApplication $app) {
-    $groupcash = new Application(new EccKeyService());
+    $groupcash = new Groupcash(new EccKeyService());
     $field = new Base64Field();
 
     $app->fields->add($field);

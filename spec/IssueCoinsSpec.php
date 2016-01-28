@@ -1,7 +1,7 @@
 <?php
 namespace spec\groupcash\php;
 
-use groupcash\php\Application;
+use groupcash\php\Groupcash;
 use groupcash\php\model\Promise;
 use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
@@ -11,23 +11,26 @@ use spec\groupcash\php\fakes\FakeKeyService;
  * together with the public key of the backer and a unique serial number.
  *
  * @property Assert assert <-
+ * @property Groupcash lib
  */
 class IssueCoinsSpec {
 
+    function before() {
+        $this->lib = new Groupcash(new FakeKeyService());
+    }
+
     function singleCoin() {
-        $app = new Application(new FakeKeyService());
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
+        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
 
         $this->assert->size($coins, 1);
 
         $this->assert->equals($coins[0]->getTransaction(), new Promise('public backer', 'my promise', 42));
         $this->assert->equals($coins[0]->getSignature()->getSigner(), 'public issuer');
-        $this->assert->isTrue($app->verifyCoin($coins[0], ['public issuer']));
+        $this->assert->isTrue($this->lib->verifyCoin($coins[0], ['public issuer']));
     }
 
     function multipleCoins() {
-        $app = new Application(new FakeKeyService());
-        $coins = $app->issueCoins('my promise', 'public backer', 42, 3, 'issuer');
+        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 3, 'issuer');
 
         $this->assert->size($coins, 3);
 
