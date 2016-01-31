@@ -12,14 +12,19 @@ class Transference implements Transaction{
     /** @var null|string */
     private $prev;
 
+    /** @var Fraction */
+    private $fraction;
+
     /**
      * @param Coin $coin
      * @param string $target
+     * @param Fraction $fraction
      * @param null|string $prev
      */
-    public function __construct(Coin $coin, $target, $prev = null) {
+    public function __construct(Coin $coin, $target, Fraction $fraction = null, $prev = null) {
         $this->coin = $coin;
         $this->target = $target;
+        $this->fraction = $fraction ?: new Fraction(1, 1);
         $this->prev = $prev;
     }
 
@@ -59,6 +64,13 @@ class Transference implements Transaction{
      * @return string
      */
     public function __toString() {
-        return (string)$this->coin . ($this->prev ? " {{$this->prev}}" : '') . ' => ' . $this->target;
+        return $this->fraction . ' of ' . (string)$this->coin . ($this->prev ? " {{$this->prev}}" : '') . ' => ' . $this->target;
+    }
+
+    /**
+     * @return Fraction
+     */
+    public function getFraction() {
+        return $this->fraction;
     }
 }

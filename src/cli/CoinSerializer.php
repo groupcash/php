@@ -58,30 +58,17 @@ class CoinSerializer {
     }
 
     private function arrayCoin(Coin $coin) {
-        $array = [
+        return [
             'trans' => $this->arrayTransaction($coin->getTransaction()),
             'sig' => $this->arraySignature($coin->getSignature())
         ];
-        if ($coin instanceof SplitCoin) {
-            $fraction = $coin->getFraction();
-            $array['fraction'] = $fraction->getNominator() . '|' . $fraction->getDenominator();
-        }
-        return $array;
     }
 
     private function objectCoin(array $array) {
-        if (isset($array['fraction'])) {
-            list($nom, $den) = explode('|', $array['fraction']);
-            return new SplitCoin(
-                $this->objectTransaction($array['trans']),
-                $this->objectSignature($array['sig']),
-                new Fraction($nom, $den));
-        } else {
-            return new Coin(
-                $this->objectTransaction($array['trans']),
-                $this->objectSignature($array['sig'])
-            );
-        }
+        return new Coin(
+            $this->objectTransaction($array['trans']),
+            $this->objectSignature($array['sig'])
+        );
     }
 
     private function arrayTransaction(Transaction $transaction) {
@@ -136,17 +123,21 @@ class CoinSerializer {
     }
 
     private function arrayTransference(Transference $transference) {
+        $fraction = $transference->getFraction();
         return [
             'coin' => $this->arrayCoin($transference->getCoin()),
             'target' => $transference->getTarget(),
+            'fraction' => $fraction->getNominator() . '|' . $fraction->getDenominator(),
             'prev' => $transference->getPrev()
         ];
     }
 
     private function objectTransference(array $array) {
+        list($nom, $den) = explode('|', $array['fraction']);
         return new Transference(
             $this->objectCoin($array['coin']),
             $array['target'],
+            new Fraction($nom, $den),
             $array['prev']
         );
     }

@@ -45,8 +45,8 @@ class ResolveTransactionsSpec {
         $balances = $this->lib->resolveTransactions($second);
 
         $this->assert->equals($balances, [
-            'public first' => new Fraction(-1, 1),
-            'public second' => new Fraction(1, 1)
+            'public first' => new Fraction(-1),
+            'public second' => new Fraction(1)
         ]);
     }
 
@@ -59,9 +59,9 @@ class ResolveTransactionsSpec {
         $balances = $this->lib->resolveTransactions($third);
 
         $this->assert->equals($balances, [
-            'public first' => new Fraction(-1, 1),
-            'public second' => new Fraction(0, 1),
-            'public third' => new Fraction(1, 1),
+            'public first' => new Fraction(-1),
+            'public second' => new Fraction(0),
+            'public third' => new Fraction(1),
         ]);
     }
 
@@ -74,27 +74,24 @@ class ResolveTransactionsSpec {
         $balances = $this->lib->resolveTransactions($third);
 
         $this->assert->equals($balances, [
-            'public first' => new Fraction(0, 1),
-            'public second' => new Fraction(0, 1)
+            'public first' => new Fraction(0),
+            'public second' => new Fraction(0)
         ]);
     }
 
-    function splitCoins() {
+    function splitTransferences() {
         $coins = $this->lib->issueCoins('my promise', 'public backer', 1, 1, 'issuer');
         $sold = $this->lib->transferCoin($coins[0], 'public dude', 'backer');
 
-        list($soldA,) = $this->lib->splitCoin($sold, [1, 2]);
-        $first = $this->lib->transferCoin($soldA, 'public first', 'dude');
+        $first = $this->lib->transferCoin($sold, 'public first', 'dude', new Fraction(1, 3));
         $second = $this->lib->transferCoin($first, 'public second', 'first');
-
-        list($secondA,) = $this->lib->splitCoin($second, [1, 1]);
-        $third = $this->lib->transferCoin($secondA, 'public third', 'second');
+        $third = $this->lib->transferCoin($second, 'public third', 'second', new Fraction(1, 2));
 
         $balances = $this->lib->resolveTransactions($third);
 
         $this->assert->equals($balances, [
             'public dude' => new Fraction(-1, 3),
-            'public first' => new Fraction(0, 9),
+            'public first' => new Fraction(0),
             'public second' => new Fraction(1, 6),
             'public third' => new Fraction(1, 6),
         ]);

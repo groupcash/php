@@ -5,7 +5,6 @@ use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signer;
-use groupcash\php\model\SplitCoin;
 use groupcash\php\model\Transference;
 
 class Groupcash {
@@ -50,24 +49,13 @@ class Groupcash {
 
     /**
      * @param Coin $coin
-     * @param int[] $parts
-     * @return SplitCoin[]
-     */
-    public function splitCoin(Coin $coin, array $parts) {
-        if (count($parts) <= 1) {
-            return $coin;
-        }
-        return $coin->split($parts);
-    }
-
-    /**
-     * @param Coin $coin
      * @param string $targetAddress
      * @param string $ownerKey
+     * @param Fraction|null $fraction
      * @return Coin
      */
-    public function transferCoin(Coin $coin, $targetAddress, $ownerKey) {
-        return $coin->transfer($targetAddress, new Signer($this->key, $ownerKey));
+    public function transferCoin(Coin $coin, $targetAddress, $ownerKey, Fraction $fraction = null) {
+        return $coin->transfer($targetAddress, new Signer($this->key, $ownerKey), $fraction);
     }
 
     /**
@@ -118,14 +106,11 @@ class Groupcash {
 
         $fractions = [];
         $lastOwner = null;
+        $fraction = new Fraction(1);
+
         foreach ($transferences as $transference) {
             if ($lastOwner) {
-                $fraction = new Fraction(1, 1);
-
-                $transferredCoin = $transference->getCoin();
-                if ($transferredCoin instanceof SplitCoin) {
-                    $fraction = $transferredCoin->getFraction();
-                }
+                $fraction = $fraction->times($transference->getFraction());
 
                 $fractions[$lastOwner][] = $fraction->times(new Fraction(-1, 1));
                 $fractions[$transference->getTarget()][] = $fraction;
@@ -155,20 +140,35 @@ class Groupcash {
         $transference = $coin->getTransaction();
 
         if ($transference instanceof Promise) {
+            return $coin;
+        } else {
+            return $this->validateTransference($coin, $backerKey);
+        }
+    }
+
+    private function validateTransference(Coin $coin, $backerKey) {
+        $signer = new Signer($this->key, $backerKey);
+        $transference = $coin->getTransaction();
+
+        if ($transference instanceof Promise) {
             if ($transference->getBacker() != $this->key->publicKey($backerKey)) {
                 throw new \Exception('Only the backer of a coin can validate it.');
             }
-            return $coin;
+            return $coin->transfer(
+                null,
+                $signer,
+                new Fraction(1)
+            );
 
         } else if ($transference instanceof Transference) {
-            if ($transference->getCoin()->getTransaction() instanceof Transference) {
-                $validatedCoin = $this->validateCoin($transference->getCoin(), $backerKey);
-                $transference = $validatedCoin->getTransaction();
-            }
+            /** @var Transference $issued */
+            $issued = $this->validateTransference($transference->getCoin(), $backerKey)->getTransaction();
 
-            $backer = new Signer($this->key, $backerKey);
-            $hash = $this->key->hash($coin->getTransaction()->fingerprint());
-            return $transference->getCoin()->transfer($coin->getTransaction()->getTarget(), $backer, $hash);
+            return $issued->getCoin()->transfer(
+                $transference->getTarget(),
+                $signer,
+                $transference->getFraction()->times($issued->getFraction()),
+                $this->key->hash($issued->fingerprint()));
         }
 
         throw new \Exception('Invalid coin.');

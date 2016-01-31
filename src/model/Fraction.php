@@ -13,8 +13,10 @@ class Fraction {
      * @param int $nominator
      * @param int $denominator
      */
-    public function __construct($nominator, $denominator) {
-        if (function_exists('gmp_gcd')) {
+    public function __construct($nominator, $denominator = 1) {
+        if ($nominator == 0) {
+            $denominator = 1;
+        } else if (function_exists('gmp_gcd')) {
             $gcd = gmp_intval(gmp_gcd((string)$nominator, (string)$denominator));
             $nominator /= $gcd;
             $denominator /= $gcd;
@@ -45,7 +47,7 @@ class Fraction {
     }
 
     function __toString() {
-        return $this->nominator . '/' . $this->denominator;
+        return $this->nominator . ($this->denominator != 1 ? ('/' . $this->denominator) : '');
     }
 
     public function times(Fraction $fraction) {

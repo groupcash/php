@@ -26,19 +26,8 @@ class Coin {
         return self::create($promise, $issuer);
     }
 
-    public function transfer($newOwnerAddress, Signer $owner, $prev = null) {
-        return self::create(new Transference($this, $newOwnerAddress, $prev), $owner);
-    }
-
-    /**
-     * @param int[] $parts
-     * @return SplitCoin[]
-     */
-    public function split(array $parts) {
-        $sum = array_sum($parts);
-        return array_map(function ($part) use ($sum) {
-            return new SplitCoin($this->transaction, $this->signature, new Fraction($part, $sum));
-        }, $parts);
+    public function transfer($newOwnerAddress, Signer $owner, Fraction $fraction = null, $prev = null) {
+        return self::create(new Transference($this, $newOwnerAddress, $fraction, $prev), $owner);
     }
 
     /**
