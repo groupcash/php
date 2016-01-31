@@ -5,10 +5,10 @@ use groupcash\php\Groupcash;
 use groupcash\php\impl\EccKeyService;
 use rtens\domin\delivery\cli\CliApplication;
 use rtens\domin\reflection\GenericMethodAction;
-use rtens\domin\reflection\MethodActionGenerator;
 
 class Bootstrapper {
 
+    /** @var Groupcash */
     private $lib;
 
     public function __construct() {
@@ -31,8 +31,13 @@ class Bootstrapper {
     }
 
     private function addLibraryActions(CliApplication $app) {
-        (new MethodActionGenerator($app->actions, $app->types, $app->parser))
-            ->fromObject($this->lib);
+        foreach ((new \ReflectionClass($this->lib))->getMethods() as $method) {
+            if (!$method->isPublic() || $method->isConstructor()) {
+                continue;
+            }
+            $app->actions->add($method->getName(),
+                new GenericMethodAction($this->lib, $method->getName(), $app->types, $app->parser));
+        }
     }
 
     private function addDecodeAction(CliApplication $app) {

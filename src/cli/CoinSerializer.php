@@ -5,7 +5,6 @@ use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signature;
-use groupcash\php\model\SplitCoin;
 use groupcash\php\model\Transaction;
 use groupcash\php\model\Transference;
 
@@ -14,6 +13,8 @@ class CoinSerializer {
     const VERSION = '1.0';
 
     /**
+     * Presents a coin in a human-readable format.
+     *
      * @param string $encoded
      * @param bool $pretty
      * @return string

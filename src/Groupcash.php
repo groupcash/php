@@ -17,6 +17,8 @@ class Groupcash {
     }
 
     /**
+     * Generates a new private key.
+     *
      * @return string
      */
     public function generateKey() {
@@ -24,6 +26,8 @@ class Groupcash {
     }
 
     /**
+     * Displays the public key corresponding to the given private key.
+     *
      * @param string $key
      * @return string
      */
@@ -32,6 +36,8 @@ class Groupcash {
     }
 
     /**
+     * Creates a new coin representing a delivery promise.
+     *
      * @param string $promise
      * @param string $backerAddress
      * @param int $serialStart
@@ -48,6 +54,8 @@ class Groupcash {
     }
 
     /**
+     * Transfers a coin to a new target owner.
+     *
      * @param Coin $coin
      * @param string $targetAddress
      * @param string $ownerKey
@@ -59,6 +67,8 @@ class Groupcash {
     }
 
     /**
+     * Verifies that all transactions of a coin are sound.
+     *
      * @param Coin $coin
      * @param array|null $knownIssuerAddresses
      * @return bool
@@ -89,8 +99,10 @@ class Groupcash {
     }
 
     /**
+     * Resolves all transactions of a coin into changes of balances.
+     *
      * @param Coin $coin
-     * @return array|Fraction[] indexed by addresses
+     * @return Fraction[] indexed by addresses
      */
     public function resolveTransactions(Coin $coin) {
         /** @var Transference[] $transferences */
@@ -131,6 +143,8 @@ class Groupcash {
     }
 
     /**
+     * Validates that a coin was not double-spent.
+     *
      * @param Coin $coin
      * @param string $backerKey
      * @return Coin
