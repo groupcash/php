@@ -19,7 +19,7 @@ class Coin {
     }
 
     private static function create(Transaction $transaction, Signer $signer) {
-        return new Coin($transaction, $signer->sign($transaction));
+        return new Coin($transaction, $signer->sign($transaction->fingerprint()));
     }
 
     public static function issue(Promise $promise, Signer $issuer) {

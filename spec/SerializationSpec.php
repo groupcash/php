@@ -19,7 +19,7 @@ class SerializationSpec {
 
     function simpleCoin() {
         $coin = new Coin(
-            new Promise('public backer', 'a promise', 1),
+            new Promise('myCurrency', 'public backer', 'a promise', 1),
             new Signature('issuer', 'my signature')
         );
 
@@ -28,6 +28,7 @@ class SerializationSpec {
             'coin' => [
                 'trans' => [
                     'promise' => [
+                        'currency' => 'myCurrency',
                         'descr' => 'a promise',
                         'serial' => 1,
                         'backer' => 'public backer']],
@@ -45,7 +46,7 @@ class SerializationSpec {
                 new Coin(
                     new Transference(
                         new Coin(
-                            new Promise('public backer', 'a promise', 1),
+                            new Promise('myCurrency', 'public backer', 'a promise', 1),
                             new Signature('issuer', 'my signature')
                         ),
                         'first target',
@@ -70,6 +71,7 @@ class SerializationSpec {
                                     'coin' => [
                                         'trans' => [
                                             'promise' => [
+                                                'currency' => 'myCurrency',
                                                 'descr' => 'a promise',
                                                 'serial' => 1,
                                                 'backer' => 'public backer']],
@@ -97,7 +99,7 @@ class SerializationSpec {
         $first = new Coin(
             new Transference(
                 new Coin(
-                    new Promise('public backer', 'a promise', 1),
+                    new Promise('myCurrency', 'public backer', 'a promise', 1),
                     new Signature('issuer', 'my signature')
                 ),
                 'public first',
@@ -112,6 +114,7 @@ class SerializationSpec {
                         'coin' => [
                             'trans' => [
                                 'promise' => [
+                                    'currency' => 'myCurrency',
                                     'descr' => 'a promise',
                                     'serial' => 1,
                                     'backer' => 'public backer']],

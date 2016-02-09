@@ -1,6 +1,7 @@
 <?php
 namespace groupcash\php;
 
+use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Promise;
@@ -38,6 +39,7 @@ class Groupcash {
     /**
      * Creates a new coin representing a delivery promise.
      *
+     * @param string $currency
      * @param string $issuerKey
      * @param string $promise
      * @param string $backerAddress
@@ -45,12 +47,12 @@ class Groupcash {
      * @param int $count
      * @return model\Coin[]
      */
-    public function issueCoins($issuerKey, $promise, $backerAddress, $serialStart, $count) {
+    public function issueCoins($currency, $issuerKey, $promise, $backerAddress, $serialStart, $count) {
         $issuer = new Signer($this->key, $issuerKey);
 
         $coins = [];
         for ($i = $serialStart; $i < $serialStart + $count; $i++) {
-            $coins[] = Coin::issue(new Promise($backerAddress, $promise, $i), $issuer);
+            $coins[] = Coin::issue(new Promise($currency, $backerAddress, $promise, $i), $issuer);
         }
         return $coins;
     }
@@ -119,10 +121,10 @@ class Groupcash {
      * Verifies that all transactions of a coin are sound.
      *
      * @param Coin $coin
-     * @param array|null $knownIssuerAddresses
+     * @param null|Authorization[] $authorizedIssuers
      * @return bool
      */
-    public function verifyCoin(Coin $coin, array $knownIssuerAddresses = null) {
+    public function verifyCoin(Coin $coin, array $authorizedIssuers = null) {
         $transaction = $coin->getTransaction();
         $signature = $coin->getSignature();
 
@@ -131,16 +133,21 @@ class Groupcash {
         }
 
         if ($transaction instanceof Promise) {
-            if (!is_null($knownIssuerAddresses) && !in_array($coin->getSignature()->getSigner(), $knownIssuerAddresses)) {
-                return false;
+            if (!$authorizedIssuers) {
+                return true;
             }
-            return true;
+            foreach ($authorizedIssuers as $issuer) {
+                if ($issuer->isAuthorizedToIssue($transaction, $coin->getSignature(), $this->key)) {
+                    return true;
+                }
+            }
+            return false;
 
         } else if ($transaction instanceof Transference) {
             if ($coin->getSignature()->getSigner() != $transaction->getCoin()->getTransaction()->getTarget()) {
                 return false;
             }
-            return $this->verifyCoin($transaction->getCoin(), $knownIssuerAddresses);
+            return $this->verifyCoin($transaction->getCoin(), $authorizedIssuers);
 
         } else {
             return false;

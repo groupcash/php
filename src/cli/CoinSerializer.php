@@ -109,6 +109,7 @@ class CoinSerializer {
 
     private function arrayPromise(Promise $promise) {
         return [
+            'currency' => $promise->getCurrency(),
             'descr' => $promise->getDescription(),
             'serial' => $promise->getSerial(),
             'backer' => $promise->getBacker()
@@ -117,9 +118,7 @@ class CoinSerializer {
 
     private function objectPromise(array $array) {
         return new Promise(
-            $array['backer'],
-            $array['descr'],
-            $array['serial']
+            $array['currency'], $array['backer'], $array['descr'], $array['serial']
         );
     }
 

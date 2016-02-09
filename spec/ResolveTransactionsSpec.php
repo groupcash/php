@@ -20,14 +20,14 @@ class ResolveTransactionsSpec {
     }
 
     function issuedCoin() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 1, 1);
         $balances = $this->lib->resolveTransactions($coins[0]);
 
         $this->assert->equals($balances, []);
     }
 
     function validatedCoin() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 1, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $validated = $this->lib->validateCoin('backer', $second);
@@ -38,7 +38,7 @@ class ResolveTransactionsSpec {
     }
 
     function singleTransference() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 1, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
 
@@ -51,7 +51,7 @@ class ResolveTransactionsSpec {
     }
 
     function multipleTransferences() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 1, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('second', $second, 'public third');
@@ -66,7 +66,7 @@ class ResolveTransactionsSpec {
     }
 
     function cancellingOut() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 1, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('second', $second, 'public first');
@@ -80,7 +80,7 @@ class ResolveTransactionsSpec {
     }
 
     function splitTransferences() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 1, 1);
         $sold = $this->lib->transferCoin('backer', $coins[0], 'public dude');
 
         $first = $this->lib->transferCoin('dude', $sold, 'public first', new Fraction(1, 3));

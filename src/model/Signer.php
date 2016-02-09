@@ -21,12 +21,12 @@ class Signer {
     }
 
     /**
-     * @param Transaction $transaction
+     * @param string $content
      * @return Signature
      */
-    public function sign(Transaction $transaction) {
+    public function sign($content) {
         return new Signature($this->getAddress(),
-            $this->service->sign($transaction->fingerprint(), $this->key));
+            $this->service->sign($content, $this->key));
     }
 
     /**

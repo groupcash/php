@@ -20,22 +20,22 @@ class TransferCoinsSpec {
     }
 
     function originalCoin() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
 
         $transferred = $this->lib->transferCoin('backer', $coins[0], 'new owner');
 
         $this->assert->equals($transferred->getTransaction(), new Transference($coins[0], 'new owner'));
         $this->assert->equals($transferred->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($transferred, ['public issuer']));
+        $this->assert->isTrue($this->lib->verifyCoin($transferred));
     }
 
     function transferredCoin() {
-        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
 
         $this->assert->equals($second->getTransaction(), new Transference($first, 'public second'));
         $this->assert->equals($second->getSignature()->getSigner(), 'public first');
-        $this->assert->isTrue($this->lib->verifyCoin($second, ['public issuer']));
+        $this->assert->isTrue($this->lib->verifyCoin($second));
     }
 }

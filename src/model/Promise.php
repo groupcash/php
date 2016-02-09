@@ -12,12 +12,17 @@ class Promise implements Transaction{
     /** @var string */
     private $backer;
 
+    /** @var string */
+    private $currency;
+
     /**
+     * @param string $currency
      * @param string $backer
      * @param string $description
      * @param int $serial
      */
-    public function __construct($backer, $description, $serial) {
+    public function __construct($currency, $backer, $description, $serial) {
+        $this->currency = $currency;
         $this->backer = $backer;
         $this->description = $description;
         $this->serial = $serial;
@@ -63,5 +68,12 @@ class Promise implements Transaction{
      */
     public function __toString() {
         return "{$this->description}({$this->serial}) by {$this->backer}";
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrency() {
+        return $this->currency;
     }
 }
