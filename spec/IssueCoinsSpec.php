@@ -20,7 +20,7 @@ class IssueCoinsSpec {
     }
 
     function singleCoin() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
 
         $this->assert->size($coins, 1);
 
@@ -30,7 +30,7 @@ class IssueCoinsSpec {
     }
 
     function multipleCoins() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 3, 'issuer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 3);
 
         $this->assert->size($coins, 3);
 

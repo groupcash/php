@@ -20,42 +20,42 @@ class VerifyCoinSpec {
     }
 
     function failIfIssuerIsNotKnown() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'not issuer');
+        $coins = $this->lib->issueCoins('not issuer', 'my promise', 'public backer', 42, 1);
         $this->assert->not($this->lib->verifyCoin($coins[0], ['public issuer']));
     }
 
     function blankIssuerList() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'not issuer');
+        $coins = $this->lib->issueCoins('not issuer', 'my promise', 'public backer', 42, 1);
         $this->assert->isTrue($this->lib->verifyCoin($coins[0]));
     }
 
     function failIfNotTransferredByBacker() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $transferred = $this->lib->transferCoin($coins[0], 'public first', 'not backer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $transferred = $this->lib->transferCoin('not backer', $coins[0], 'public first');
 
         $this->assert->not($this->lib->verifyCoin($transferred, ['public issuer']));
     }
 
     function failIfIssuerSignatureIsInvalid() {
         $this->key->nextSign = 'wrong';
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
 
         $this->assert->not($this->lib->verifyCoin($coins[0], ['public issuer']));
     }
 
     function failIfFirstSignatureIsInvalid() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
         $this->key->nextSign = 'wrong';
-        $transferred = $this->lib->transferCoin($coins[0], 'public first', 'backer');
+        $transferred = $this->lib->transferCoin('backer', $coins[0], 'public first');
 
         $this->assert->not($this->lib->verifyCoin($transferred, ['public issuer']));
     }
 
     function failIfChainIsBroken() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $first = $this->lib->transferCoin($coins[0], 'public first', 'backer');
-        $second = $this->lib->transferCoin($first, 'public second', 'first');
-        $third = $this->lib->transferCoin($second, 'public third', 'not second');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+        $second = $this->lib->transferCoin('first', $first, 'public second');
+        $third = $this->lib->transferCoin('not second', $second, 'public third');
 
         $this->assert->not($this->lib->verifyCoin($third, ['public issuer']));
     }

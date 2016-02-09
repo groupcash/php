@@ -38,14 +38,14 @@ class Groupcash {
     /**
      * Creates a new coin representing a delivery promise.
      *
+     * @param string $issuerKey
      * @param string $promise
      * @param string $backerAddress
      * @param int $serialStart
      * @param int $count
-     * @param string $issuerKey
-     * @return Coin[]
+     * @return model\Coin[]
      */
-    public function issueCoins($promise, $backerAddress, $serialStart, $count, $issuerKey) {
+    public function issueCoins($issuerKey, $promise, $backerAddress, $serialStart, $count) {
         $coins = [];
         for ($i = $serialStart; $i < $serialStart + $count; $i++) {
             $coins[] = Coin::issue(new Promise($backerAddress, $promise, $i), new Signer($this->key, $issuerKey));
@@ -56,14 +56,60 @@ class Groupcash {
     /**
      * Transfers a coin to a new target owner.
      *
+     * @param string $ownerKey
      * @param Coin $coin
      * @param string $targetAddress
-     * @param string $ownerKey
      * @param Fraction|null $fraction
      * @return Coin
      */
-    public function transferCoin(Coin $coin, $targetAddress, $ownerKey, Fraction $fraction = null) {
+    public function transferCoin($ownerKey, Coin $coin, $targetAddress, Fraction $fraction = null) {
         return $coin->transfer($targetAddress, new Signer($this->key, $ownerKey), $fraction);
+    }
+
+    /**
+     * Validates that a coin was not double-spent.
+     *
+     * @param string $backerKey
+     * @param Coin $coin
+     * @return Coin
+     * @throws \Exception if invalid
+     */
+    public function validateCoin($backerKey, Coin $coin) {
+        $transference = $coin->getTransaction();
+
+        if ($transference instanceof Promise) {
+            return $coin;
+        } else {
+            return $this->validateTransference($backerKey, $coin);
+        }
+    }
+
+    private function validateTransference($backerKey, Coin $coin) {
+        $signer = new Signer($this->key, $backerKey);
+        $transference = $coin->getTransaction();
+
+        if ($transference instanceof Promise) {
+            if ($transference->getBacker() != $this->key->publicKey($backerKey)) {
+                throw new \Exception('Only the backer of a coin can validate it.');
+            }
+            return $coin->transfer(
+                null,
+                $signer,
+                new Fraction(1)
+            );
+
+        } else if ($transference instanceof Transference) {
+            /** @var Transference $issued */
+            $issued = $this->validateTransference($backerKey, $transference->getCoin())->getTransaction();
+
+            return $issued->getCoin()->transfer(
+                $transference->getTarget(),
+                $signer,
+                $transference->getFraction()->times($issued->getFraction()),
+                $this->key->hash($issued->fingerprint()));
+        }
+
+        throw new \Exception('Invalid coin.');
     }
 
     /**
@@ -140,51 +186,5 @@ class Groupcash {
             }
         }
         return $balances;
-    }
-
-    /**
-     * Validates that a coin was not double-spent.
-     *
-     * @param Coin $coin
-     * @param string $backerKey
-     * @return Coin
-     * @throws \Exception if invalid
-     */
-    public function validateCoin(Coin $coin, $backerKey) {
-        $transference = $coin->getTransaction();
-
-        if ($transference instanceof Promise) {
-            return $coin;
-        } else {
-            return $this->validateTransference($coin, $backerKey);
-        }
-    }
-
-    private function validateTransference(Coin $coin, $backerKey) {
-        $signer = new Signer($this->key, $backerKey);
-        $transference = $coin->getTransaction();
-
-        if ($transference instanceof Promise) {
-            if ($transference->getBacker() != $this->key->publicKey($backerKey)) {
-                throw new \Exception('Only the backer of a coin can validate it.');
-            }
-            return $coin->transfer(
-                null,
-                $signer,
-                new Fraction(1)
-            );
-
-        } else if ($transference instanceof Transference) {
-            /** @var Transference $issued */
-            $issued = $this->validateTransference($transference->getCoin(), $backerKey)->getTransaction();
-
-            return $issued->getCoin()->transfer(
-                $transference->getTarget(),
-                $signer,
-                $transference->getFraction()->times($issued->getFraction()),
-                $this->key->hash($issued->fingerprint()));
-        }
-
-        throw new \Exception('Invalid coin.');
     }
 }

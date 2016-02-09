@@ -20,9 +20,9 @@ class TransferCoinsSpec {
     }
 
     function originalCoin() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
 
-        $transferred = $this->lib->transferCoin($coins[0], 'new owner', 'backer');
+        $transferred = $this->lib->transferCoin('backer', $coins[0], 'new owner');
 
         $this->assert->equals($transferred->getTransaction(), new Transference($coins[0], 'new owner'));
         $this->assert->equals($transferred->getSignature()->getSigner(), 'public backer');
@@ -30,9 +30,9 @@ class TransferCoinsSpec {
     }
 
     function transferredCoin() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $first = $this->lib->transferCoin($coins[0], 'public first', 'backer');
-        $second = $this->lib->transferCoin($first, 'public second', 'first');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+        $second = $this->lib->transferCoin('first', $first, 'public second');
 
         $this->assert->equals($second->getTransaction(), new Transference($first, 'public second'));
         $this->assert->equals($second->getSignature()->getSigner(), 'public first');

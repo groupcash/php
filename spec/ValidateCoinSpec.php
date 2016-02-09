@@ -24,27 +24,27 @@ class ValidateCoinSpec {
     }
 
     function issuedCoin() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $validated = $this->lib->validateCoin($coins[0], 'backer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $validated = $this->lib->validateCoin('backer', $coins[0]);
 
         $this->assert->equals($validated, $coins[0]);
     }
 
     function failIfNotBacker() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $transferred = $this->lib->transferCoin($coins[0], 'public first', 'backer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $transferred = $this->lib->transferCoin('backer', $coins[0], 'public first');
 
         $this->try->tryTo(function () use ($transferred) {
-            $this->lib->validateCoin($transferred, 'not backer');
+            $this->lib->validateCoin('not backer', $transferred);
         });
         $this->try->thenTheException_ShouldBeThrown('Only the backer of a coin can validate it.');
     }
 
     function firstTransaction() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $transferred = $this->lib->transferCoin($coins[0], 'public first', 'backer');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $transferred = $this->lib->transferCoin('backer', $coins[0], 'public first');
 
-        $validated = $this->lib->validateCoin($transferred, 'backer');
+        $validated = $this->lib->validateCoin('backer', $transferred);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public first', new Fraction(1),
             '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . ')'));
@@ -55,11 +55,11 @@ class ValidateCoinSpec {
     function secondTransaction() {
         $this->lib = new Groupcash(new FakeKeyService());
 
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $first = $this->lib->transferCoin($coins[0], 'public first', 'backer');
-        $second = $this->lib->transferCoin($first, 'public second', 'first');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+        $second = $this->lib->transferCoin('first', $first, 'public second');
 
-        $validated = $this->lib->validateCoin($second, 'backer');
+        $validated = $this->lib->validateCoin('backer', $second);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public second', new Fraction(1),
             '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public first' . "\0" .
@@ -69,12 +69,12 @@ class ValidateCoinSpec {
     }
 
     function thirdTransaction() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $first = $this->lib->transferCoin($coins[0], 'public first', 'backer');
-        $second = $this->lib->transferCoin($first, 'public second', 'first');
-        $third = $this->lib->transferCoin($second, 'public third', 'second');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+        $second = $this->lib->transferCoin('first', $first, 'public second');
+        $third = $this->lib->transferCoin('second', $second, 'public third');
 
-        $validated = $this->lib->validateCoin($third, 'backer');
+        $validated = $this->lib->validateCoin('backer', $third);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public third', new Fraction(1),
             '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public second' . "\0" .
@@ -85,14 +85,14 @@ class ValidateCoinSpec {
     }
 
     function transferenceAfterValidation() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $first = $this->lib->transferCoin($coins[0], 'public first', 'backer');
-        $second = $this->lib->transferCoin($first, 'public second', 'first');
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+        $second = $this->lib->transferCoin('first', $first, 'public second');
 
-        $validatedSecond = $this->lib->validateCoin($second, 'backer');
-        $third = $this->lib->transferCoin($validatedSecond, 'public third', 'second');
+        $validatedSecond = $this->lib->validateCoin('backer', $second);
+        $third = $this->lib->transferCoin('second', $validatedSecond, 'public third');
 
-        $validated = $this->lib->validateCoin($third, 'backer');
+        $validated = $this->lib->validateCoin('backer', $third);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public third', new Fraction(1),
             '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public second' . "\0" .
@@ -102,12 +102,12 @@ class ValidateCoinSpec {
     }
 
     function fractions() {
-        $coins = $this->lib->issueCoins('my promise', 'public backer', 42, 1, 'issuer');
-        $first = $this->lib->transferCoin($coins[0], 'public first', 'backer', new Fraction(1, 2));
-        $second = $this->lib->transferCoin($first, 'public second', 'first', new Fraction(1, 3));
-        $third = $this->lib->transferCoin($second, 'public third', 'second', new Fraction(5, 7));
+        $coins = $this->lib->issueCoins('issuer', 'my promise', 'public backer', 42, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first', new Fraction(1, 2));
+        $second = $this->lib->transferCoin('first', $first, 'public second', new Fraction(1, 3));
+        $third = $this->lib->transferCoin('second', $second, 'public third', new Fraction(5, 7));
 
-        $validated = $this->lib->validateCoin($third, 'backer');
+        $validated = $this->lib->validateCoin('backer', $third);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public third', new Fraction(5, 42),
             '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public second' . "\0" .
