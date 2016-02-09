@@ -46,9 +46,11 @@ class Groupcash {
      * @return model\Coin[]
      */
     public function issueCoins($issuerKey, $promise, $backerAddress, $serialStart, $count) {
+        $issuer = new Signer($this->key, $issuerKey);
+
         $coins = [];
         for ($i = $serialStart; $i < $serialStart + $count; $i++) {
-            $coins[] = Coin::issue(new Promise($backerAddress, $promise, $i), new Signer($this->key, $issuerKey));
+            $coins[] = Coin::issue(new Promise($backerAddress, $promise, $i), $issuer);
         }
         return $coins;
     }
@@ -63,7 +65,8 @@ class Groupcash {
      * @return Coin
      */
     public function transferCoin($ownerKey, Coin $coin, $targetAddress, Fraction $fraction = null) {
-        return $coin->transfer($targetAddress, new Signer($this->key, $ownerKey), $fraction);
+        $owner = new Signer($this->key, $ownerKey);
+        return $coin->transfer($targetAddress, $owner, $fraction);
     }
 
     /**
@@ -80,16 +83,16 @@ class Groupcash {
         if ($transference instanceof Promise) {
             return $coin;
         } else {
-            return $this->validateTransference($backerKey, $coin);
+            $backer = new Signer($this->key, $backerKey);
+            return $this->validateTransference($backer, $coin);
         }
     }
 
-    private function validateTransference($backerKey, Coin $coin) {
-        $signer = new Signer($this->key, $backerKey);
+    private function validateTransference(Signer $signer, Coin $coin) {
         $transference = $coin->getTransaction();
 
         if ($transference instanceof Promise) {
-            if ($transference->getBacker() != $this->key->publicKey($backerKey)) {
+            if ($transference->getBacker() != $signer->getAddress()) {
                 throw new \Exception('Only the backer of a coin can validate it.');
             }
             return $coin->transfer(
@@ -100,7 +103,7 @@ class Groupcash {
 
         } else if ($transference instanceof Transference) {
             /** @var Transference $issued */
-            $issued = $this->validateTransference($backerKey, $transference->getCoin())->getTransaction();
+            $issued = $this->validateTransference($signer, $transference->getCoin())->getTransaction();
 
             return $issued->getCoin()->transfer(
                 $transference->getTarget(),
