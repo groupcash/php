@@ -23,40 +23,40 @@ class VerifyCoinSpec {
     }
 
     function success() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->isTrue($this->lib->verifyCoin($coins[0], [
             Authorization::create('public issuer', new Signer(new FakeKeyService(), 'root'))
         ]));
     }
 
     function failIfIssuerIsNotAuthorized() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->not($this->lib->verifyCoin($coins[0], [
             Authorization::create('not issuer', new Signer(new FakeKeyService(), 'root'))
         ]));
     }
 
     function failIfAuthorizationNotValid() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->not($this->lib->verifyCoin($coins[0], [
             new Authorization('public issuer', new Signature('public root', 'invalid'))
         ]));
     }
 
     function failIfNotAuthorizedByCurrencyRoot() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->not($this->lib->verifyCoin($coins[0], [
             Authorization::create('public issuer', new Signer(new FakeKeyService(), 'not root'))
         ]));
     }
 
     function skipIssuerVerification() {
-        $coins = $this->lib->issueCoins('public root', 'not issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('not issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->isTrue($this->lib->verifyCoin($coins[0]));
     }
 
     function failIfNotTransferredByBacker() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $transferred = $this->lib->transferCoin('not backer', $coins[0], 'public first');
 
         $this->assert->not($this->lib->verifyCoin($transferred));
@@ -64,13 +64,13 @@ class VerifyCoinSpec {
 
     function failIfIssuerSignatureIsInvalid() {
         $this->key->nextSign = 'wrong';
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
 
         $this->assert->not($this->lib->verifyCoin($coins[0]));
     }
 
     function failIfFirstSignatureIsInvalid() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->key->nextSign = 'wrong';
         $transferred = $this->lib->transferCoin('backer', $coins[0], 'public first');
 
@@ -78,7 +78,7 @@ class VerifyCoinSpec {
     }
 
     function failIfChainIsBroken() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('not second', $second, 'public third');

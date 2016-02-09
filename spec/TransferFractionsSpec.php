@@ -23,7 +23,7 @@ class TransferFractionsSpec {
     }
 
     function none() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'promise', 'public backer', 1, 1);
         $coin = $this->lib->transferCoin('backer', $coins[0], 'public first', new Fraction(0));
 
         $this->assert->equals($coin->getTransaction(),
@@ -31,7 +31,7 @@ class TransferFractionsSpec {
     }
 
     function all() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'promise', 'public backer', 1, 1);
         $coin = $this->lib->transferCoin('backer', $coins[0], 'public first', new Fraction(1));
 
         $this->assert->equals($coin->getTransaction(),
@@ -39,7 +39,7 @@ class TransferFractionsSpec {
     }
 
     function half() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'promise', 'public backer', 1, 1);
         $coin = $this->lib->transferCoin('backer', $coins[0], 'public first', new Fraction(1, 2));
 
         $this->assert->equals($coin->getTransaction(),
@@ -47,7 +47,7 @@ class TransferFractionsSpec {
     }
 
     function thirdOfHalf() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'promise', 'public backer', 1, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'promise', 'public backer', 1, 1);
         $half = $this->lib->transferCoin('backer', $coins[0], 'public first', new Fraction(1, 2));
         $sixth = $this->lib->transferCoin('backer', $half, 'public first', new Fraction(1, 3));
 

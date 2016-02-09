@@ -39,15 +39,15 @@ class Groupcash {
     /**
      * Creates a new coin representing a delivery promise.
      *
-     * @param string $currency
      * @param string $issuerKey
+     * @param string $currency
      * @param string $promise
      * @param string $backerAddress
      * @param int $serialStart
      * @param int $count
      * @return model\Coin[]
      */
-    public function issueCoins($currency, $issuerKey, $promise, $backerAddress, $serialStart, $count) {
+    public function issueCoins($issuerKey, $currency, $promise, $backerAddress, $serialStart, $count) {
         $issuer = new Signer($this->key, $issuerKey);
 
         $coins = [];

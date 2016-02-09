@@ -20,7 +20,7 @@ class TransferCoinsSpec {
     }
 
     function originalCoin() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
 
         $transferred = $this->lib->transferCoin('backer', $coins[0], 'new owner');
 
@@ -30,7 +30,7 @@ class TransferCoinsSpec {
     }
 
     function transferredCoin() {
-        $coins = $this->lib->issueCoins('public root', 'issuer', 'my promise', 'public backer', 42, 1);
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
 
