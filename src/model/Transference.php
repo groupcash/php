@@ -50,7 +50,7 @@ class Transference implements Transaction{
         if ($this->prev) {
             $pieces[] = $this->prev;
         }
-        return implode("\0", $pieces);
+        return implode("", $pieces);
     }
 
     /**

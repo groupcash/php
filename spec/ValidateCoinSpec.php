@@ -47,7 +47,7 @@ class ValidateCoinSpec {
         $validated = $this->lib->validateCoin('backer', $transferred);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public first', new Fraction(1),
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . ')'));
+            '(my promise42public backer)'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
         $this->assert->isTrue($this->lib->verifyCoin($validated, ['public issuer']));
     }
@@ -62,8 +62,8 @@ class ValidateCoinSpec {
         $validated = $this->lib->validateCoin('backer', $second);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public second', new Fraction(1),
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public first' . "\0" .
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . '))'));
+            '(my promise42public backerpublic first' . 
+            '(my promise42public backer))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
         $this->assert->isTrue($this->lib->verifyCoin($validated, ['public issuer']));
     }
@@ -77,9 +77,9 @@ class ValidateCoinSpec {
         $validated = $this->lib->validateCoin('backer', $third);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public third', new Fraction(1),
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public second' . "\0" .
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public first' . "\0" .
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . ')))'));
+            '(my promise42public backerpublic second' . 
+            '(my promise42public backerpublic first' . 
+            '(my promise42public backer)))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
         $this->assert->isTrue($this->lib->verifyCoin($validated, ['public issuer']));
     }
@@ -95,8 +95,8 @@ class ValidateCoinSpec {
         $validated = $this->lib->validateCoin('backer', $third);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public third', new Fraction(1),
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public second' . "\0" .
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . '))'));
+            '(my promise42public backerpublic second' . 
+            '(my promise42public backer))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
         $this->assert->isTrue($this->lib->verifyCoin($validated, ['public issuer']));
     }
@@ -110,9 +110,9 @@ class ValidateCoinSpec {
         $validated = $this->lib->validateCoin('backer', $third);
 
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public third', new Fraction(5, 42),
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public second' . "\0" .
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . 'public first' . "\0" .
-            '(my promise' . "\0" . '42' . "\0" . 'public backer' . "\0" . ')))'));
+            '(my promise42public backerpublic second' .
+            '(my promise42public backerpublic first' .
+            '(my promise42public backer)))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
         $this->assert->isTrue($this->lib->verifyCoin($validated, ['public issuer']));
     }
