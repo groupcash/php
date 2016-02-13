@@ -3,6 +3,7 @@
   "description": "PHP implementation of the groupcash protocol",
   "type": "library",
   "require": {
+    "php": ">=5.5",
     "rtens/domin": "dev-master",
     "mdanter/ecc": "^0.3.0"
   },

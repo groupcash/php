@@ -92,7 +92,7 @@ class ResolveTransactionsSpec {
         $this->assert->equals($balances, [
             'public dude' => new Fraction(-1, 3),
             'public first' => new Fraction(0),
-            'public second' => new Fraction(1, 6),
+            'public second' => new Fraction(3, 18),
             'public third' => new Fraction(1, 6),
         ]);
     }

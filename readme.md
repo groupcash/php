@@ -1,4 +1,4 @@
-# groupcash PHP
+# groupcash PHP [![Build Status](https://travis-ci.org/groupcash/php.png?branch=master)](https://travis-ci.org/groupcash/php)
 
 Implementation of the [*groupcash* protocol][protocol] in PHP with command line interface.
 
