@@ -118,6 +118,17 @@ class Groupcash {
     }
 
     /**
+     * Creates an authorization for the given issuer address.
+     *
+     * @param string $rootKey
+     * @param string $issuerAddress
+     * @return Authorization
+     */
+    public function authorizeIssuer($rootKey, $issuerAddress) {
+        return Authorization::create($issuerAddress, new Signer($this->key, $rootKey));
+    }
+
+    /**
      * Verifies that all transactions of a coin are sound.
      *
      * @param Coin $coin

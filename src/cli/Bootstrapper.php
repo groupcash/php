@@ -11,9 +11,15 @@ class Bootstrapper {
     /** @var Groupcash */
     private $lib;
 
+    /** @var Serializer[] */
+    private $serializers;
+
     public function __construct() {
         $this->lib = new Groupcash(new EccKeyService());
-        $this->serializer = new CoinSerializer();
+        $this->serializers = [
+            new CoinSerializer(),
+            new AuthorizationSerializer()
+        ];
     }
 
     public function run() {
@@ -23,8 +29,8 @@ class Bootstrapper {
     }
 
     private function setUpCliApplication(CliApplication $app) {
-        $app->fields->add(new CoinField($this->serializer));
-        $app->renderers->add(new CoinRenderer($this->serializer));
+        $app->fields->add(new SerializingField($this->serializers));
+        $app->renderers->add(new SerializingRenderer($this->serializers));
 
         $this->addLibraryActions($app);
         $this->addDecodeAction($app);
@@ -41,7 +47,8 @@ class Bootstrapper {
     }
 
     private function addDecodeAction(CliApplication $app) {
-        $app->actions->add('decode', (new GenericMethodAction($this->serializer, 'decode', $app->types, $app->parser))
-            ->generic()->setCaption('Decode'));
+        $app->actions->add('decode',
+            (new GenericMethodAction(new SerializingField([]), 'decode', $app->types, $app->parser))
+                ->generic()->setCaption('Decode'));
     }
 }

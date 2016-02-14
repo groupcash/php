@@ -8,64 +8,33 @@ use groupcash\php\model\Signature;
 use groupcash\php\model\Transaction;
 use groupcash\php\model\Transference;
 
-class CoinSerializer {
+class CoinSerializer extends Serializer{
 
-    const VERSION = '1.0';
+    public function serializes() {
+        return Coin::class;
+    }
 
-    /**
-     * Presents a coin in a human-readable format.
-     *
-     * @param string $encoded
-     * @param bool $pretty
-     * @return string
-     */
-    public function decode($encoded, $pretty = false) {
-        $decoded = base64_decode($encoded);
-        if ($pretty) {
-            $decoded = json_encode(json_decode($decoded, true), JSON_PRETTY_PRINT);
-        }
-        return $decoded;
+    protected function version() {
+        return '1.0';
+    }
+
+    public function objectKey() {
+        return 'coin';
     }
 
     /**
      * @param Coin $coin
-     * @return string
-     */
-    public function serialize(Coin $coin) {
-        $serialized = [
-            'ver' => self::VERSION,
-            'coin' => $this->arrayCoin($coin)
-        ];
-        return $this->encode(json_encode($serialized));
-    }
-
-    /**
-     * @param string $serialized
-     * @return Coin
+     * @return array
      * @throws \Exception
      */
-    public function unserialize($serialized) {
-        $array = json_decode($this->decode($serialized), true);
-
-        if ($array['ver'] != self::VERSION) {
-            throw new \Exception('Unsupported serialization version');
-        }
-
-        return $this->objectCoin($array['coin']);
-    }
-
-    public function encode($serialized) {
-        return base64_encode($serialized);
-    }
-
-    private function arrayCoin(Coin $coin) {
+    protected function serializeObject($coin) {
         return [
             'trans' => $this->arrayTransaction($coin->getTransaction()),
             'sig' => $this->arraySignature($coin->getSignature())
         ];
     }
 
-    private function objectCoin(array $array) {
+    protected function inflateObject($array) {
         return new Coin(
             $this->objectTransaction($array['trans']),
             $this->objectSignature($array['sig'])
@@ -125,7 +94,7 @@ class CoinSerializer {
     private function arrayTransference(Transference $transference) {
         $fraction = $transference->getFraction();
         return [
-            'coin' => $this->arrayCoin($transference->getCoin()),
+            'coin' => $this->serializeObject($transference->getCoin()),
             'target' => $transference->getTarget(),
             'fraction' => $fraction->getNominator() . '|' . $fraction->getDenominator(),
             'prev' => $transference->getPrev()
@@ -135,7 +104,7 @@ class CoinSerializer {
     private function objectTransference(array $array) {
         list($nom, $den) = explode('|', $array['fraction']);
         return new Transference(
-            $this->objectCoin($array['coin']),
+            $this->inflateObject($array['coin']),
             $array['target'],
             new Fraction($nom, $den),
             $array['prev']

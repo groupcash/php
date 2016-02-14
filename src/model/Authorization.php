@@ -33,4 +33,18 @@ class Authorization {
     private function fingerprint() {
         return $this->issuer;
     }
+
+    /**
+     * @return string
+     */
+    public function getIssuer() {
+        return $this->issuer;
+    }
+
+    /**
+     * @return Signature
+     */
+    public function getSignature() {
+        return $this->signature;
+    }
 }

@@ -1,7 +1,9 @@
 <?php
 namespace spec\groupcash\php;
 
+use groupcash\php\cli\AuthorizationSerializer;
 use groupcash\php\cli\CoinSerializer;
+use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Promise;
@@ -132,16 +134,26 @@ class SerializationSpec {
         $this->assert->equals($this->serializeUnserialize($first), $first);
     }
 
+    function authorization() {
+        $serializer = new AuthorizationSerializer();
+        $authorization = new Authorization('lisa', new Signature('bart', 'el barto'));
+
+        $this->assert->equals($serializer->serialize($authorization),
+            '{"ver":"1.0","auth":{"issuer":"lisa","sig":{"signer":"bart","signed":"el barto"}}}');
+
+        $this->assert->equals($serializer->inflate($serializer->serialize($authorization)),  $authorization);
+    }
+
     /**
      * @param $coin
      * @return mixed
      */
     private function serializeToArray($coin) {
-        $json = json_decode($this->serializer->decode($this->serializer->serialize($coin)), true);
+        $json = json_decode($this->serializer->serialize($coin), true);
         return $json;
     }
 
     private function serializeUnserialize(Coin $coin) {
-        return $this->serializer->unserialize($this->serializer->serialize($coin));
+        return $this->serializer->inflate($this->serializer->serialize($coin));
     }
 }

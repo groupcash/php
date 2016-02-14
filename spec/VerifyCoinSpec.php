@@ -25,14 +25,14 @@ class VerifyCoinSpec {
     function success() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->isTrue($this->lib->verifyCoin($coins[0], [
-            Authorization::create('public issuer', new Signer(new FakeKeyService(), 'root'))
+            $this->lib->authorizeIssuer('root', 'public issuer')
         ]));
     }
 
     function failIfIssuerIsNotAuthorized() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $this->assert->not($this->lib->verifyCoin($coins[0], [
-            Authorization::create('not issuer', new Signer(new FakeKeyService(), 'root'))
+            $this->lib->authorizeIssuer('root', 'not issuer')
         ]));
     }
 
