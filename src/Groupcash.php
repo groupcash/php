@@ -111,7 +111,7 @@ class Groupcash {
                 $transference->getTarget(),
                 $signer,
                 $transference->getFraction()->times($issued->getFraction()),
-                $this->key->hash($issued->fingerprint()));
+                $this->key->hash($issued->fingerprint() . $transference->getPrev()));
         }
 
         throw new \Exception('Invalid coin.');
