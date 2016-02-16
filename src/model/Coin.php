@@ -47,4 +47,19 @@ class Coin {
     function __toString() {
         return (string)$this->transaction . ', ' . $this->signature->getSigner();
     }
+
+    /**
+     * @return Fraction
+     */
+    public function getFraction() {
+        $fraction = new Fraction(1);
+
+        $transaction = $this->getTransaction();
+        while ($transaction instanceof Transference) {
+            $fraction = $fraction->times($transaction->getFraction());
+            $transaction = $transaction->getCoin()->getTransaction();
+        }
+
+        return $fraction;
+    }
 }

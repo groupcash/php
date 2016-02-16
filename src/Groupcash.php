@@ -171,6 +171,7 @@ class Groupcash {
      * @param Coin $coin
      * @param string $fromOwner
      * @return Fraction[] indexed by addresses
+     * @throws \Exception
      */
     public function resolveTransactions(Coin $coin, $fromOwner) {
         /** @var Transference[] $transferences */
