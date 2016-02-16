@@ -169,9 +169,10 @@ class Groupcash {
      * Resolves all transactions of a coin into changes of balances.
      *
      * @param Coin $coin
+     * @param string $fromOwner
      * @return Fraction[] indexed by addresses
      */
-    public function resolveTransactions(Coin $coin) {
+    public function resolveTransactions(Coin $coin, $fromOwner) {
         /** @var Transference[] $transferences */
         $transferences = [];
 
@@ -181,14 +182,20 @@ class Groupcash {
             $transaction = $transaction->getCoin()->getTransaction();
         }
 
+        if (!($transaction instanceof Promise)) {
+            throw new \Exception('Invalid coin.');
+        }
+
         $transferences = array_reverse($transferences);
 
         $fractions = [];
-        $lastOwner = null;
+        $lastOwner = $transaction->getBacker();
         $fraction = new Fraction(1);
 
         foreach ($transferences as $transference) {
-            if ($lastOwner) {
+            if (!$fromOwner || $fromOwner == $lastOwner) {
+                $fromOwner = null;
+
                 $fraction = $fraction->times($transference->getFraction());
 
                 $fractions[$lastOwner][] = $fraction->negative();

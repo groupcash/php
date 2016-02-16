@@ -21,7 +21,7 @@ class ResolveTransactionsSpec {
 
     function issuedCoin() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 1, 1);
-        $balances = $this->lib->resolveTransactions($coins[0]);
+        $balances = $this->lib->resolveTransactions($coins[0], 'public backer');
 
         $this->assert->equals($balances, []);
     }
@@ -32,9 +32,21 @@ class ResolveTransactionsSpec {
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $validated = $this->lib->validateCoin('backer', $second);
 
-        $balances = $this->lib->resolveTransactions($validated);
+        $balances = $this->lib->resolveTransactions($validated, 'public first');
 
         $this->assert->equals($balances, []);
+    }
+
+    function boughtCoin() {
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 1, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+
+        $balances = $this->lib->resolveTransactions($first, 'public backer');
+
+        $this->assert->equals($balances, [
+            'public backer' => new Fraction(-1),
+            'public first' => new Fraction(1)
+        ]);
     }
 
     function singleTransference() {
@@ -42,7 +54,7 @@ class ResolveTransactionsSpec {
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
 
-        $balances = $this->lib->resolveTransactions($second);
+        $balances = $this->lib->resolveTransactions($second, 'public first');
 
         $this->assert->equals($balances, [
             'public first' => new Fraction(-1),
@@ -56,11 +68,25 @@ class ResolveTransactionsSpec {
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('second', $second, 'public third');
 
-        $balances = $this->lib->resolveTransactions($third);
+        $balances = $this->lib->resolveTransactions($third, 'public first');
 
         $this->assert->equals($balances, [
             'public first' => new Fraction(-1),
             'public second' => new Fraction(0),
+            'public third' => new Fraction(1),
+        ]);
+    }
+
+    function fromSecond() {
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 1, 1);
+        $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
+        $second = $this->lib->transferCoin('first', $first, 'public second');
+        $third = $this->lib->transferCoin('second', $second, 'public third');
+
+        $balances = $this->lib->resolveTransactions($third, 'public second');
+
+        $this->assert->equals($balances, [
+            'public second' => new Fraction(-1),
             'public third' => new Fraction(1),
         ]);
     }
@@ -71,7 +97,7 @@ class ResolveTransactionsSpec {
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('second', $second, 'public first');
 
-        $balances = $this->lib->resolveTransactions($third);
+        $balances = $this->lib->resolveTransactions($third, 'public first');
 
         $this->assert->equals($balances, [
             'public first' => new Fraction(0),
@@ -87,7 +113,7 @@ class ResolveTransactionsSpec {
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('second', $second, 'public third', new Fraction(1, 2));
 
-        $balances = $this->lib->resolveTransactions($third);
+        $balances = $this->lib->resolveTransactions($third, 'public dude');
 
         $this->assert->equals($balances, [
             'public dude' => new Fraction(-1, 3),
