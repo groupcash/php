@@ -191,7 +191,7 @@ class Groupcash {
             if ($lastOwner) {
                 $fraction = $fraction->times($transference->getFraction());
 
-                $fractions[$lastOwner][] = $fraction->times(new Fraction(-1, 1));
+                $fractions[$lastOwner][] = $fraction->negative();
                 $fractions[$transference->getTarget()][] = $fraction;
             }
 
@@ -201,7 +201,7 @@ class Groupcash {
         /** @var Fraction[] $balances */
         $balances = [];
         foreach ($fractions as $member => $theirFractions) {
-            $balances[$member] = new Fraction(0, 1);
+            $balances[$member] = new Fraction(0);
             foreach ($theirFractions as $fraction) {
                 $balances[$member] = $balances[$member]->plus($fraction);
             }

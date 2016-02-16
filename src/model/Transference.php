@@ -24,7 +24,7 @@ class Transference implements Transaction{
     public function __construct(Coin $coin, $target, Fraction $fraction = null, $prev = null) {
         $this->coin = $coin;
         $this->target = $target;
-        $this->fraction = $fraction ?: new Fraction(1, 1);
+        $this->fraction = $fraction ?: new Fraction(1);
         $this->prev = $prev;
     }
 

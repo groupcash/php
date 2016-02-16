@@ -42,12 +42,23 @@ class Fraction {
     /**
      * @return float
      */
-    public function getFloat() {
+    public function toFloat() {
         return $this->nominator / $this->denominator;
     }
 
     function __toString() {
         return $this->nominator . ($this->denominator != 1 ? ('/' . $this->denominator) : '');
+    }
+
+    public function inverse() {
+        if ($this->nominator == 0) {
+            throw new \Exception('Cannot inverse zero.');
+        }
+        return new Fraction($this->denominator, $this->nominator);
+    }
+
+    public function negative() {
+        return new Fraction(-$this->nominator, $this->denominator);
     }
 
     public function times(Fraction $fraction) {
@@ -61,5 +72,13 @@ class Fraction {
             $this->nominator * $fraction->denominator + $fraction->nominator * $this->denominator,
             $this->denominator * $fraction->denominator
         );
+    }
+
+    public function minus(Fraction $fraction) {
+        return $this->plus($fraction->negative());
+    }
+
+    public function dividedBy(Fraction $fraction) {
+        return $this->times($fraction->inverse());
     }
 }
