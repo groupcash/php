@@ -193,10 +193,10 @@ class Groupcash {
         $fraction = new Fraction(1);
 
         foreach ($transferences as $transference) {
+            $fraction = $fraction->times($transference->getFraction());
+
             if (!$fromOwner || $fromOwner == $lastOwner) {
                 $fromOwner = null;
-
-                $fraction = $fraction->times($transference->getFraction());
 
                 $fractions[$lastOwner][] = $fraction->negative();
                 $fractions[$transference->getTarget()][] = $fraction;

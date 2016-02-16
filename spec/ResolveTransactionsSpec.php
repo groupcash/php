@@ -122,4 +122,21 @@ class ResolveTransactionsSpec {
             'public third' => new Fraction(1, 6),
         ]);
     }
+
+    function splitTransferencesWithDifferentStart() {
+        $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 1, 1);
+        $sold = $this->lib->transferCoin('backer', $coins[0], 'public dude');
+
+        $first = $this->lib->transferCoin('dude', $sold, 'public first', new Fraction(1, 3));
+        $second = $this->lib->transferCoin('first', $first, 'public second');
+        $third = $this->lib->transferCoin('second', $second, 'public third', new Fraction(1, 2));
+
+        $balances = $this->lib->resolveTransactions($third, 'public first');
+
+        $this->assert->equals($balances, [
+            'public first' => new Fraction(-1, 3),
+            'public second' => new Fraction(3, 18),
+            'public third' => new Fraction(1, 6),
+        ]);
+    }
 }
