@@ -20,7 +20,11 @@ class Fraction {
             $gcd = gmp_intval(gmp_gcd((string)$nominator, (string)$denominator));
             $nominator /= $gcd;
             $denominator /= $gcd;
+        } else if ($nominator / $denominator == (int)($nominator / $denominator)) {
+            $nominator = $nominator / $denominator;
+            $denominator = 1;
         }
+
         $this->denominator = $denominator;
         $this->nominator = $nominator;
     }
