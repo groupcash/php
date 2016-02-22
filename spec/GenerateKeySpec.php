@@ -6,7 +6,7 @@ use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
- * Keys are used by group members to create cryptographic signatures. To each key belongs a unique address that
+ * Keys are used by users to create cryptographic signatures. To each key belongs a unique address that
  * identifies the holder of the key.
  *
  * @property Assert assert <-

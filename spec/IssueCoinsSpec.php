@@ -7,8 +7,8 @@ use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
- * A coin is a promise for a specific delivery of a certain commodity, signed by a regulating member of the group
- * together with the public key of the backer and a unique serial number.
+ * A coin represents a delivery promise made by a backer, identified by a serial number
+ * and signed by the regulator of the currency.
  *
  * @property Assert assert <-
  * @property Groupcash lib

@@ -12,7 +12,7 @@ use groupcash\php\model\Transference;
 use rtens\scrut\Assert;
 
 /**
- * The CLI application serializes coins for storing.
+ * Coins are serialized for exchange between applications.
  *
  * @property Assert assert <-
  * @property CoinSerializer serializer <-

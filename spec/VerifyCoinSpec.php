@@ -9,7 +9,8 @@ use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
- * A coin is verified by verifying all signatures, the transference chain and that it was issued by a known issuer.
+ * A coin is consistent if all signatures are valid, the transference chain is unbroken and it was issued
+ * by a authorized issuer.
  *
  * @property Assert assert <-
  * @property FakeKeyService key

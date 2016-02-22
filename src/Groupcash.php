@@ -72,14 +72,14 @@ class Groupcash {
     }
 
     /**
-     * Validates that a coin was not double-spent.
+     * Creates coin directly transferred from backer to new owner.
      *
      * @param string $backerKey
      * @param Coin $coin
      * @return Coin
      * @throws \Exception if invalid
      */
-    public function validateCoin($backerKey, Coin $coin) {
+    public function accountCoin($backerKey, Coin $coin) {
         $transference = $coin->getTransaction();
 
         if ($transference instanceof Promise) {

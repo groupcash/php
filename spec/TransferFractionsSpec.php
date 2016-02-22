@@ -9,7 +9,7 @@ use rtens\scrut\fixtures\ExceptionFixture;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
- * In order to support micro-payments, fractions of coins can be transferred. For validation, the fraction that each
+ * In order to support micro-payments, fractions of coins can be transferred. For accounting, the fraction that each
  * owner is entitled to needs to be kept track of.
  *
  * @property Assert assert <-
