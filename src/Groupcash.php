@@ -79,18 +79,18 @@ class Groupcash {
      * @return Coin
      * @throws \Exception if invalid
      */
-    public function accountCoin($backerKey, Coin $coin) {
+    public function confirmCoin($backerKey, Coin $coin) {
         $transference = $coin->getTransaction();
 
         if ($transference instanceof Promise) {
             return $coin;
         } else {
             $backer = new Signer($this->key, $backerKey);
-            return $this->validateTransference($backer, $coin);
+            return $this->confirmTransference($backer, $coin);
         }
     }
 
-    private function validateTransference(Signer $signer, Coin $coin) {
+    private function confirmTransference(Signer $signer, Coin $coin) {
         $transference = $coin->getTransaction();
 
         if ($transference instanceof Promise) {
@@ -105,7 +105,7 @@ class Groupcash {
 
         } else if ($transference instanceof Transference) {
             /** @var Transference $issued */
-            $issued = $this->validateTransference($signer, $transference->getCoin())->getTransaction();
+            $issued = $this->confirmTransference($signer, $transference->getCoin())->getTransaction();
 
             return $issued->getCoin()->transfer(
                 $transference->getTarget(),

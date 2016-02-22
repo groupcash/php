@@ -7,8 +7,8 @@ use rtens\scrut\Assert;
 use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
- * The possibly multiple transactions of a coin since the last accounting can be resolved to calculate how the balance
- * of each involved user changes.
+ * The possibly multiple transactions of a coin since the last confirmation can be resolved to calculate how
+ * the balance of each involved user changes.
  *
  * @property Assert assert <-
  * @property Groupcash lib
@@ -30,7 +30,7 @@ class ResolveTransactionsSpec {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 1, 1);
         $first = $this->lib->transferCoin('backer', $coins[0], 'public first');
         $second = $this->lib->transferCoin('first', $first, 'public second');
-        $validated = $this->lib->accountCoin('backer', $second);
+        $validated = $this->lib->confirmCoin('backer', $second);
 
         $balances = $this->lib->resolveTransactions($validated, 'public first');
 

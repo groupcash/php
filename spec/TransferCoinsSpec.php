@@ -9,7 +9,7 @@ use spec\groupcash\php\fakes\FakeKeyService;
 
 /**
  * The owner of a coin transfers it by signing it together with the public key of the new owner. The transaction
- * should be accounted by the backer of the coin to avoid double-spending.
+ * should be confirmed by the backer of the coin to avoid double-spending.
  *
  * @property Assert assert <-
  * @property Groupcash lib
