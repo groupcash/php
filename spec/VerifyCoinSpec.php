@@ -24,49 +24,54 @@ class VerifyCoinSpec {
 
     function success() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
-        $this->assert->isTrue($this->lib->verifyCoin($coins[0], [
-            $this->lib->authorizeIssuer('root', 'public issuer')
-        ]));
+        $issuers = [$this->lib->authorizeIssuer('root', 'public issuer')];
+
+        $this->assert->not($this->lib->findInconsistencies($coins[0], $issuers));
     }
 
     function failIfIssuerIsNotAuthorized() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
-        $this->assert->not($this->lib->verifyCoin($coins[0], [
-            $this->lib->authorizeIssuer('root', 'not issuer')
-        ]));
+        $issuers = [$this->lib->authorizeIssuer('root', 'not issuer')];
+
+        $this->assert->equals($this->lib->findInconsistencies($coins[0], $issuers),
+            'The issuer is not authorized.');
     }
 
     function failIfAuthorizationNotValid() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
-        $this->assert->not($this->lib->verifyCoin($coins[0], [
-            new Authorization('public issuer', new Signature('public root', 'invalid'))
-        ]));
+        $issuers = [new Authorization('public issuer', new Signature('public root', 'invalid'))];
+
+        $this->assert->equals($this->lib->findInconsistencies($coins[0], $issuers),
+            'The issuer is not authorized.');
     }
 
     function failIfNotAuthorizedByCurrencyRoot() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
-        $this->assert->not($this->lib->verifyCoin($coins[0], [
-            Authorization::create('public issuer', new Signer(new FakeKeyService(), 'not root'))
-        ]));
+        $issuers = [Authorization::create('public issuer', new Signer(new FakeKeyService(), 'not root'))];
+
+        $this->assert->equals($this->lib->findInconsistencies($coins[0], $issuers),
+            'The issuer is not authorized.');
     }
 
     function skipIssuerVerification() {
         $coins = $this->lib->issueCoins('not issuer', 'public root', 'my promise', 'public backer', 42, 1);
-        $this->assert->isTrue($this->lib->verifyCoin($coins[0]));
+        $this->assert->not($this->lib->findInconsistencies($coins[0]));
     }
 
     function failIfNotTransferredByBacker() {
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
         $transferred = $this->lib->transferCoin('not backer', $coins[0], 'public first');
 
-        $this->assert->not($this->lib->verifyCoin($transferred));
+        $this->assert->equals($this->lib->findInconsistencies($transferred),
+            'Signed by non-owner [public not backer].');
     }
 
     function failIfIssuerSignatureIsInvalid() {
         $this->key->nextSign = 'wrong';
         $coins = $this->lib->issueCoins('issuer', 'public root', 'my promise', 'public backer', 42, 1);
 
-        $this->assert->not($this->lib->verifyCoin($coins[0]));
+        $this->assert->equals($this->lib->findInconsistencies($coins[0]),
+            'Invalid signature by [public issuer].');
     }
 
     function failIfFirstSignatureIsInvalid() {
@@ -74,7 +79,8 @@ class VerifyCoinSpec {
         $this->key->nextSign = 'wrong';
         $transferred = $this->lib->transferCoin('backer', $coins[0], 'public first');
 
-        $this->assert->not($this->lib->verifyCoin($transferred));
+        $this->assert->equals($this->lib->findInconsistencies($transferred),
+            'Invalid signature by [public backer].');
     }
 
     function failIfChainIsBroken() {
@@ -83,6 +89,7 @@ class VerifyCoinSpec {
         $second = $this->lib->transferCoin('first', $first, 'public second');
         $third = $this->lib->transferCoin('not second', $second, 'public third');
 
-        $this->assert->not($this->lib->verifyCoin($third));
+        $this->assert->equals($this->lib->findInconsistencies($third),
+            'Signed by non-owner [public not second].');
     }
 }

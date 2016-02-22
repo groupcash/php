@@ -26,7 +26,7 @@ class IssueCoinsSpec {
 
         $this->assert->equals($coins[0]->getTransaction(), new Promise('public root', 'public backer', 'my promise', 42));
         $this->assert->equals($coins[0]->getSignature()->getSigner(), 'public issuer');
-        $this->assert->isTrue($this->lib->verifyCoin($coins[0]));
+        $this->assert->not($this->lib->findInconsistencies($coins[0]));
     }
 
     function multipleCoins() {

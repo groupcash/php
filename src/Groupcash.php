@@ -129,39 +129,40 @@ class Groupcash {
     }
 
     /**
-     * Verifies that all transactions of a coin are sound.
+     * Finds inconsistencies in the transactions.
      *
      * @param Coin $coin
      * @param null|Authorization[] $authorizedIssuers
-     * @return bool
+     * @return string|bool False if coin is consistent, true or reason if inconsistent
      */
-    public function verifyCoin(Coin $coin, array $authorizedIssuers = null) {
+    public function findInconsistencies(Coin $coin, array $authorizedIssuers = null) {
         $transaction = $coin->getTransaction();
         $signature = $coin->getSignature();
 
         if (!$this->key->verify($transaction->fingerprint(), $signature->getSigned(), $signature->getSigner())) {
-            return false;
+            return "Invalid signature by [{$signature->getSigner()}].";
         }
 
         if ($transaction instanceof Promise) {
-            if (!$authorizedIssuers) {
-                return true;
+            if (is_null($authorizedIssuers)) {
+                return false;
             }
+
             foreach ($authorizedIssuers as $issuer) {
                 if ($issuer->isAuthorizedToIssue($transaction, $coin->getSignature(), $this->key)) {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return 'The issuer is not authorized.';
 
         } else if ($transaction instanceof Transference) {
             if ($coin->getSignature()->getSigner() != $transaction->getCoin()->getTransaction()->getTarget()) {
-                return false;
+                return "Signed by non-owner [{$coin->getSignature()->getSigner()}].";
             }
-            return $this->verifyCoin($transaction->getCoin(), $authorizedIssuers);
+            return $this->findInconsistencies($transaction->getCoin(), $authorizedIssuers);
 
         } else {
-            return false;
+            return 'Unknown coin structure.';
         }
     }
 

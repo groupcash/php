@@ -49,7 +49,7 @@ class ValidateCoinSpec {
         $this->assert->equals($validated->getTransaction(), new Transference($coins[0], 'public first', new Fraction(1),
             '(my promise42public backer)'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($validated));
+        $this->assert->not($this->lib->findInconsistencies($validated));
     }
 
     function secondTransaction() {
@@ -65,7 +65,7 @@ class ValidateCoinSpec {
             '(my promise42public backerpublic first' .
             '(my promise42public backer))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($validated));
+        $this->assert->not($this->lib->findInconsistencies($validated));
     }
 
     function thirdTransaction() {
@@ -81,7 +81,7 @@ class ValidateCoinSpec {
             '(my promise42public backerpublic first' .
             '(my promise42public backer)))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($validated));
+        $this->assert->not($this->lib->findInconsistencies($validated));
     }
 
     function transferenceAfterValidation() {
@@ -100,7 +100,7 @@ class ValidateCoinSpec {
             '(my promise42public backerpublic first' .
             '(my promise42public backer))))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($validated));
+        $this->assert->not($this->lib->findInconsistencies($validated));
     }
 
     function fractions() {
@@ -117,7 +117,7 @@ class ValidateCoinSpec {
                 '(my promise42public backerpublic first' .
                 '(my promise42public backer)))'));
         $this->assert->equals($validated->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($validated));
+        $this->assert->not($this->lib->findInconsistencies($validated));
     }
 
     function validateAValidatedCoin() {

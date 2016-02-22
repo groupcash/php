@@ -27,7 +27,7 @@ class TransferCoinsSpec {
 
         $this->assert->equals($transferred->getTransaction(), new Transference($coins[0], 'new owner'));
         $this->assert->equals($transferred->getSignature()->getSigner(), 'public backer');
-        $this->assert->isTrue($this->lib->verifyCoin($transferred));
+        $this->assert->not($this->lib->findInconsistencies($transferred));
     }
 
     function transferredCoin() {
@@ -37,7 +37,7 @@ class TransferCoinsSpec {
 
         $this->assert->equals($second->getTransaction(), new Transference($first, 'public second'));
         $this->assert->equals($second->getSignature()->getSigner(), 'public first');
-        $this->assert->isTrue($this->lib->verifyCoin($second));
+        $this->assert->not($this->lib->findInconsistencies($second));
     }
 
     function transferFraction() {
