@@ -1,5 +1,6 @@
 <?php
 namespace groupcash\php\model;
+use groupcash\php\Signer;
 
 /**
  * An Issue is the first Transaction of a Coin.
@@ -23,6 +24,10 @@ class Issue extends Transaction {
         parent::__construct([$promise], [$output], $signature);
         $this->promise = $promise;
         $this->output = $output;
+    }
+
+    public static function coin(Promise $promise, Output $output, Signer $signer) {
+        return new Coin(Coin::VERSION, new Issue($promise, $output, $signer->sign([[$promise], [$output]])), 0);
     }
 
     /**
