@@ -1,0 +1,22 @@
+# groupcash PHP [![Build Status](https://travis-ci.org/groupcash/php.png?branch=master)](https://travis-ci.org/groupcash/php)
+
+Implementation of the [*groupcash* protocol][core algorithms] in PHP with command line interface.
+
+[algorithms]: https://github.com/groupcash/core
+
+## Usage
+
+Download and install the project with [composer]
+
+    php composer.phar create-project groupcash/php groupcash-php -sdev
+    cd groupcash-php
+
+Execute the specifications to make sure everything works
+
+    vendor/bin/scrut spec
+
+Run the CLI application
+
+    php groupcash.php
+
+[composer]: http://getcomposer.com
