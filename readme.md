@@ -1,6 +1,6 @@
 # groupcash PHP [![Build Status](https://travis-ci.org/groupcash/php.png?branch=master)](https://travis-ci.org/groupcash/php)
 
-Implementation of the [*groupcash* algorithms][design] in PHP with command line interface.
+Implementation of the [*groupcash* design][design] in PHP with command line interface.
 
 [design]: https://github.com/groupcash/core/blob/master/design.md
 
