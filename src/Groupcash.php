@@ -24,6 +24,14 @@ class Groupcash {
         $this->finger = $finger;
     }
 
+    public function generateKey() {
+        return $this->key->generatePrivateKey();
+    }
+
+    public function getAddress($key) {
+        return $this->key->publicKey($key);
+    }
+
     public function issueCoin($issuerKey, Promise $promise, Output $output) {
         return Coin::issue($promise, $output, new Signer($this->key, $this->finger, $issuerKey));
     }
