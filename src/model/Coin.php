@@ -1,6 +1,8 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\Signer;
+
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.
  */
@@ -19,6 +21,32 @@ class Coin extends Input {
         parent::__construct($transaction, $outputIndex);
 
         $this->version = self::VERSION;
+    }
+
+    /**
+     * @param Promise $promise
+     * @param Output $output
+     * @param Signer $signer
+     * @return Coin
+     */
+    public static function issue(Promise $promise, Output $output, Signer $signer) {
+        return new Coin(new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0);
+    }
+
+    /**
+     * @param Coin[] $coins
+     * @param Output[] $outputs
+     * @param Signer $signer
+     * @return Coin[]
+     */
+    public static function transfer($coins, $outputs, Signer $signer) {
+        $transaction = new Transaction($coins, $outputs, $signer->sign([$coins, $outputs]));
+
+        $coins = [];
+        foreach ($outputs as $i => $output) {
+            $coins[] = new Coin($transaction, $i);
+        }
+        return $coins;
     }
 
     /**

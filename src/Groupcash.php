@@ -2,12 +2,10 @@
 namespace groupcash\php;
 
 use groupcash\php\model\Coin;
-use groupcash\php\model\Base;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
-use groupcash\php\model\Transaction;
 
 class Groupcash {
 
@@ -27,9 +25,7 @@ class Groupcash {
     }
 
     public function issueCoin($issuerKey, Promise $promise, Output $output) {
-        $signer = new Signer($this->key, $this->finger, $issuerKey);
-
-        return new Coin(new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0);
+        return Coin::issue($promise, $output, new Signer($this->key, $this->finger, $issuerKey));
     }
 
     /**
@@ -74,13 +70,6 @@ class Groupcash {
             throw new \Exception('Only the owner can transfer coins.');
         }
 
-        $signer = new Signer($this->key, $this->finger, $ownerKey);
-        $transaction = new Transaction($coins, $outputs, $signer->sign([$coins, $outputs]));
-
-        $coins = [];
-        foreach ($outputs as $i => $output) {
-            $coins[] = new Coin($transaction, $i);
-        }
-        return $coins;
+        return Coin::transfer($coins, $outputs, new Signer($this->key, $this->finger, $ownerKey));
     }
 }
