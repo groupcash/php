@@ -100,6 +100,13 @@ class Groupcash {
             throw new \Exception('Only the owner can transfer coins.');
         }
 
+        $currencies = array_unique(array_map(function (Coin $coin) {
+            return $coin->getBases()[0]->getPromise()->getCurrency();
+        }, $coins));
+        if (count($currencies) != 1) {
+            throw new \Exception('All coins must be of the same currency.');
+        }
+
         return Coin::transfer($coins, $outputs, new Signer($this->key, $this->finger, $ownerKey));
     }
 

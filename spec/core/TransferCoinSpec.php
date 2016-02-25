@@ -95,7 +95,7 @@ class TransferCoinSpec {
         $this->try->thenTheException_ShouldBeThrown('The output value must equal the input value.');
     }
 
-    function notSameOwner() {
+    function differentOwners() {
         $this->try->tryTo(function () {
             $this->lib->transferCoins('', [
                 $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
@@ -105,6 +105,18 @@ class TransferCoinSpec {
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('All coins must have the same owner.');
+    }
+
+    function differentCurrencies() {
+        $this->try->tryTo(function () {
+            $this->lib->transferCoins('a key', [
+                $this->lib->issueCoin('', new Promise('a', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('', new Promise('b', ''), new Output('a', new Fraction(1))),
+            ], [
+                new Output('', new Fraction(2))
+            ]);
+        });
+        $this->try->thenTheException_ShouldBeThrown('All coins must be of the same currency.');
     }
 
     function wrongKey() {
