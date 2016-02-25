@@ -5,7 +5,7 @@ use groupcash\php\io\CoinSerializer;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
-use groupcash\php\model\Issue;
+use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signature;
@@ -55,7 +55,7 @@ class SerializationSpec {
             '1.0',
             new Transaction(
                 [new Input(
-                    new Issue(
+                    new Base(
                         new Promise('coin', 'My Promise'),
                         new Output('the backer', new Fraction(1)),
                         new Signature('the issuer', 'el issuero')

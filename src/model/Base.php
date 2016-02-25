@@ -3,11 +3,11 @@ namespace groupcash\php\model;
 use groupcash\php\Signer;
 
 /**
- * An Issue is the first Transaction of a Coin.
+ * The first Transaction of a Coin.
  *
- * It is signed by an issuer, has a Promise as its only Input which is transferred to its backer.
+ * A Base is signed by an issuer, has a Promise as its only Input which is transferred to its backer.
  */
-class Issue extends Transaction {
+class Base extends Transaction {
 
     /** @var Promise */
     private $promise;
@@ -27,7 +27,7 @@ class Issue extends Transaction {
     }
 
     public static function coin(Promise $promise, Output $output, Signer $signer) {
-        return new Coin(Coin::VERSION, new Issue($promise, $output, $signer->sign([[$promise], [$output]])), 0);
+        return new Coin(Coin::VERSION, new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0);
     }
 
     /**

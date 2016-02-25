@@ -2,7 +2,7 @@
 namespace groupcash\php;
 
 use groupcash\php\model\Fraction;
-use groupcash\php\model\Issue;
+use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 
@@ -24,6 +24,6 @@ class Groupcash {
     }
 
     public function issueCoin($issuerKey, Promise $promise, $backerAddress, Fraction $value) {
-        return Issue::coin($promise, new Output($backerAddress, $value), new Signer($this->key, $this->finger, $issuerKey));
+        return Base::coin($promise, new Output($backerAddress, $value), new Signer($this->key, $this->finger, $issuerKey));
     }
 }

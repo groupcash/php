@@ -4,7 +4,7 @@ namespace groupcash\php\model;
 /**
  * A Promise describes the delivery promise of a backer in a certain currency.
  *
- * The Output of the Promises Issue defines how many units it is worth.
+ * The Output of the Promises Base defines how many units it is worth.
  */
 class Promise {
 

@@ -4,7 +4,7 @@ namespace groupcash\php\io;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
-use groupcash\php\model\Issue;
+use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signature;
@@ -65,7 +65,7 @@ class CoinSerializer {
     }
 
     private function serializeTransaction(Transaction $transaction) {
-        if ($transaction instanceof Issue) {
+        if ($transaction instanceof Base) {
             return $this->serializeIssue($transaction);
         }
 
@@ -88,7 +88,7 @@ class CoinSerializer {
         );
     }
 
-    private function serializeIssue(Issue $issue) {
+    private function serializeIssue(Base $issue) {
         return [
             'promise'=> $this->serializePromise($issue->getPromise()),
             'out' => $this->serializeOutput($issue->getOutput()),
@@ -97,7 +97,7 @@ class CoinSerializer {
     }
 
     private function deserializeIssue($array) {
-        return new Issue(
+        return new Base(
             $this->deserializePromise($array['promise']),
             $this->deserializeOutput($array['out']),
             $this->deserializeSignature($array['sig'])

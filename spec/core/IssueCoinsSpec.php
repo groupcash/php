@@ -5,7 +5,7 @@ use groupcash\php\key\FakeFinger;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\Groupcash;
 use groupcash\php\model\Fraction;
-use groupcash\php\model\Issue;
+use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use rtens\scrut\Assert;
@@ -25,10 +25,10 @@ class IssueCoinsSpec {
     function singleCoin() {
         $coin = $this->lib->issueCoin('issuer key', new Promise('foo', 'my promise'), 'backer', new Fraction(42));
 
-        /** @var Issue $issue */
+        /** @var Base $issue */
         $issue = $coin->getTransaction();
 
-        $this->assert->isInstanceOf($issue, Issue::class);
+        $this->assert->isInstanceOf($issue, Base::class);
         $this->assert->equals($issue->getPromise(), new Promise('foo', 'my promise'));
         $this->assert->equals($issue->getInputs(), [new Promise('foo', 'my promise')]);
         $this->assert->equals($issue->getOutput(), new Output('backer', new Fraction(42)));
