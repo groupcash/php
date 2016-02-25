@@ -24,19 +24,40 @@ class Groupcash {
         $this->finger = $finger;
     }
 
+    /**
+     * Generates a new private key.
+     *
+     * @return string
+     */
     public function generateKey() {
         return $this->key->generatePrivateKey();
     }
 
+    /**
+     * Displays the public key corresponding to the given private key.
+     *
+     * @param string $key
+     * @return string
+     */
     public function getAddress($key) {
         return $this->key->publicKey($key);
     }
 
+    /**
+     * Creates a new coin based on a delivery promise.
+     *
+     * @param $issuerKey
+     * @param Promise $promise
+     * @param Output $output
+     * @return Coin
+     */
     public function issueCoin($issuerKey, Promise $promise, Output $output) {
         return Coin::issue($promise, $output, new Signer($this->key, $this->finger, $issuerKey));
     }
 
     /**
+     * Transfers the values of one or more coins to one or more targets.
+     *
      * @param string $ownerKey
      * @param Coin[] $coins
      * @param Output[] $outputs
