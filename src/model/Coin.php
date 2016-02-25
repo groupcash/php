@@ -12,14 +12,13 @@ class Coin extends Input {
     private $version;
 
     /**
-     * @param string $version
      * @param Transaction $transaction
      * @param $outputIndex
      */
-    public function __construct($version, Transaction $transaction, $outputIndex) {
+    public function __construct(Transaction $transaction, $outputIndex) {
         parent::__construct($transaction, $outputIndex);
 
-        $this->version = $version;
+        $this->version = self::VERSION;
     }
 
     /**
@@ -27,5 +26,19 @@ class Coin extends Input {
      */
     public function getVersion() {
         return $this->version;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwner() {
+        return $this->getOutput()->getTarget();
+    }
+
+    /**
+     * @return Fraction
+     */
+    public function getValue() {
+        return $this->getOutput()->getValue();
     }
 }

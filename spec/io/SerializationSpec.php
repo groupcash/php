@@ -31,9 +31,12 @@ class SerializationSpec {
 
     function unsupportedCoinVersionIn() {
         $coin = new Coin(
-            'foo',
             new Transaction([], [], new Signature('', '')), 0
         );
+
+        $version = (new \ReflectionClass($coin))->getProperty('version');
+        $version->setAccessible(true);
+        $version->setValue($coin, 'foo');
 
         $this->try->tryTo(function () use ($coin) {
             $this->serializer->serialize($coin);
@@ -52,7 +55,6 @@ class SerializationSpec {
 
     function transferredCoin() {
         $coin = new Coin(
-            '1.0',
             new Transaction(
                 [new Input(
                     new Base(

@@ -44,7 +44,6 @@ class CoinSerializer {
 
         $input = $this->deserializeInput($array);
         return new Coin(
-            $array['v'],
             $input->getTransaction(),
             $input->getOutputIndex()
         );

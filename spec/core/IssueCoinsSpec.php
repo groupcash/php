@@ -23,7 +23,7 @@ class IssueCoinsSpec {
     }
 
     function singleCoin() {
-        $coin = $this->lib->issueCoin('issuer key', new Promise('foo', 'my promise'), 'backer', new Fraction(42));
+        $coin = $this->lib->issueCoin('issuer key', new Promise('foo', 'my promise'), new Output('backer', new Fraction(42)));
 
         /** @var Base $issue */
         $issue = $coin->getTransaction();

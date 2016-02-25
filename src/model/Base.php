@@ -1,6 +1,5 @@
 <?php
 namespace groupcash\php\model;
-use groupcash\php\Signer;
 
 /**
  * The first Transaction of a Coin.
@@ -24,10 +23,6 @@ class Base extends Transaction {
         parent::__construct([$promise], [$output], $signature);
         $this->promise = $promise;
         $this->output = $output;
-    }
-
-    public static function coin(Promise $promise, Output $output, Signer $signer) {
-        return new Coin(Coin::VERSION, new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0);
     }
 
     /**
