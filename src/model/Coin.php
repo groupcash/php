@@ -1,6 +1,7 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\Finger;
 use groupcash\php\Signer;
 
 /**
@@ -49,6 +50,30 @@ class Coin extends Input {
         return $coins;
     }
 
+    public function confirm($backer, Signer $signer, Finger $finger) {
+        $myBases = array_filter($this->getBases(), function (Base $base) use ($backer) {
+            return $base->getOutput()->getTarget() == $backer;
+        });
+        $inputs = array_map(function (Base $base) {
+            return new Input($base, 0);
+        }, $myBases);
+
+        $fractionSum = function (Fraction $sum, Base $base) {
+            return $sum->plus($base->getOutput()->getValue());
+        };
+        $totalBaseSum = array_reduce($this->getBases(), $fractionSum, new Fraction(0));
+        $myBaseSum = array_reduce($myBases, $fractionSum, new Fraction(0));
+
+        $target = $this->getOwner();
+        $fraction = $this->getValue()->times($myBaseSum)->dividedBy($totalBaseSum);
+        $output = new Output($target, $fraction);
+
+        $fingerprint = $finger->makePrint($this->getTransaction());
+        $signature = $signer->sign([$inputs, $output, $fingerprint]);
+
+        return new Coin(new Confirmation($inputs, [$output], $fingerprint, $signature), 0);
+    }
+
     /**
      * @return string
      */
@@ -68,5 +93,24 @@ class Coin extends Input {
      */
     public function getValue() {
         return $this->getOutput()->getValue();
+    }
+
+    /**
+     * @return Base[]
+     */
+    public function getBases() {
+        return $this->getBasesOf($this->getTransaction());
+    }
+
+    private function getBasesOf(Transaction $transaction) {
+        if ($transaction instanceof Base) {
+            return [$transaction];
+        }
+
+        $bases = [];
+        foreach ($transaction->getInputs() as $input) {
+            $bases = array_merge($bases, $this->getBasesOf($input->getTransaction()));
+        }
+        return $bases;
     }
 }

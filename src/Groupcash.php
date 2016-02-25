@@ -1,6 +1,7 @@
 <?php
 namespace groupcash\php;
 
+use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
@@ -100,5 +101,31 @@ class Groupcash {
         }
 
         return Coin::transfer($coins, $outputs, new Signer($this->key, $this->finger, $ownerKey));
+    }
+
+    /**
+     * Creates a new coin with a value proportional to the bases of the backer.
+     *
+     * @param string $backerKey
+     * @param Coin $coin
+     * @return Coin
+     * @throws \Exception
+     */
+    public function confirmCoin($backerKey, Coin $coin) {
+        $bases = $coin->getBases();
+        $backers = array_map(function (Base $base) {
+            return $base->getOutput()->getTarget();
+        }, $bases);
+
+        $backer = $this->key->publicKey($backerKey);
+        if (!in_array($backer, $backers)) {
+            throw new \Exception('Only a backer of the coin can confirm it.');
+        }
+
+        if (count($bases) == 1 && $bases[0] == $coin->getTransaction()) {
+            return $coin;
+        }
+
+        return $coin->confirm($backer, new Signer($this->key, $this->finger, $backerKey), $this->finger);
     }
 }
