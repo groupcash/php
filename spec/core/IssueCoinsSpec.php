@@ -29,7 +29,7 @@ class IssueCoinsSpec {
 
         $this->assert->isInstanceOf($issue, Base::class);
         $this->assert->equals($issue->getPromise(), new Promise('foo', 'my promise'));
-        $this->assert->equals($issue->getInputs(), [new Promise('foo', 'my promise')]);
+        $this->assert->equals($issue->getInputs(), []);
         $this->assert->equals($issue->getOutput(), new Output('backer', new Fraction(42)));
         $this->assert->equals($issue->getOutputs(), [new Output('backer', new Fraction(42))]);
         $this->assert->equals($issue->getSignature()->getSigner(), 'issuer');

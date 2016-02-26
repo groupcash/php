@@ -25,19 +25,32 @@ class ConfirmCoinSpec {
     }
 
     function notTheBacker() {
-        $coin = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
+        $base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
+        $one = $this->lib->transferCoins('bart key', [$base], [new Output('lisa', new Fraction(1))]);
 
-        $this->try->tryTo(function () use ($coin) {
-            $this->lib->confirmCoin('not bart key', $coin);
+        $this->try->tryTo(function () use ($one) {
+            $this->lib->confirmCoin('not bart key', $one[0]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Only a backer of the coin can confirm it.');
+        $this->try->thenTheException_ShouldBeThrown('Not a backer');
     }
 
     function base() {
-        $coin = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
-        $confirmed = $this->lib->confirmCoin('bart key', $coin);
+        $base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
+        $confirmed = $this->lib->confirmCoin('bart key', $base);
 
-        $this->assert->equals($confirmed, $coin);
+        $this->assert->equals($confirmed->getOwner(), 'bart');
+        $this->assert->equals($confirmed->getValue(), new Fraction(1));
+
+        /** @var Confirmation $confirmation */
+        $confirmation = $confirmed->getInput()->getTransaction();
+        $this->assert->isInstanceOf($confirmation, Confirmation::class);
+        $this->assert->equals($confirmation->getInputs(), [new Input($base->getInput()->getTransaction(), 0)]);
+        $this->assert->equals($confirmation->getHash(), '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1)');
+        $this->assert->equals($confirmation->getSignature()->getSigner(), 'bart');
+        $this->assert->equals($confirmation->getSignature()->getSign(),
+            '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . 'bart' . "\0" . '1|1' . "\0" .
+            '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1))' .
+            ' signed with bart key');
     }
 
     function singleTransaction() {
@@ -52,13 +65,7 @@ class ConfirmCoinSpec {
         /** @var Confirmation $confirmation */
         $confirmation = $confirmed->getInput()->getTransaction();
         $this->assert->isInstanceOf($confirmation, Confirmation::class);
-        $this->assert->equals($confirmation->getInputs(), [new Input($base->getInput()->getTransaction(), 0)]);
         $this->assert->equals($confirmation->getHash(), '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1)');
-        $this->assert->equals($confirmation->getSignature()->getSigner(), 'bart');
-        $this->assert->equals($confirmation->getSignature()->getSign(),
-            '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . 'lisa' . "\0" . '1|1' . "\0" .
-            '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1))' .
-            ' signed with bart key');
     }
 
     function chain() {

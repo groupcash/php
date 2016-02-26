@@ -13,7 +13,11 @@ class Confirmation extends Transaction {
      * @param Signature $signature
      */
     public function __construct(array $bases, Output $output, $hash, Signature $signature) {
-        parent::__construct(array_map([$this, 'makeInput'], $bases), [$output], $signature);
+        parent::__construct(
+            array_map([$this, 'makeInput'], $bases),
+            $this->keepChange($bases, $output),
+            $signature);
+
         $this->hash = $hash;
     }
 
@@ -61,5 +65,26 @@ class Confirmation extends Transaction {
 
     private function makeInput(Base $base) {
         return new Input($base, 0);
+    }
+
+    /**
+     * @param Base[] $bases
+     * @param Output $output
+     * @return Output[]
+     */
+    private function keepChange(array $bases, Output $output) {
+        /** @var Fraction $sum */
+        $sum = array_reduce($bases, function (Fraction $sum, Base $base) {
+            return $sum->plus($base->getOutput()->getValue());
+        }, new Fraction(0));
+
+        if ($sum == $output->getValue()) {
+            return [$output];
+        }
+
+        return [
+            $output,
+            new Output(null, $sum->minus($output->getValue()))
+        ];
     }
 }

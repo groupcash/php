@@ -1,10 +1,7 @@
 <?php
 namespace groupcash\php;
 
-use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
-use groupcash\php\model\Fraction;
-use groupcash\php\model\Input;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signer;
@@ -62,52 +59,16 @@ class Groupcash {
      * @throws \Exception
      */
     public function transferCoins($ownerKey, array $coins, array $outputs) {
-        if (!$coins) {
-            throw new \Exception('No coins given.');
-        }
-        if (!$outputs) {
-            throw new \Exception('No outputs given.');
-        }
-
-        $outputValue = array_reduce($outputs, function (Fraction $sum, Output $output) {
-            if ($output->getValue()->isLessThan(new Fraction(0)) || $output->getValue() == new Fraction(0)) {
-                throw new \Exception('Output values must be positive.');
-            }
-
-            return $sum->plus($output->getValue());
-        }, new Fraction(0));
-
         $inputs = array_map(function (Coin $coin) {
             return $coin->getInput();
         }, $coins);
 
-        $inputValue = array_reduce($inputs, function (Fraction $sum, Input $input) {
-            return $sum->plus($input->getOutput()->getValue());
-        }, new Fraction(0));
+        $transferred = Coin::transfer($inputs, $outputs, new Signer($this->key, $ownerKey));
 
-        if ($inputValue != $outputValue) {
-            throw new \Exception('The output value must equal the input value.');
+        foreach ($transferred as $coin) {
+            $this->verifyCoin($coin);
         }
-
-        $owners = array_unique(array_map(function (Coin $coin) {
-            return $coin->getOwner();
-        }, $coins));
-
-        if (count($owners) != 1) {
-            throw new \Exception('All coins must have the same owner.');
-        }
-        if ($owners[0] != $this->key->publicKey($ownerKey)) {
-            throw new \Exception('Only the owner can transfer coins.');
-        }
-
-        $currencies = array_unique(array_map(function (Coin $coin) {
-            return $coin->getBases()[0]->getPromise()->getCurrency();
-        }, $coins));
-        if (count($currencies) != 1) {
-            throw new \Exception('All coins must be of the same currency.');
-        }
-
-        return Coin::transfer($inputs, $outputs, new Signer($this->key, $ownerKey));
+        return $transferred;
     }
 
     /**
@@ -119,20 +80,20 @@ class Groupcash {
      * @throws \Exception
      */
     public function confirmCoin($backerKey, Coin $coin) {
-        $bases = $coin->getBases();
-        $backers = array_map(function (Base $base) {
-            return $base->getOutput()->getTarget();
-        }, $bases);
-
         $backer = $this->key->publicKey($backerKey);
-        if (!in_array($backer, $backers)) {
-            throw new \Exception('Only a backer of the coin can confirm it.');
-        }
+        $confirmed = $coin->confirm($backer, new Signer($this->key, $backerKey), $this->key);
 
-        if (count($bases) == 1 && $bases[0] == $coin->getInput()->getTransaction()) {
-            return $coin;
-        }
+        $this->verifyCoin($confirmed);
+        return $confirmed;
+    }
 
-        return $coin->confirm($backer, new Signer($this->key, $backerKey), $this->key);
+    /**
+     * Verifies that the Coin is internally consistent.
+     *
+     * @param Coin $coin
+     * @throw Exception if Coin does not verify
+     */
+    private function verifyCoin(Coin $coin) {
+        (new Verification($coin))->mustBeOk();
     }
 }

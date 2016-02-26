@@ -81,12 +81,17 @@ class Coin {
      * @param Signer $signer
      * @param KeyService $service
      * @return Coin
+     * @throws \Exception
      */
     public function confirm($backer, Signer $signer, KeyService $service) {
         $allBases = $this->getBases();
-        $myBases = array_filter($allBases, function (Base $base) use ($backer) {
+        $myBases = array_values(array_filter($allBases, function (Base $base) use ($backer) {
             return $base->getOutput()->getTarget() == $backer;
-        });
+        }));
+
+        if (!$myBases) {
+            throw new \Exception('Not a backer');
+        }
 
         $output = new Output(
             $this->getOwner(),

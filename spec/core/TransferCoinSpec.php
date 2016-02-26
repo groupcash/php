@@ -29,21 +29,10 @@ class TransferCoinSpec {
             $this->lib->transferCoins('', [
                 // Empty
             ], [
-                // Empty
+                new Output('', new Fraction(0))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('No coins given.');
-    }
-
-    function noOutput() {
-        $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
-            ], [
-                // Empty
-            ]);
-        });
-        $this->try->thenTheException_ShouldBeThrown('No outputs given.');
+        $this->try->thenTheException_ShouldBeThrown('No inputs');
     }
 
     function emptyOutput() {
@@ -51,10 +40,11 @@ class TransferCoinSpec {
             $this->lib->transferCoins('', [
                 $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
             ], [
-                new Output('', new Fraction(0))
+                new Output('', new Fraction(0)),
+                new Output('', new Fraction(1)),
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Output values must be positive.');
+        $this->try->thenTheException_ShouldBeThrown('Zero output value');
     }
 
     function negativeOutput() {
@@ -62,10 +52,11 @@ class TransferCoinSpec {
             $this->lib->transferCoins('', [
                 $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
             ], [
-                new Output('', new Fraction(-1))
+                new Output('', new Fraction(-1)),
+                new Output('', new Fraction(2)),
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Output values must be positive.');
+        $this->try->thenTheException_ShouldBeThrown('Negative output value');
     }
 
     function outputOverflow() {
@@ -78,7 +69,7 @@ class TransferCoinSpec {
                 new Output('', new Fraction(4))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('The output value must equal the input value.');
+        $this->try->thenTheException_ShouldBeThrown('Output sum not equal input sum');
     }
 
     function outputUnderflow() {
@@ -91,19 +82,19 @@ class TransferCoinSpec {
                 new Output('', new Fraction(3))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('The output value must equal the input value.');
+        $this->try->thenTheException_ShouldBeThrown('Output sum not equal input sum');
     }
 
     function differentOwners() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
+            $this->lib->transferCoins('a key', [
                 $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
                 $this->lib->issueCoin('', new Promise('', ''), new Output('b', new Fraction(1))),
             ], [
                 new Output('', new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('All coins must have the same owner.');
+        $this->try->thenTheException_ShouldBeThrown('Inconsistent owners: [a], [b]');
     }
 
     function differentCurrencies() {
@@ -115,19 +106,28 @@ class TransferCoinSpec {
                 new Output('', new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('All coins must be of the same currency.');
+        $this->try->thenTheException_ShouldBeThrown('Inconsistent currencies: [a], [b]');
     }
 
     function wrongKey() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
+            $this->lib->transferCoins('not a key', [
                 $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
                 $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
             ], [
                 new Output('b key', new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Only the owner can transfer coins.');
+        $this->try->thenTheException_ShouldBeThrown('Signed by non-owner: [not a]');
+    }
+
+    function noOutput() {
+        $transferred = $this->lib->transferCoins('', [
+            $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
+        ], [
+            // Empty
+        ]);
+        $this->assert->size($transferred, 0);
     }
 
     function base() {

@@ -8,13 +8,17 @@ namespace groupcash\php\model;
  */
 class Base extends Transaction {
 
+    /** @var Promise */
+    private $promise;
+
     /**
      * @param Promise $promise
      * @param Output $output
      * @param Signature $signature
      */
     public function __construct(Promise $promise, Output $output, Signature $signature) {
-        parent::__construct([$promise], [$output], $signature);
+        parent::__construct([], [$output], $signature);
+        $this->promise = $promise;
     }
 
     /**
@@ -38,7 +42,7 @@ class Base extends Transaction {
      * @return Promise
      */
     public function getPromise() {
-        return $this->getInputs()[0];
+        return $this->promise;
     }
 
     /**
