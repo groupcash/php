@@ -1,6 +1,7 @@
 <?php
-namespace groupcash\php\io;
+namespace groupcash\php\io\cli;
 
+use groupcash\php\io\Serializer;
 use groupcash\php\model\Coin;
 use rtens\domin\delivery\Renderer;
 

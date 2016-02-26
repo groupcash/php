@@ -1,7 +1,7 @@
 <?php
 
-use groupcash\php\io\CommandLineInterface;
+use groupcash\php\io\cli\Application;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-(new CommandLineInterface())->run();
+(new Application())->run();

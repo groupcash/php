@@ -1,12 +1,15 @@
 <?php
-namespace groupcash\php\io;
+namespace groupcash\php\io\cli;
 
 use groupcash\php\Groupcash;
+use groupcash\php\io\AuthorizationSerializer;
+use groupcash\php\io\CoinSerializer;
+use groupcash\php\io\Serializer;
 use groupcash\php\key\EccKeyService;
 use rtens\domin\delivery\cli\CliApplication;
 use rtens\domin\reflection\GenericMethodAction;
 
-class CommandLineInterface {
+class Application {
 
     /** @var Groupcash */
     private $lib;

@@ -1,5 +1,5 @@
 <?php
-namespace groupcash\php\io;
+namespace groupcash\php\io\cli;
 
 use rtens\domin\delivery\Renderer;
 use rtens\domin\delivery\RendererRegistry;
