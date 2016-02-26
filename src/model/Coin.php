@@ -76,24 +76,34 @@ class Coin {
         return $coins;
     }
 
+    /**
+     * @param string $backer
+     * @param Signer $signer
+     * @param KeyService $service
+     * @return Coin
+     */
     public function confirm($backer, Signer $signer, KeyService $service) {
-        $myBases = array_filter($this->getBases(), function (Base $base) use ($backer) {
+        $allBases = $this->getBases();
+        $myBases = array_filter($allBases, function (Base $base) use ($backer) {
             return $base->getOutput()->getTarget() == $backer;
         });
 
-        $fractionSum = function (Fraction $sum, Base $base) {
-            return $sum->plus($base->getOutput()->getValue());
-        };
-        $totalBaseSum = array_reduce($this->getBases(), $fractionSum, new Fraction(0));
-        $myBaseSum = array_reduce($myBases, $fractionSum, new Fraction(0));
-
-        $target = $this->getOwner();
-        $fraction = $this->getValue()->times($myBaseSum)->dividedBy($totalBaseSum);
-        $output = new Output($target, $fraction);
+        $output = new Output(
+            $this->getOwner(),
+            $this->getValue()
+                ->times($this->baseSum($myBases))
+                ->dividedBy($this->baseSum($allBases))
+        );
 
         $hash = $service->hash(Signer::squash($this->input->getTransaction()));
 
         return new Coin(new Input(Confirmation::signedConfirmation($myBases, $output, $hash, $signer), 0));
+    }
+
+    private function baseSum($bases) {
+        return array_reduce($bases, function (Fraction $sum, Base $base) {
+            return $sum->plus($base->getOutput()->getValue());
+        }, new Fraction(0));
     }
 
     private function getBasesOf(Transaction $transaction) {
