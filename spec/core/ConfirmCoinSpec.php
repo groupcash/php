@@ -51,10 +51,10 @@ class ConfirmCoinSpec {
         $this->assert->equals($confirmed->getValue(), new Fraction(1));
 
         /** @var Confirmation $confirmation */
-        $confirmation = $confirmed->getTransaction();
+        $confirmation = $confirmed->getInput()->getTransaction();
         $this->assert->isInstanceOf($confirmation, Confirmation::class);
-        $this->assert->equals($confirmation->getInputs(), [new Input($base->getTransaction(), 0)]);
-        $this->assert->equals($confirmation->getFingerprint(), (new FakeFinger())->makePrint($one[0]->getTransaction()));
+        $this->assert->equals($confirmation->getInputs(), [new Input($base->getInput()->getTransaction(), 0)]);
+        $this->assert->equals($confirmation->getFingerprint(), (new FakeFinger())->makePrint($one[0]->getInput()->getTransaction()));
         $this->assert->equals($confirmation->getSignature()->getSigner(), 'bart');
         $this->assert->equals($confirmation->getSignature()->getSign(),
             serialize([$confirmation->getBases(), new Output('lisa', new Fraction(1)), $confirmation->getFingerprint()]) .
@@ -70,8 +70,9 @@ class ConfirmCoinSpec {
         $confirmed = $this->lib->confirmCoin('bart key', $three[0]);
 
         $this->assert->equals($confirmed->getOwner(), 'homer');
-        $this->assert->isInstanceOf($confirmed->getTransaction(), Confirmation::class);
-        $this->assert->equals($confirmed->getTransaction()->getInputs(), [new Input($base->getTransaction(), 0)]);
+        $this->assert->isInstanceOf($confirmed->getInput()->getTransaction(), Confirmation::class);
+        $this->assert->equals($confirmed->getInput()->getTransaction()->getInputs(),
+            [new Input($base->getInput()->getTransaction(), 0)]);
     }
 
     function twoBases() {
@@ -83,9 +84,9 @@ class ConfirmCoinSpec {
 
         $this->assert->equals($confirmed->getOwner(), 'lisa');
         $this->assert->equals($confirmed->getValue(), new Fraction(3));
-        $this->assert->equals($confirmed->getTransaction()->getInputs(), [
-            new Input($one->getTransaction(), 0),
-            new Input($two->getTransaction(), 0)
+        $this->assert->equals($confirmed->getInput()->getTransaction()->getInputs(), [
+            new Input($one->getInput()->getTransaction(), 0),
+            new Input($two->getInput()->getTransaction(), 0)
         ]);
     }
 

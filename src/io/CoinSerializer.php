@@ -13,7 +13,7 @@ use groupcash\php\model\Transaction;
 
 class CoinSerializer {
 
-    const SERIALIZER_ID = '__JSON_A__';
+    const SERIALIZER_ID = '__COIN_JSON_A__';
     const SUPPORTED_VERSIONS = ['dev'];
 
     public function serialize(Coin $coin) {
@@ -31,7 +31,7 @@ class CoinSerializer {
     private function serializeCoin(Coin $coin) {
         return [
             'v' => $coin->version(),
-            'coin' => $this->serializeInput($coin)
+            'in' => $this->serializeInput($coin->getInput())
         ];
     }
 
@@ -40,10 +40,8 @@ class CoinSerializer {
             throw new \Exception('Unsupported coin version.');
         }
 
-        $input = $this->deserializeInput($array['coin']);
         return new Coin(
-            $input->getTransaction(),
-            $input->getOutputIndex()
+            $this->deserializeInput($array['in'])
         );
     }
 

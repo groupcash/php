@@ -7,18 +7,48 @@ use groupcash\php\Signer;
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.
  */
-class Coin extends Input {
+class Coin {
+
+    /** @var Input */
+    private $input;
 
     /**
-     * @param Transaction $transaction
-     * @param $outputIndex
+     * @param Input $input
      */
-    public function __construct(Transaction $transaction, $outputIndex) {
-        parent::__construct($transaction, $outputIndex);
+    public function __construct(Input $input) {
+        $this->input = $input;
     }
 
     public function version() {
         return 'dev';
+    }
+
+    /**
+     * @return Input
+     */
+    public function getInput() {
+        return $this->input;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwner() {
+        return $this->input->getOutput()->getTarget();
+    }
+
+    /**
+     * @return Fraction
+     */
+    public function getValue() {
+        return $this->input->getOutput()->getValue();
+    }
+
+    /**
+     * @return Base[]
+     */
+    public function getBases() {
+        return $this->getBasesOf($this->input->getTransaction());
     }
 
     /**
@@ -28,7 +58,7 @@ class Coin extends Input {
      * @return Coin
      */
     public static function issue(Promise $promise, Output $output, Signer $signer) {
-        return new Coin(new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0);
+        return new Coin(new Input(new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0));
     }
 
     /**
@@ -42,7 +72,7 @@ class Coin extends Input {
 
         $coins = [];
         foreach ($outputs as $i => $output) {
-            $coins[] = new Coin($transaction, $i);
+            $coins[] = new Coin(new Input($transaction, $i));
         }
         return $coins;
     }
@@ -62,31 +92,10 @@ class Coin extends Input {
         $fraction = $this->getValue()->times($myBaseSum)->dividedBy($totalBaseSum);
         $output = new Output($target, $fraction);
 
-        $fingerprint = $finger->makePrint($this->getTransaction());
+        $fingerprint = $finger->makePrint($this->input->getTransaction());
         $signature = $signer->sign([$myBases, $output, $fingerprint]);
 
-        return new Coin(new Confirmation($myBases, $output, $fingerprint, $signature), 0);
-    }
-
-    /**
-     * @return string
-     */
-    public function getOwner() {
-        return $this->getOutput()->getTarget();
-    }
-
-    /**
-     * @return Fraction
-     */
-    public function getValue() {
-        return $this->getOutput()->getValue();
-    }
-
-    /**
-     * @return Base[]
-     */
-    public function getBases() {
-        return $this->getBasesOf($this->getTransaction());
+        return new Coin(new Input(new Confirmation($myBases, $output, $fingerprint, $signature), 0));
     }
 
     private function getBasesOf(Transaction $transaction) {

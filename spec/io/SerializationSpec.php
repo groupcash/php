@@ -40,7 +40,7 @@ class SerializationSpec {
     }
 
     function complete() {
-        $coin = new Coin(
+        $coin = new Coin(new Input(
             new Transaction(
                 [new Input(
                     new Base(
@@ -70,15 +70,15 @@ class SerializationSpec {
                 new Signature('bart', 'el barto')
             ),
             42
-        );
+        ));
 
         $serialized = $this->serializer->serialize($coin);
 
-        $this->assert->equals(substr($serialized, 0, 10), CoinSerializer::SERIALIZER_ID);
+        $this->assert->equals(substr($serialized, 0, 15), CoinSerializer::SERIALIZER_ID);
         $this->assert->equals($this->serializer->deserialize($serialized), $coin);
-        $this->assert->equals(json_decode(substr($serialized, 10), true), [
+        $this->assert->equals(json_decode(substr($serialized, 15), true), [
             'v' => $coin->version(),
-            'coin' => [
+            'in' => [
                 'out#' => 42,
                 'tx' => [
                     'in' => [

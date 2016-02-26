@@ -81,7 +81,11 @@ class Groupcash {
             return $sum->plus($output->getValue());
         }, new Fraction(0));
 
-        $inputValue = array_reduce($coins, function (Fraction $sum, Input $input) {
+        $inputs = array_map(function (Coin $coin) {
+            return $coin->getInput();
+        }, $coins);
+
+        $inputValue = array_reduce($inputs, function (Fraction $sum, Input $input) {
             return $sum->plus($input->getOutput()->getValue());
         }, new Fraction(0));
 
@@ -107,7 +111,7 @@ class Groupcash {
             throw new \Exception('All coins must be of the same currency.');
         }
 
-        return Coin::transfer($coins, $outputs, new Signer($this->key, $this->finger, $ownerKey));
+        return Coin::transfer($inputs, $outputs, new Signer($this->key, $this->finger, $ownerKey));
     }
 
     /**
@@ -129,7 +133,7 @@ class Groupcash {
             throw new \Exception('Only a backer of the coin can confirm it.');
         }
 
-        if (count($bases) == 1 && $bases[0] == $coin->getTransaction()) {
+        if (count($bases) == 1 && $bases[0] == $coin->getInput()->getTransaction()) {
             return $coin;
         }
 

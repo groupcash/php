@@ -132,8 +132,9 @@ class TransferCoinSpec {
     }
 
     function base() {
+        $base = $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1)));
         $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1)))
+            $base
         ], [
             new Output('lisa', new Fraction(1))
         ]);
@@ -141,12 +142,20 @@ class TransferCoinSpec {
         $this->assert->size($transferred, 1);
         $this->assert->equals($transferred[0]->getOwner(), 'lisa');
         $this->assert->equals($transferred[0]->getValue(), new Fraction(1));
-        $this->assert->equals($transferred[0]->getOutput(), new Output('lisa', new Fraction(1)));
-        $this->assert->equals($transferred[0]->getTransaction()->getInputs(), [$this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1)))]);
-        $this->assert->equals($transferred[0]->getTransaction()->getOutputs(), [new Output('lisa', new Fraction(1))]);
-        $this->assert->equals($transferred[0]->getTransaction()->getSignature()->getSigner(), 'bart');
-        $this->assert->equals($transferred[0]->getTransaction()->getSignature()->getSign(),
-            serialize([[$this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1)))], [new Output('lisa', new Fraction(1))]]) . ' signed with bart key');
+
+        $input = $transferred[0]->getInput();
+        $this->assert->equals($input->getOutput(), new Output('lisa', new Fraction(1)));
+
+        $inputTx = $input->getTransaction();
+        $this->assert->equals($inputTx->getInputs(), [$base->getInput()]);
+        $this->assert->equals($inputTx->getOutputs(), [new Output('lisa', new Fraction(1))]);
+        $this->assert->equals($inputTx->getSignature()->getSigner(), 'bart');
+        $this->assert->equals($inputTx->getSignature()->getSign(),
+            serialize([
+                [$base->getInput()],
+                [new Output('lisa', new Fraction(1))]
+            ]) .
+            ' signed with bart key');
     }
 
     function multipleOutputs() {
@@ -209,7 +218,9 @@ class TransferCoinSpec {
 
         $this->assert->size($three, 1);
         $this->assert->equals($three[0]->getOwner(), 'homer');
-        $this->assert->equals($three[0]->getTransaction()->getInputs(), [$two[0]]);
-        $this->assert->equals($three[0]->getTransaction()->getInputs()[0]->getTransaction()->getInputs(), [$one[0]]);
+
+        $tx = $three[0]->getInput()->getTransaction();
+        $this->assert->equals($tx->getInputs(), [$two[0]->getInput()]);
+        $this->assert->equals($tx->getInputs()[0]->getTransaction()->getInputs(), [$one[0]->getInput()]);
     }
 }

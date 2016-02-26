@@ -26,7 +26,7 @@ class IssueCoinsSpec {
         $coin = $this->lib->issueCoin('issuer key', new Promise('foo', 'my promise'), new Output('backer', new Fraction(42)));
 
         /** @var Base $issue */
-        $issue = $coin->getTransaction();
+        $issue = $coin->getInput()->getTransaction();
 
         $this->assert->isInstanceOf($issue, Base::class);
         $this->assert->equals($issue->getPromise(), new Promise('foo', 'my promise'));
