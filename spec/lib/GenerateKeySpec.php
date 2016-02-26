@@ -2,7 +2,6 @@
 namespace spec\groupcash\php;
 
 use groupcash\php\Groupcash;
-use groupcash\php\key\FakeFinger;
 use groupcash\php\key\FakeKeyService;
 use rtens\scrut\Assert;
 
@@ -16,7 +15,7 @@ use rtens\scrut\Assert;
 class GenerateKeySpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService(), new FakeFinger());
+        $this->lib = new Groupcash(new FakeKeyService());
     }
 
     function generate() {

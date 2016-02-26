@@ -4,7 +4,7 @@ namespace groupcash\php\model;
 /**
  * An Input references one Output of another Transaction.
  */
-class Input {
+class Input implements Finger {
 
     /** @var Transaction */
     private $transaction;
@@ -40,5 +40,12 @@ class Input {
      */
     public function getOutputIndex() {
         return $this->outputIndex;
+    }
+
+    /**
+     * @return mixed|array|Finger[]
+     */
+    public function getPrint() {
+        return [$this->transaction, $this->outputIndex];
     }
 }

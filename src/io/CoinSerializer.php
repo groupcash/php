@@ -105,7 +105,7 @@ class CoinSerializer {
 
     private function serializeConfirmation(Confirmation $confirmation) {
         return [
-            'finger' => $confirmation->getFingerprint(),
+            'finger' => $confirmation->getHash(),
             'bases' => array_map([$this, 'serializeBase'], $confirmation->getBases()),
             'out' => $this->serializeOutput($confirmation->getOutput()),
             'sig' => $this->serializeSignature($confirmation->getSignature())

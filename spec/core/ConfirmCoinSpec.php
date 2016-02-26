@@ -2,7 +2,6 @@
 namespace spec\groupcash\php\core;
 
 use groupcash\php\Groupcash;
-use groupcash\php\key\FakeFinger;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\model\Confirmation;
 use groupcash\php\model\Fraction;
@@ -22,7 +21,7 @@ use rtens\scrut\fixtures\ExceptionFixture;
 class ConfirmCoinSpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService(), new FakeFinger());
+        $this->lib = new Groupcash(new FakeKeyService());
     }
 
     function notTheBacker() {
@@ -54,10 +53,11 @@ class ConfirmCoinSpec {
         $confirmation = $confirmed->getInput()->getTransaction();
         $this->assert->isInstanceOf($confirmation, Confirmation::class);
         $this->assert->equals($confirmation->getInputs(), [new Input($base->getInput()->getTransaction(), 0)]);
-        $this->assert->equals($confirmation->getFingerprint(), (new FakeFinger())->makePrint($one[0]->getInput()->getTransaction()));
+        $this->assert->equals($confirmation->getHash(), '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1)');
         $this->assert->equals($confirmation->getSignature()->getSigner(), 'bart');
         $this->assert->equals($confirmation->getSignature()->getSign(),
-            serialize([$confirmation->getBases(), new Output('lisa', new Fraction(1)), $confirmation->getFingerprint()]) .
+            '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . 'lisa' . "\0" . '1|1' . "\0" .
+            '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1))' .
             ' signed with bart key');
     }
 

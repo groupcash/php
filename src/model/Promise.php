@@ -6,7 +6,7 @@ namespace groupcash\php\model;
  *
  * The Output of the Promises Base defines how many units it is worth.
  */
-class Promise {
+class Promise implements Finger {
 
     /** @var string */
     private $currency;
@@ -35,5 +35,12 @@ class Promise {
      */
     public function getDescription() {
         return $this->description;
+    }
+
+    /**
+     * @return mixed|array|Finger[]
+     */
+    public function getPrint() {
+        return [$this->currency, $this->description];
     }
 }

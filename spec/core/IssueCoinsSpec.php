@@ -1,7 +1,6 @@
 <?php
 namespace spec\groupcash\php\core;
 
-use groupcash\php\key\FakeFinger;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\Groupcash;
 use groupcash\php\model\Fraction;
@@ -19,7 +18,7 @@ use rtens\scrut\Assert;
 class IssueCoinsSpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService(), new FakeFinger());
+        $this->lib = new Groupcash(new FakeKeyService());
     }
 
     function singleCoin() {
@@ -35,9 +34,7 @@ class IssueCoinsSpec {
         $this->assert->equals($issue->getOutputs(), [new Output('backer', new Fraction(42))]);
         $this->assert->equals($issue->getSignature()->getSigner(), 'issuer');
         $this->assert->equals($issue->getSignature()->getSign(),
-            serialize([
-                [new Promise('foo', 'my promise')],
-                [new Output('backer', new Fraction(42))]
-            ]) . ' signed with issuer key');
+            '#(foo' . "\0" . 'my promise' . "\0" . 'backer' . "\0" . '42|1)' .
+            ' signed with issuer key');
     }
 }

@@ -4,7 +4,7 @@ namespace groupcash\php\model;
 /**
  * Representation of a numerical value with nominator and denominator.
  */
-class Fraction {
+class Fraction implements Finger {
 
     /** @var int */
     private $nominator;
@@ -95,5 +95,9 @@ class Fraction {
 
     public function dividedBy(Fraction $fraction) {
         return $this->times($fraction->inverse());
+    }
+
+    public function getPrint() {
+        return $this->nominator . '|' . $this->denominator;
     }
 }

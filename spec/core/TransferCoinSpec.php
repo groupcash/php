@@ -2,7 +2,6 @@
 namespace spec\groupcash\php\core;
 
 use groupcash\php\Groupcash;
-use groupcash\php\key\FakeFinger;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Output;
@@ -22,7 +21,7 @@ use rtens\scrut\fixtures\ExceptionFixture;
 class TransferCoinSpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService(), new FakeFinger());
+        $this->lib = new Groupcash(new FakeKeyService());
     }
 
     function noCoins() {
@@ -132,7 +131,7 @@ class TransferCoinSpec {
     }
 
     function base() {
-        $base = $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1)));
+        $base = $this->lib->issueCoin('i', new Promise('c', 'p'), new Output('bart', new Fraction(1)));
         $transferred = $this->lib->transferCoins('bart key', [
             $base
         ], [
@@ -151,10 +150,7 @@ class TransferCoinSpec {
         $this->assert->equals($inputTx->getOutputs(), [new Output('lisa', new Fraction(1))]);
         $this->assert->equals($inputTx->getSignature()->getSigner(), 'bart');
         $this->assert->equals($inputTx->getSignature()->getSign(),
-            serialize([
-                [$base->getInput()],
-                [new Output('lisa', new Fraction(1))]
-            ]) .
+            '#(c' . "\0" . 'p' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1)' .
             ' signed with bart key');
     }
 

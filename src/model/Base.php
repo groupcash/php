@@ -8,12 +8,6 @@ namespace groupcash\php\model;
  */
 class Base extends Transaction {
 
-    /** @var Promise */
-    private $promise;
-
-    /** @var Output */
-    private $output;
-
     /**
      * @param Promise $promise
      * @param Output $output
@@ -21,21 +15,36 @@ class Base extends Transaction {
      */
     public function __construct(Promise $promise, Output $output, Signature $signature) {
         parent::__construct([$promise], [$output], $signature);
-        $this->promise = $promise;
-        $this->output = $output;
+    }
+
+    /**
+     * @param Promise $promise
+     * @param Output $output
+     * @param Signer $signer
+     * @return Base
+     */
+    public static function signedBase(Promise $promise, Output $output, Signer $signer) {
+        return new Base($promise, $output, $signer->sign([$promise, $output]));
+    }
+
+    /**
+     * @return array
+     */
+    public function getPrint() {
+        return [$this->getPromise(), $this->getOutput()];
     }
 
     /**
      * @return Promise
      */
     public function getPromise() {
-        return $this->promise;
+        return $this->getInputs()[0];
     }
 
     /**
      * @return Output
      */
     public function getOutput() {
-        return $this->output;
+        return $this->getOutputs()[0];
     }
 }

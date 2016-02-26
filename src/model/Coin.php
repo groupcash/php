@@ -1,8 +1,7 @@
 <?php
 namespace groupcash\php\model;
 
-use groupcash\php\Finger;
-use groupcash\php\Signer;
+use groupcash\php\KeyService;
 
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.
@@ -58,17 +57,17 @@ class Coin {
      * @return Coin
      */
     public static function issue(Promise $promise, Output $output, Signer $signer) {
-        return new Coin(new Input(new Base($promise, $output, $signer->sign([[$promise], [$output]])), 0));
+        return new Coin(new Input(Base::signedBase($promise, $output, $signer), 0));
     }
 
     /**
-     * @param Coin[] $coins
+     * @param Input[] $inputs
      * @param Output[] $outputs
      * @param Signer $signer
      * @return Coin[]
      */
-    public static function transfer($coins, $outputs, Signer $signer) {
-        $transaction = new Transaction($coins, $outputs, $signer->sign([$coins, $outputs]));
+    public static function transfer($inputs, $outputs, Signer $signer) {
+        $transaction = Transaction::signedTransaction($inputs, $outputs, $signer);
 
         $coins = [];
         foreach ($outputs as $i => $output) {
@@ -77,7 +76,7 @@ class Coin {
         return $coins;
     }
 
-    public function confirm($backer, Signer $signer, Finger $finger) {
+    public function confirm($backer, Signer $signer, KeyService $service) {
         $myBases = array_filter($this->getBases(), function (Base $base) use ($backer) {
             return $base->getOutput()->getTarget() == $backer;
         });
@@ -92,10 +91,9 @@ class Coin {
         $fraction = $this->getValue()->times($myBaseSum)->dividedBy($totalBaseSum);
         $output = new Output($target, $fraction);
 
-        $fingerprint = $finger->makePrint($this->input->getTransaction());
-        $signature = $signer->sign([$myBases, $output, $fingerprint]);
+        $hash = $service->hash(Signer::squash($this->input->getTransaction()));
 
-        return new Coin(new Input(new Confirmation($myBases, $output, $fingerprint, $signature), 0));
+        return new Coin(new Input(Confirmation::signedConfirmation($myBases, $output, $hash, $signer), 0));
     }
 
     private function getBasesOf(Transaction $transaction) {

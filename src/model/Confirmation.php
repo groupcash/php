@@ -4,17 +4,36 @@ namespace groupcash\php\model;
 class Confirmation extends Transaction {
 
     /** @var string */
-    private $fingerprint;
+    private $hash;
 
     /**
      * @param Base[] $bases
      * @param Output $output
-     * @param string $fingerprint
+     * @param string $hash
      * @param Signature $signature
      */
-    public function __construct(array $bases, $output, $fingerprint, Signature $signature) {
+    public function __construct(array $bases, Output $output, $hash, Signature $signature) {
         parent::__construct(array_map([$this, 'makeInput'], $bases), [$output], $signature);
-        $this->fingerprint = $fingerprint;
+        $this->hash = $hash;
+    }
+
+    /**
+     * @param Base[] $bases
+     * @param Output $output
+     * @param string $hash
+     * @param Signer $signer
+     * @return Confirmation
+     */
+    public static function signedConfirmation($bases, Output $output, $hash, Signer $signer) {
+        return new Confirmation($bases, $output, $hash,
+            $signer->sign([$bases, $output, $hash]));
+    }
+
+    /**
+     * @return array
+     */
+    public function getPrint() {
+        return [$this->getBases(), $this->getOutput(), $this->hash];
     }
 
     /**
@@ -33,14 +52,14 @@ class Confirmation extends Transaction {
         return $this->getOutputs()[0];
     }
 
-    private function makeInput(Base $base) {
-        return new Input($base, 0);
-    }
-
     /**
      * @return string
      */
-    public function getFingerprint() {
-        return $this->fingerprint;
+    public function getHash() {
+        return $this->hash;
+    }
+
+    private function makeInput(Base $base) {
+        return new Input($base, 0);
     }
 }

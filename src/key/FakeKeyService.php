@@ -52,6 +52,6 @@ class FakeKeyService implements KeyService {
      * @return string
      */
     public function hash($content) {
-        return "($content)";
+        return "#($content)";
     }
 }

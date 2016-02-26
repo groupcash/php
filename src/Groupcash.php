@@ -7,22 +7,18 @@ use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
+use groupcash\php\model\Signer;
 
 class Groupcash {
 
     /** @var KeyService */
     private $key;
 
-    /** @var Finger */
-    private $finger;
-
     /**
      * @param KeyService $key
-     * @param Finger $finger
      */
-    public function __construct(KeyService $key, Finger $finger) {
+    public function __construct(KeyService $key) {
         $this->key = $key;
-        $this->finger = $finger;
     }
 
     /**
@@ -53,7 +49,7 @@ class Groupcash {
      * @return Coin
      */
     public function issueCoin($issuerKey, Promise $promise, Output $output) {
-        return Coin::issue($promise, $output, new Signer($this->key, $this->finger, $issuerKey));
+        return Coin::issue($promise, $output, new Signer($this->key, $issuerKey));
     }
 
     /**
@@ -111,7 +107,7 @@ class Groupcash {
             throw new \Exception('All coins must be of the same currency.');
         }
 
-        return Coin::transfer($inputs, $outputs, new Signer($this->key, $this->finger, $ownerKey));
+        return Coin::transfer($inputs, $outputs, new Signer($this->key, $ownerKey));
     }
 
     /**
@@ -137,6 +133,6 @@ class Groupcash {
             return $coin;
         }
 
-        return $coin->confirm($backer, new Signer($this->key, $this->finger, $backerKey), $this->finger);
+        return $coin->confirm($backer, new Signer($this->key, $backerKey), $this->key);
     }
 }

@@ -6,7 +6,7 @@ namespace groupcash\php\model;
  *
  * Each Output can only be referenced by a single Input.
  */
-class Output {
+class Output implements Finger {
 
     /** @var string */
     private $target;
@@ -35,5 +35,12 @@ class Output {
      */
     public function getValue() {
         return $this->value;
+    }
+
+    /**
+     * @return mixed|array|Finger[]
+     */
+    public function getPrint() {
+        return [$this->target, $this->value];
     }
 }
