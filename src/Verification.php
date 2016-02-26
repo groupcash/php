@@ -32,6 +32,8 @@ class Verification {
         $this->consistentCurrencies($coin);
         $this->traverseTransactions($coin->getInput()->getTransaction(),
             function (Transaction $transaction) {
+                $this->verifySignature($transaction);
+
                 if ($transaction instanceof Base) {
                     return;
                 } else if ($this->hasInputs($transaction)) {
@@ -181,6 +183,13 @@ class Verification {
 
         if ($inputSum != $outputSum) {
             $this->errors[] = 'Output sum not equal input sum';
+        }
+    }
+
+    private function verifySignature(Transaction $transaction) {
+        $hash = $this->key->hash(Signer::squash($transaction));
+        if (!$this->key->verify($hash, $transaction->getSignature())) {
+            $this->errors[] = "Invalid signature by [{$transaction->getSignature()->getSigner()}]";
         }
     }
 }

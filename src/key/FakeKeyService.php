@@ -44,7 +44,8 @@ class FakeKeyService implements KeyService {
      * @return boolean
      */
     public function verify($content, Signature $signature) {
-        return str_replace(" signed with {$signature->getSigner()} key", '', $signature->getSign()) == $content;
+        $signed = $this->sign($content, $signature->getSigner() . ' key');
+        return $signed == $signature->getSign();
     }
 
     /**

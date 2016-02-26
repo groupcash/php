@@ -26,7 +26,7 @@ class TransferCoinSpec {
 
     function noCoins() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
+            $this->lib->transferCoins('a key', [
                 // Empty
             ], [
                 new Output('', new Fraction(0))
@@ -37,8 +37,8 @@ class TransferCoinSpec {
 
     function emptyOutput() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
+            $this->lib->transferCoins('a key', [
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
             ], [
                 new Output('', new Fraction(0)),
                 new Output('', new Fraction(1)),
@@ -49,8 +49,8 @@ class TransferCoinSpec {
 
     function negativeOutput() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
+            $this->lib->transferCoins('a key', [
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
             ], [
                 new Output('', new Fraction(-1)),
                 new Output('', new Fraction(2)),
@@ -61,9 +61,9 @@ class TransferCoinSpec {
 
     function outputOverflow() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(3))),
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(2))),
+            $this->lib->transferCoins('a key', [
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(3))),
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(2))),
             ], [
                 new Output('', new Fraction(2)),
                 new Output('', new Fraction(4))
@@ -74,9 +74,9 @@ class TransferCoinSpec {
 
     function outputUnderflow() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(3))),
-                $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(2))),
+            $this->lib->transferCoins('a key', [
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(3))),
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(2))),
             ], [
                 new Output('', new Fraction(1)),
                 new Output('', new Fraction(3))
@@ -88,8 +88,8 @@ class TransferCoinSpec {
     function differentOwners() {
         $this->try->tryTo(function () {
             $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('', new Promise('', ''), new Output('b', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('b', new Fraction(1))),
             ], [
                 new Output('', new Fraction(2))
             ]);
@@ -100,8 +100,8 @@ class TransferCoinSpec {
     function differentCurrencies() {
         $this->try->tryTo(function () {
             $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('', new Promise('a', ''), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('', new Promise('b', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('a', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('b', ''), new Output('a', new Fraction(1))),
             ], [
                 new Output('', new Fraction(2))
             ]);
@@ -112,8 +112,8 @@ class TransferCoinSpec {
     function wrongKey() {
         $this->try->tryTo(function () {
             $this->lib->transferCoins('not a key', [
-                $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('', new Promise('', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
             ], [
                 new Output('b key', new Fraction(2))
             ]);
@@ -123,7 +123,7 @@ class TransferCoinSpec {
 
     function noOutput() {
         $transferred = $this->lib->transferCoins('', [
-            $this->lib->issueCoin('', new Promise('', ''), new Output('', new Fraction(1))),
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('', new Fraction(1))),
         ], [
             // Empty
         ]);
@@ -131,7 +131,7 @@ class TransferCoinSpec {
     }
 
     function base() {
-        $base = $this->lib->issueCoin('i', new Promise('c', 'p'), new Output('bart', new Fraction(1)));
+        $base = $this->lib->issueCoin('i key', new Promise('c', 'p'), new Output('bart', new Fraction(1)));
         $transferred = $this->lib->transferCoins('bart key', [
             $base
         ], [
@@ -156,7 +156,7 @@ class TransferCoinSpec {
 
     function multipleOutputs() {
         $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(6)))
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(6)))
         ], [
             new Output('lisa', new Fraction(1)),
             new Output('marge', new Fraction(2)),
@@ -174,9 +174,9 @@ class TransferCoinSpec {
 
     function multipleInputs() {
         $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1))),
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(2))),
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(3)))
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(1))),
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(2))),
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(3)))
         ], [
             new Output('lisa', new Fraction(6))
         ]);
@@ -188,9 +188,9 @@ class TransferCoinSpec {
 
     function multipleInputsAndOutputs() {
         $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1))),
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(2))),
-            $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(3)))
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(1))),
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(2))),
+            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(3)))
         ], [
             new Output('lisa', new Fraction(3)),
             new Output('homer', new Fraction(1)),
@@ -207,7 +207,7 @@ class TransferCoinSpec {
     }
 
     function chaining() {
-        $coin = $this->lib->issueCoin('', new Promise('', ''), new Output('bart', new Fraction(1)));
+        $coin = $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(1)));
         $one = $this->lib->transferCoins('bart key', [$coin], [new Output('lisa', new Fraction(1))]);
         $two = $this->lib->transferCoins('lisa key', [$one[0]], [new Output('marge', new Fraction(1))]);
         $three = $this->lib->transferCoins('marge key', [$two[0]], [new Output('homer', new Fraction(1))]);
