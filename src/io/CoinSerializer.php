@@ -47,7 +47,7 @@ class CoinSerializer {
 
     private function serializeInput(Input $input) {
         return [
-            'out#' => $input->getOutputIndex(),
+            'iout' => $input->getOutputIndex(),
             'tx' => $this->serializeTransaction($input->getTransaction())
         ];
     }
@@ -55,7 +55,7 @@ class CoinSerializer {
     private function deserializeInput($array) {
         return new Input(
             $this->deserializeTransaction($array['tx']),
-            $array['out#']
+            $array['iout']
         );
     }
 

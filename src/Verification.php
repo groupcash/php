@@ -31,16 +31,19 @@ class Verification {
     public function verify(Coin $coin) {
         $this->consistentCurrencies($coin);
         $this->traverseTransactions($coin->getInput()->getTransaction(),
-            function (Transaction $transaction) {
+            function (Transaction $transaction, $acc) {
                 $this->verifySignature($transaction);
 
                 if ($transaction instanceof Base) {
-                    return;
-                } else if ($this->hasInputs($transaction)) {
+                    return $acc;
+                } else if ($this->hasInputs($transaction) && $this->outputsExist($transaction)) {
                     $this->consistentOwners($transaction);
                     $this->signedByOwner($transaction);
                     $this->inputOutputParity($transaction);
+                    $acc = $this->uniqueInput($transaction, $acc);
                 }
+
+                return $acc;
             });
 
         return $this;
@@ -127,11 +130,12 @@ class Verification {
         }
     }
 
-    private function traverseTransactions(Transaction $transaction, callable $call) {
-        $call($transaction);
+    private function traverseTransactions(Transaction $transaction, callable $call, $acc = []) {
+        $acc = $call($transaction, $acc);
         foreach ($transaction->getInputs() as $input) {
-            $this->traverseTransactions($input->getTransaction(), $call);
+            $acc = $this->traverseTransactions($input->getTransaction(), $call, $acc);
         }
+        return $acc;
     }
 
     private function hasInputs(Transaction $transaction) {
@@ -181,8 +185,10 @@ class Verification {
             return $sum->plus($input->getOutput()->getValue());
         }, new Fraction(0));
 
-        if ($inputSum != $outputSum) {
-            $this->errors[] = 'Output sum not equal input sum';
+        if ($inputSum < $outputSum) {
+            $this->errors[] = 'Output sum greater than input sum';
+        } else if ($inputSum > $outputSum) {
+            $this->errors[] = 'Output sum less than input sum';
         }
     }
 
@@ -191,5 +197,38 @@ class Verification {
         if (!$this->key->verify($hash, $transaction->getSignature())) {
             $this->errors[] = "Invalid signature by [{$transaction->getSignature()->getSigner()}]";
         }
+    }
+
+    private function outputsExist(Transaction $transaction) {
+        $exists = true;
+        foreach ($transaction->getInputs() as $input) {
+            if (!array_key_exists($input->getOutputIndex(), $input->getTransaction()->getOutputs())) {
+                $this->errors[] = 'Invalid output index';
+                $exists = false;
+            }
+        }
+        return $exists;
+    }
+
+    private function uniqueInput(Transaction $transaction, $acc) {
+        $inputs = isset($acc['inputs']) ? $acc['inputs'] : [];
+        $transactions = isset($acc['transactions']) ? $acc['transactions'] : [];
+
+        $squashedTransaction = Signer::squash($transaction);
+        $acc['transactions'][] = $squashedTransaction;
+        if (in_array($squashedTransaction, $transactions)) {
+            return $acc;
+        }
+
+        foreach ($transaction->getInputs() as $input) {
+            $squashed = Signer::squash($input);
+            if (in_array($squashed, $inputs)) {
+                $this->errors[] = "Output already used";
+            }
+            $inputs[] = $squashed;
+        }
+
+        $acc['inputs'] = $inputs;
+        return $acc;
     }
 }

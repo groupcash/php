@@ -69,7 +69,7 @@ class TransferCoinSpec {
                 new Output('', new Fraction(4))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Output sum not equal input sum');
+        $this->try->thenTheException_ShouldBeThrown('Output sum greater than input sum');
     }
 
     function outputUnderflow() {
@@ -82,7 +82,7 @@ class TransferCoinSpec {
                 new Output('', new Fraction(3))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Output sum not equal input sum');
+        $this->try->thenTheException_ShouldBeThrown('Output sum less than input sum');
     }
 
     function differentOwners() {
@@ -112,8 +112,8 @@ class TransferCoinSpec {
     function wrongKey() {
         $this->try->tryTo(function () {
             $this->lib->transferCoins('not a key', [
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('', '1'), new Output('a', new Fraction(1))),
+                $this->lib->issueCoin('i key', new Promise('', '2'), new Output('a', new Fraction(1))),
             ], [
                 new Output('b key', new Fraction(2))
             ]);

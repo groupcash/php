@@ -79,11 +79,11 @@ class SerializationSpec {
         $this->assert->equals(json_decode(substr($serialized, 15), true), [
             'v' => $coin->version(),
             'in' => [
-                'out#' => 42,
+                'iout' => 42,
                 'tx' => [
                     'ins' => [
                         [
-                            'out#' => 0,
+                            'iout' => 0,
                             'tx' => [
                                 'promise' => [
                                     'currency' => 'coin',
@@ -100,7 +100,7 @@ class SerializationSpec {
                             ]
                         ],
                         [
-                            'out#' => 0,
+                            'iout' => 0,
                             'tx' => [
                                 'finger' => 'my print',
                                 'bases' => [
