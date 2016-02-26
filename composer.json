@@ -1,27 +1,30 @@
 {
-    "name": "groupcash/php",
-    "description": "PHP implementation of groupcash algorithms",
-    "type": "library",
-    "require": {},
-    "require-dev": {
-        "rtens/scrut": "^1.1"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Nikolas Martens",
-            "email": "Nikolas.M@rtens.org"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "groupcash\\php\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "spec\\groupcash\\php\\": "spec/"
-        }
-    },
-    "minimum-stability": "dev"
+  "name": "groupcash/php",
+  "description": "PHP implementation of groupcash algorithms",
+  "type": "library",
+  "require": {
+    "php": ">=5.5",
+    "mdanter/ecc": "^0.3.0"
+  },
+  "require-dev": {
+    "rtens/scrut": "^1.1"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nikolas Martens",
+      "email": "Nikolas.M@rtens.org"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "groupcash\\php\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "spec\\groupcash\\php\\": "spec/"
+    }
+  },
+  "minimum-stability": "dev"
 }
