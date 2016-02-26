@@ -4,7 +4,8 @@
   "type": "library",
   "require": {
     "php": ">=5.5",
-    "mdanter/ecc": "^0.3.0"
+    "mdanter/ecc": "^0.3.0",
+    "rtens/domin": "dev-master"
   },
   "require-dev": {
     "rtens/scrut": "^1.1"

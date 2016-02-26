@@ -25,16 +25,16 @@ class SerializationSpec {
 
     function unsupported() {
         $this->try->tryTo(function () {
-            $this->serializer->deserialize('foo');
+            $this->serializer->inflate('foo');
         });
         $this->try->thenTheException_ShouldBeThrown('Unsupported serialization.');
     }
 
     function unsupportedCoinVersion() {
-        $coin = CoinSerializer::SERIALIZER_ID . '{"v":"foo"}';
+        $coin = CoinSerializer::TOKEN . '__COIN_JSON_A__{"v":"foo"}';
 
         $this->try->tryTo(function () use ($coin) {
-            $this->serializer->deserialize($coin);
+            $this->serializer->inflate($coin);
         });
         $this->try->thenTheException_ShouldBeThrown('Unsupported coin version.');
     }
@@ -74,8 +74,8 @@ class SerializationSpec {
 
         $serialized = $this->serializer->serialize($coin);
 
-        $this->assert->equals(substr($serialized, 0, 15), CoinSerializer::SERIALIZER_ID);
-        $this->assert->equals($this->serializer->deserialize($serialized), $coin);
+        $this->assert->equals(substr($serialized, 0, 15), CoinSerializer::TOKEN);
+        $this->assert->equals($this->serializer->inflate($serialized), $coin);
         $this->assert->equals(json_decode(substr($serialized, 15), true), [
             'v' => $coin->version(),
             'in' => [
@@ -86,15 +86,15 @@ class SerializationSpec {
                             'iout' => 0,
                             'tx' => [
                                 'promise' => [
-                                    'currency' => 'coin',
-                                    'descr' => 'My Promise'
+                                    'coin',
+                                    'My Promise'
                                 ],
                                 'out' => [
                                     'to' => 'the backer',
                                     'val' => 1
                                 ],
                                 'sig' => [
-                                    'signer' => 'the issuer',
+                                    'by' => 'the issuer',
                                     'sign' => 'el issuero'
                                 ]
                             ]
@@ -106,15 +106,15 @@ class SerializationSpec {
                                 'bases' => [
                                     [
                                         'promise' => [
-                                            'currency' => 'foo',
-                                            'descr' => 'Her Promise'
+                                            'foo',
+                                            'Her Promise'
                                         ],
                                         'out' => [
                                             'to' => 'the backress',
                                             'val' => 1
                                         ],
                                         'sig' => [
-                                            'signer' => 'the issuress',
+                                            'by' => 'the issuress',
                                             'sign' => 'la issuera'
                                         ]
                                     ]
@@ -124,7 +124,7 @@ class SerializationSpec {
                                     'val' => 42
                                 ],
                                 'sig' => [
-                                    'signer' => 'lisa',
+                                    'by' => 'lisa',
                                     'sign' => 'la lisa'
                                 ]
                             ]
@@ -141,7 +141,7 @@ class SerializationSpec {
                         ]
                     ],
                     'sig' => [
-                        'signer' => 'bart',
+                        'by' => 'bart',
                         'sign' => 'el barto'
                     ]
                 ]

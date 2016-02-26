@@ -41,7 +41,7 @@ class Groupcash {
     /**
      * Creates a new coin based on a delivery promise.
      *
-     * @param $issuerKey
+     * @param string $issuerKey
      * @param Promise $promise
      * @param Output $output
      * @return Coin

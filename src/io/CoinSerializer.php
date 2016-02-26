@@ -11,21 +11,40 @@ use groupcash\php\model\Promise;
 use groupcash\php\model\Signature;
 use groupcash\php\model\Transaction;
 
-class CoinSerializer {
+class CoinSerializer extends Serializer {
 
-    const SERIALIZER_ID = '__COIN_JSON_A__';
+    const TOKEN = '__COIN_JSON_A__';
+
     private static $SUPPORTED_VERSIONS = ['dev'];
 
-    public function serialize(Coin $coin) {
-        return self::SERIALIZER_ID . json_encode($this->serializeCoin($coin));
+    /**
+     * @return string Name of class that is serialized and inflated
+     */
+    public function serializes() {
+        return Coin::class;
     }
 
-    public function deserialize($serialized) {
-        $serializerId = substr($serialized, 0, strlen(self::SERIALIZER_ID));
-        if ($serializerId != self::SERIALIZER_ID) {
-            throw new \Exception('Unsupported serialization.');
-        }
-        return $this->deserializeCoin(json_decode(substr($serialized, strlen(self::SERIALIZER_ID)), true));
+    /**
+     * @return string
+     */
+    protected function token() {
+        return self::TOKEN;
+    }
+
+    /**
+     * @param Coin $object
+     * @return array
+     */
+    protected function serializeObject($object) {
+        return $this->serializeCoin($object);
+    }
+
+    /**
+     * @param array $serialized
+     * @return object
+     */
+    protected function inflateObject($serialized) {
+        return $this->inflateCoin($serialized);
     }
 
     private function serializeCoin(Coin $coin) {
@@ -35,13 +54,13 @@ class CoinSerializer {
         ];
     }
 
-    private function deserializeCoin($array) {
+    private function inflateCoin($array) {
         if (!in_array($array['v'], self::$SUPPORTED_VERSIONS)) {
             throw new \Exception('Unsupported coin version.');
         }
 
         return new Coin(
-            $this->deserializeInput($array['in'])
+            $this->inflateInput($array['in'])
         );
     }
 
@@ -52,9 +71,9 @@ class CoinSerializer {
         ];
     }
 
-    private function deserializeInput($array) {
+    private function inflateInput($array) {
         return new Input(
-            $this->deserializeTransaction($array['tx']),
+            $this->inflateTransaction($array['tx']),
             $array['iout']
         );
     }
@@ -73,17 +92,17 @@ class CoinSerializer {
         ];
     }
 
-    private function deserializeTransaction($array) {
+    private function inflateTransaction($array) {
         if (array_key_exists('promise', $array)) {
-            return $this->deserializeBase($array);
+            return $this->inflateBase($array);
         } else if (array_key_exists('finger', $array)) {
-            return $this->deserializeConfirmation($array);
+            return $this->inflateConfirmation($array);
         }
 
         return new Transaction(
-            array_map([$this, 'deserializeInput'], $array['ins']),
-            array_map([$this, 'deserializeOutput'], $array['outs']),
-            $this->deserializeSignature($array['sig'])
+            array_map([$this, 'inflateInput'], $array['ins']),
+            array_map([$this, 'inflateOutput'], $array['outs']),
+            $this->inflateSignature($array['sig'])
         );
     }
 
@@ -95,11 +114,11 @@ class CoinSerializer {
         ];
     }
 
-    private function deserializeBase($array) {
+    private function inflateBase($array) {
         return new Base(
-            $this->deserializePromise($array['promise']),
-            $this->deserializeOutput($array['out']),
-            $this->deserializeSignature($array['sig'])
+            $this->inflatePromise($array['promise']),
+            $this->inflateOutput($array['out']),
+            $this->inflateSignature($array['sig'])
         );
     }
 
@@ -112,26 +131,26 @@ class CoinSerializer {
         ];
     }
 
-    private function deserializeConfirmation($array) {
+    private function inflateConfirmation($array) {
         return new Confirmation(
-            array_map([$this, 'deserializeBase'], $array['bases']),
-            $this->deserializeOutput($array['out']),
+            array_map([$this, 'inflateBase'], $array['bases']),
+            $this->inflateOutput($array['out']),
             $array['finger'],
-            $this->deserializeSignature($array['sig'])
+            $this->inflateSignature($array['sig'])
         );
     }
 
     private function serializePromise(Promise $promise) {
         return [
-            'currency' => $promise->getCurrency(),
-            'descr' => $promise->getDescription()
+            $promise->getCurrency(),
+            $promise->getDescription()
         ];
     }
 
-    private function deserializePromise($array) {
+    private function inflatePromise($array) {
         return new Promise(
-            $array['currency'],
-            $array['descr']
+            $array[0],
+            $array[1]
         );
     }
 
@@ -142,10 +161,10 @@ class CoinSerializer {
         ];
     }
 
-    private function deserializeOutput($array) {
+    private function inflateOutput($array) {
         return new Output(
             $array['to'],
-            $this->deserializeFraction($array['val'])
+            $this->inflateFraction($array['val'])
         );
     }
 
@@ -157,7 +176,7 @@ class CoinSerializer {
         }
     }
 
-    private function deserializeFraction($val) {
+    private function inflateFraction($val) {
         if (strpos($val, '|')) {
             list($nom, $den) = explode('|', $val);
         } else {
@@ -169,14 +188,14 @@ class CoinSerializer {
 
     private function serializeSignature(Signature $signature) {
         return [
-            'signer' => $signature->getSigner(),
+            'by' => $signature->getSigner(),
             'sign' => $signature->getSign()
         ];
     }
 
-    private function deserializeSignature($array) {
+    private function inflateSignature($array) {
         return new Signature(
-            $array['signer'],
+            $array['by'],
             $array['sign']
         );
     }

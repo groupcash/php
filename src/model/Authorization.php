@@ -35,6 +35,13 @@ class Authorization implements Finger{
     }
 
     /**
+     * @return string
+     */
+    public function getIssuerAddress() {
+        return $this->issuerAddress;
+    }
+
+    /**
      * @return Signature
      */
     public function getSignature() {

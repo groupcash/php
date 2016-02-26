@@ -89,7 +89,7 @@ class VerifyCoinSpec {
 
     function inconsistentCurrencies() {
         $this->assertFail('Inconsistent currencies: [coin], [not coin]', $this->one, function ($tx) {
-            $tx->ins[1]->tx->promise->currency = 'not coin';
+            $tx->ins[1]->tx->promise[0] = 'not coin';
             $this->replaceSign(['coin//p2' => 'not coin//p2'], [$tx->ins[1]->tx->sig, $tx->sig]);
         });
     }
@@ -110,7 +110,7 @@ class VerifyCoinSpec {
 
     function signedByNonOwner() {
         $this->assertFail('Signed by non-owner: [not b]', $this->two, function ($tx) {
-            $tx->ins[1]->tx->sig->signer = 'not b';
+            $tx->ins[1]->tx->sig->by = 'not b';
             $this->replaceSign(['b key' => 'not b key'], [$tx->ins[1]->tx->sig]);
         });
     }
@@ -220,9 +220,11 @@ class VerifyCoinSpec {
 
     private function assertFail($message, Coin $coin, callable $modify) {
         $serializer = new CoinSerializer();
-        $serialized = json_decode(substr($serializer->serialize($coin), strlen(CoinSerializer::SERIALIZER_ID)));
+        $serialized = json_decode(substr($serializer->serialize($coin), strlen('__COIN_JSON_A__')));
         $modify($serialized->in->tx);
-        $inflated = $serializer->deserialize(CoinSerializer::SERIALIZER_ID . json_encode($serialized));
+
+        /** @var Coin $inflated */
+        $inflated = $serializer->inflate(CoinSerializer::TOKEN . json_encode($serialized));
         $this->assertNotAuthorized($message, $inflated, null);
     }
 
