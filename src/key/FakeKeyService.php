@@ -2,6 +2,7 @@
 namespace groupcash\php\key;
 
 use groupcash\php\KeyService;
+use groupcash\php\model\Signature;
 
 class FakeKeyService implements KeyService {
 
@@ -39,12 +40,11 @@ class FakeKeyService implements KeyService {
 
     /**
      * @param string $content
-     * @param string $signed
-     * @param string $publicKey
+     * @param Signature $signature
      * @return boolean
      */
-    public function verify($content, $signed, $publicKey) {
-        return str_replace(" signed with $publicKey key", '', $signed) == $content;
+    public function verify($content, Signature $signature) {
+        return str_replace(" signed with {$signature->getSigner()} key", '', $signature->getSign()) == $content;
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 namespace groupcash\php;
 
+use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
@@ -64,10 +65,7 @@ class Groupcash {
         }, $coins);
 
         $transferred = Coin::transfer($inputs, $outputs, new Signer($this->key, $ownerKey));
-
-        foreach ($transferred as $coin) {
-            $this->verifyCoin($coin);
-        }
+        (new Verification($this->key))->verifyAll($transferred)->mustBeOk();
         return $transferred;
     }
 
@@ -83,17 +81,35 @@ class Groupcash {
         $backer = $this->key->publicKey($backerKey);
         $confirmed = $coin->confirm($backer, new Signer($this->key, $backerKey), $this->key);
 
-        $this->verifyCoin($confirmed);
+        (new Verification($this->key))->verify($confirmed)->mustBeOk();
         return $confirmed;
+    }
+
+    /**
+     * Signs an Authorization for the given issuer with the currency's key
+     *
+     * @param string $currencyKey
+     * @param string $issuerAddress
+     * @return Authorization
+     */
+    public function authorizeIssuer($currencyKey, $issuerAddress) {
+        return Authorization::signed($issuerAddress, new Signer($this->key, $currencyKey));
     }
 
     /**
      * Verifies that the Coin is internally consistent.
      *
      * @param Coin $coin
+     * @param Authorization[]|null $authorizations
+     * @throws \Exception
      * @throw Exception if Coin does not verify
      */
-    private function verifyCoin(Coin $coin) {
-        (new Verification($coin))->mustBeOk();
+    public function verifyCoin(Coin $coin, $authorizations = null) {
+        $verification = new Verification($this->key);
+        $verification->verify($coin);
+        if (!is_null($authorizations)) {
+            $verification->verifyAuthorizations($coin, $authorizations);
+        }
+        $verification->mustBeOk();
     }
 }

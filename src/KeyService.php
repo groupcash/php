@@ -1,6 +1,8 @@
 <?php
 namespace groupcash\php;
 
+use groupcash\php\model\Signature;
+
 interface KeyService {
 
     /**
@@ -23,11 +25,10 @@ interface KeyService {
 
     /**
      * @param string $content
-     * @param string $signed
-     * @param string $publicKey
+     * @param Signature $signature
      * @return boolean
      */
-    public function verify($content, $signed, $publicKey);
+    public function verify($content, Signature $signature);
 
     /**
      * @param string $content
