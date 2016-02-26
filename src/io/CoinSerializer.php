@@ -14,6 +14,7 @@ use groupcash\php\model\Transaction;
 class CoinSerializer {
 
     const SERIALIZER_ID = '__JSON_A__';
+    const SUPPORTED_VERSIONS = ['dev'];
 
     public function serialize(Coin $coin) {
         return self::SERIALIZER_ID . json_encode($this->serializeCoin($coin));
@@ -28,22 +29,18 @@ class CoinSerializer {
     }
 
     private function serializeCoin(Coin $coin) {
-        if ($coin->getVersion() != Coin::VERSION) {
-            throw new \Exception('Unsupported coin version.');
-        }
-        return array_merge(
-            [
-                'v' => $coin->getVersion()
-            ],
-            $this->serializeInput($coin));
+        return [
+            'v' => $coin->version(),
+            'coin' => $this->serializeInput($coin)
+        ];
     }
 
     private function deserializeCoin($array) {
-        if ($array['v'] != Coin::VERSION) {
+        if (!in_array($array['v'], self::SUPPORTED_VERSIONS)) {
             throw new \Exception('Unsupported coin version.');
         }
 
-        $input = $this->deserializeInput($array);
+        $input = $this->deserializeInput($array['coin']);
         return new Coin(
             $input->getTransaction(),
             $input->getOutputIndex()
@@ -94,7 +91,7 @@ class CoinSerializer {
 
     private function serializeBase(Base $base) {
         return [
-            'promise'=> $this->serializePromise($base->getPromise()),
+            'promise' => $this->serializePromise($base->getPromise()),
             'out' => $this->serializeOutput($base->getOutput()),
             'sig' => $this->serializeSignature($base->getSignature())
         ];

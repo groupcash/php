@@ -9,19 +9,16 @@ use groupcash\php\Signer;
  */
 class Coin extends Input {
 
-    const VERSION = '1.0';
-
-    /** @var string */
-    private $version;
-
     /**
      * @param Transaction $transaction
      * @param $outputIndex
      */
     public function __construct(Transaction $transaction, $outputIndex) {
         parent::__construct($transaction, $outputIndex);
+    }
 
-        $this->version = self::VERSION;
+    public function version() {
+        return 'dev';
     }
 
     /**
@@ -69,13 +66,6 @@ class Coin extends Input {
         $signature = $signer->sign([$myBases, $output, $fingerprint]);
 
         return new Coin(new Confirmation($myBases, $output, $fingerprint, $signature), 0);
-    }
-
-    /**
-     * @return string
-     */
-    public function getVersion() {
-        return $this->version;
     }
 
     /**

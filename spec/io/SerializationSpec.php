@@ -30,22 +30,7 @@ class SerializationSpec {
         $this->try->thenTheException_ShouldBeThrown('Unsupported serialization.');
     }
 
-    function unsupportedCoinVersionIn() {
-        $coin = new Coin(
-            new Transaction([], [], new Signature('', '')), 0
-        );
-
-        $version = (new \ReflectionClass($coin))->getProperty('version');
-        $version->setAccessible(true);
-        $version->setValue($coin, 'foo');
-
-        $this->try->tryTo(function () use ($coin) {
-            $this->serializer->serialize($coin);
-        });
-        $this->try->thenTheException_ShouldBeThrown('Unsupported coin version.');
-    }
-
-    function unsupportedCoinVersionOut() {
+    function unsupportedCoinVersion() {
         $coin = CoinSerializer::SERIALIZER_ID . '{"v":"foo"}';
 
         $this->try->tryTo(function () use ($coin) {
@@ -92,71 +77,73 @@ class SerializationSpec {
         $this->assert->equals(substr($serialized, 0, 10), CoinSerializer::SERIALIZER_ID);
         $this->assert->equals($this->serializer->deserialize($serialized), $coin);
         $this->assert->equals(json_decode(substr($serialized, 10), true), [
-            'v' => '1.0',
-            'out#' => 42,
-            'tx' => [
-                'in' => [
-                    [
-                        'out#' => 0,
-                        'tx' => [
-                            'promise' => [
-                                'currency' => 'coin',
-                                'descr' => 'My Promise'
-                            ],
-                            'out' => [
-                                'to' => 'the backer',
-                                'val' => 1
-                            ],
-                            'sig' => [
-                                'signer' => 'the issuer',
-                                'sign' => 'el issuero'
-                            ]
-                        ]
-                    ],
-                    [
-                        'out#' => 0,
-                        'tx' => [
-                            'finger' => 'my print',
-                            'base' => [
-                                [
-                                    'promise' => [
-                                        'currency' => 'foo',
-                                        'descr' => 'Her Promise'
-                                    ],
-                                    'out' => [
-                                        'to' => 'the backress',
-                                        'val' => 1
-                                    ],
-                                    'sig' => [
-                                        'signer' => 'the issuress',
-                                        'sign' => 'la issuera'
-                                    ]
+            'v' => $coin->version(),
+            'coin' => [
+                'out#' => 42,
+                'tx' => [
+                    'in' => [
+                        [
+                            'out#' => 0,
+                            'tx' => [
+                                'promise' => [
+                                    'currency' => 'coin',
+                                    'descr' => 'My Promise'
+                                ],
+                                'out' => [
+                                    'to' => 'the backer',
+                                    'val' => 1
+                                ],
+                                'sig' => [
+                                    'signer' => 'the issuer',
+                                    'sign' => 'el issuero'
                                 ]
-                            ],
-                            'out' => [
-                                'to' => 'apu',
-                                'val' => 42
-                            ],
-                            'sig' => [
-                                'signer' => 'lisa',
-                                'sign' => 'la lisa'
+                            ]
+                        ],
+                        [
+                            'out#' => 0,
+                            'tx' => [
+                                'finger' => 'my print',
+                                'base' => [
+                                    [
+                                        'promise' => [
+                                            'currency' => 'foo',
+                                            'descr' => 'Her Promise'
+                                        ],
+                                        'out' => [
+                                            'to' => 'the backress',
+                                            'val' => 1
+                                        ],
+                                        'sig' => [
+                                            'signer' => 'the issuress',
+                                            'sign' => 'la issuera'
+                                        ]
+                                    ]
+                                ],
+                                'out' => [
+                                    'to' => 'apu',
+                                    'val' => 42
+                                ],
+                                'sig' => [
+                                    'signer' => 'lisa',
+                                    'sign' => 'la lisa'
+                                ]
                             ]
                         ]
-                    ]
-                ],
-                'out' => [
-                    [
-                        'to' => 'homer',
-                        'val' => '3|13'
                     ],
-                    [
-                        'to' => 'marge',
-                        'val' => 0
+                    'out' => [
+                        [
+                            'to' => 'homer',
+                            'val' => '3|13'
+                        ],
+                        [
+                            'to' => 'marge',
+                            'val' => 0
+                        ]
+                    ],
+                    'sig' => [
+                        'signer' => 'bart',
+                        'sign' => 'el barto'
                     ]
-                ],
-                'sig' => [
-                    'signer' => 'bart',
-                    'sign' => 'el barto'
                 ]
             ]
         ]);
