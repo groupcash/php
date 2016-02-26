@@ -54,9 +54,6 @@ class Coin extends Input {
         $myBases = array_filter($this->getBases(), function (Base $base) use ($backer) {
             return $base->getOutput()->getTarget() == $backer;
         });
-        $inputs = array_map(function (Base $base) {
-            return new Input($base, 0);
-        }, $myBases);
 
         $fractionSum = function (Fraction $sum, Base $base) {
             return $sum->plus($base->getOutput()->getValue());
@@ -69,9 +66,9 @@ class Coin extends Input {
         $output = new Output($target, $fraction);
 
         $fingerprint = $finger->makePrint($this->getTransaction());
-        $signature = $signer->sign([$inputs, $output, $fingerprint]);
+        $signature = $signer->sign([$myBases, $output, $fingerprint]);
 
-        return new Coin(new Confirmation($inputs, [$output], $fingerprint, $signature), 0);
+        return new Coin(new Confirmation($myBases, $output, $fingerprint, $signature), 0);
     }
 
     /**

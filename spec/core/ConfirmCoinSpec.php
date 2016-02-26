@@ -57,7 +57,7 @@ class ConfirmCoinSpec {
         $this->assert->equals($confirmation->getFingerprint(), (new FakeFinger())->makePrint($one[0]->getTransaction()));
         $this->assert->equals($confirmation->getSignature()->getSigner(), 'bart');
         $this->assert->equals($confirmation->getSignature()->getSign(),
-            serialize([$confirmation->getInputs(), new Output('lisa', new Fraction(1)), $confirmation->getFingerprint()]) .
+            serialize([$confirmation->getBases(), new Output('lisa', new Fraction(1)), $confirmation->getFingerprint()]) .
             ' signed with bart key');
     }
 

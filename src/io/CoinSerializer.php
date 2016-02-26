@@ -2,6 +2,7 @@
 namespace groupcash\php\io;
 
 use groupcash\php\model\Coin;
+use groupcash\php\model\Confirmation;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Base;
@@ -65,7 +66,9 @@ class CoinSerializer {
 
     private function serializeTransaction(Transaction $transaction) {
         if ($transaction instanceof Base) {
-            return $this->serializeIssue($transaction);
+            return $this->serializeBase($transaction);
+        } else if ($transaction instanceof Confirmation) {
+            return $this->serializeConfirmation($transaction);
         }
 
         return [
@@ -77,7 +80,9 @@ class CoinSerializer {
 
     private function deserializeTransaction($array) {
         if (array_key_exists('promise', $array)) {
-            return $this->deserializeIssue($array);
+            return $this->deserializeBase($array);
+        } else if (array_key_exists('finger', $array)) {
+            return $this->deserializeConfirmation($array);
         }
 
         return new Transaction(
@@ -87,18 +92,36 @@ class CoinSerializer {
         );
     }
 
-    private function serializeIssue(Base $issue) {
+    private function serializeBase(Base $base) {
         return [
-            'promise'=> $this->serializePromise($issue->getPromise()),
-            'out' => $this->serializeOutput($issue->getOutput()),
-            'sig' => $this->serializeSignature($issue->getSignature())
+            'promise'=> $this->serializePromise($base->getPromise()),
+            'out' => $this->serializeOutput($base->getOutput()),
+            'sig' => $this->serializeSignature($base->getSignature())
         ];
     }
 
-    private function deserializeIssue($array) {
+    private function deserializeBase($array) {
         return new Base(
             $this->deserializePromise($array['promise']),
             $this->deserializeOutput($array['out']),
+            $this->deserializeSignature($array['sig'])
+        );
+    }
+
+    private function serializeConfirmation(Confirmation $confirmation) {
+        return [
+            'finger' => $confirmation->getFingerprint(),
+            'base' => array_map([$this, 'serializeBase'], $confirmation->getBases()),
+            'out' => $this->serializeOutput($confirmation->getOutput()),
+            'sig' => $this->serializeSignature($confirmation->getSignature())
+        ];
+    }
+
+    private function deserializeConfirmation($array) {
+        return new Confirmation(
+            array_map([$this, 'deserializeBase'], $array['base']),
+            $this->deserializeOutput($array['out']),
+            $array['finger'],
             $this->deserializeSignature($array['sig'])
         );
     }

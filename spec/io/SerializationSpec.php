@@ -3,6 +3,7 @@ namespace spec\groupcash\php\io;
 
 use groupcash\php\io\CoinSerializer;
 use groupcash\php\model\Coin;
+use groupcash\php\model\Confirmation;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Base;
@@ -53,7 +54,7 @@ class SerializationSpec {
         $this->try->thenTheException_ShouldBeThrown('Unsupported coin version.');
     }
 
-    function transferredCoin() {
+    function complete() {
         $coin = new Coin(
             new Transaction(
                 [new Input(
@@ -62,6 +63,19 @@ class SerializationSpec {
                         new Output('the backer', new Fraction(1)),
                         new Signature('the issuer', 'el issuero')
                     ),
+                    0
+                ), new Input(
+                    new Confirmation(
+                        [
+                            new Base(
+                                new Promise('foo', 'Her Promise'),
+                                new Output('the backress', new Fraction(1)),
+                                new Signature('the issuress', 'la issuera')
+                            )
+                        ],
+                        new Output('apu', new Fraction(42)),
+                        'my print',
+                        new Signature('lisa', 'la lisa')),
                     0
                 )],
                 [
@@ -96,6 +110,36 @@ class SerializationSpec {
                             'sig' => [
                                 'signer' => 'the issuer',
                                 'sign' => 'el issuero'
+                            ]
+                        ]
+                    ],
+                    [
+                        'out#' => 0,
+                        'tx' => [
+                            'finger' => 'my print',
+                            'base' => [
+                                [
+                                    'promise' => [
+                                        'currency' => 'foo',
+                                        'descr' => 'Her Promise'
+                                    ],
+                                    'out' => [
+                                        'to' => 'the backress',
+                                        'val' => 1
+                                    ],
+                                    'sig' => [
+                                        'signer' => 'the issuress',
+                                        'sign' => 'la issuera'
+                                    ]
+                                ]
+                            ],
+                            'out' => [
+                                'to' => 'apu',
+                                'val' => 42
+                            ],
+                            'sig' => [
+                                'signer' => 'lisa',
+                                'sign' => 'la lisa'
                             ]
                         ]
                     ]
