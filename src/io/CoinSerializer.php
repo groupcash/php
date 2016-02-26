@@ -67,8 +67,8 @@ class CoinSerializer {
         }
 
         return [
-            'in' => array_map([$this, 'serializeInput'], $transaction->getInputs()),
-            'out' => array_map([$this, 'serializeOutput'], $transaction->getOutputs()),
+            'ins' => array_map([$this, 'serializeInput'], $transaction->getInputs()),
+            'outs' => array_map([$this, 'serializeOutput'], $transaction->getOutputs()),
             'sig' => $this->serializeSignature($transaction->getSignature())
         ];
     }
@@ -81,8 +81,8 @@ class CoinSerializer {
         }
 
         return new Transaction(
-            array_map([$this, 'deserializeInput'], $array['in']),
-            array_map([$this, 'deserializeOutput'], $array['out']),
+            array_map([$this, 'deserializeInput'], $array['ins']),
+            array_map([$this, 'deserializeOutput'], $array['outs']),
             $this->deserializeSignature($array['sig'])
         );
     }
@@ -106,7 +106,7 @@ class CoinSerializer {
     private function serializeConfirmation(Confirmation $confirmation) {
         return [
             'finger' => $confirmation->getFingerprint(),
-            'base' => array_map([$this, 'serializeBase'], $confirmation->getBases()),
+            'bases' => array_map([$this, 'serializeBase'], $confirmation->getBases()),
             'out' => $this->serializeOutput($confirmation->getOutput()),
             'sig' => $this->serializeSignature($confirmation->getSignature())
         ];
@@ -114,7 +114,7 @@ class CoinSerializer {
 
     private function deserializeConfirmation($array) {
         return new Confirmation(
-            array_map([$this, 'deserializeBase'], $array['base']),
+            array_map([$this, 'deserializeBase'], $array['bases']),
             $this->deserializeOutput($array['out']),
             $array['finger'],
             $this->deserializeSignature($array['sig'])

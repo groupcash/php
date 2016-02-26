@@ -81,7 +81,7 @@ class SerializationSpec {
             'in' => [
                 'out#' => 42,
                 'tx' => [
-                    'in' => [
+                    'ins' => [
                         [
                             'out#' => 0,
                             'tx' => [
@@ -103,7 +103,7 @@ class SerializationSpec {
                             'out#' => 0,
                             'tx' => [
                                 'finger' => 'my print',
-                                'base' => [
+                                'bases' => [
                                     [
                                         'promise' => [
                                             'currency' => 'foo',
@@ -130,7 +130,7 @@ class SerializationSpec {
                             ]
                         ]
                     ],
-                    'out' => [
+                    'outs' => [
                         [
                             'to' => 'homer',
                             'val' => '3|13'
