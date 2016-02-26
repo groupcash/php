@@ -1,13 +1,7 @@
 <?php
-namespace groupcash\php;
+namespace groupcash\php\model;
 
-use groupcash\php\model\Authorization;
-use groupcash\php\model\Base;
-use groupcash\php\model\Coin;
-use groupcash\php\model\Fraction;
-use groupcash\php\model\Input;
-use groupcash\php\model\Signer;
-use groupcash\php\model\Transaction;
+use groupcash\php\KeyService;
 
 class Verification {
 

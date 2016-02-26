@@ -6,6 +6,7 @@ use groupcash\php\model\Coin;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Signer;
+use groupcash\php\model\Verification;
 
 class Groupcash {
 
