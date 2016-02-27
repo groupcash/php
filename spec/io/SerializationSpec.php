@@ -2,11 +2,12 @@
 namespace spec\groupcash\php\io;
 
 use groupcash\php\io\CoinSerializer;
+use groupcash\php\io\transcoders\JsonTranscoder;
+use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Confirmation;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Input;
-use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Transaction;
@@ -16,21 +17,34 @@ use rtens\scrut\fixtures\ExceptionFixture;
 /**
  * A Coin can be serialized and de-serialized for transportation.
  *
- * @property CoinSerializer serializer <-
+ * @property CoinSerializer serializer
  * @property Assert assert <-
  * @property ExceptionFixture try <-
  */
 class SerializationSpec {
 
-    function unsupported() {
+    function before() {
+        $this->serializer = new CoinSerializer([
+            new JsonTranscoder()
+        ]);
+    }
+
+    function wrongTranscoder() {
         $this->try->tryTo(function () {
             $this->serializer->inflate('foo');
+        });
+        $this->try->thenTheException_ShouldBeThrown('No matching transcoder registered');
+    }
+
+    function unsupported() {
+        $this->try->tryTo(function () {
+            $this->serializer->inflate(JsonTranscoder::TOKEN . json_encode(['foo']));
         });
         $this->try->thenTheException_ShouldBeThrown('Unsupported serialization.');
     }
 
     function unsupportedCoinVersion() {
-        $coin = CoinSerializer::TOKEN . '__COIN_JSON_A__{"v":"foo"}';
+        $coin = JsonTranscoder::TOKEN . json_encode([CoinSerializer::TOKEN, ['v' => 'foo']]);
 
         $this->try->tryTo(function () use ($coin) {
             $this->serializer->inflate($coin);
@@ -73,9 +87,12 @@ class SerializationSpec {
 
         $serialized = $this->serializer->serialize($coin);
 
-        $this->assert->equals(substr($serialized, 0, 15), CoinSerializer::TOKEN);
+        $this->assert->equals(substr($serialized, 0, 6), JsonTranscoder::TOKEN);
         $this->assert->equals($this->serializer->inflate($serialized), $coin);
-        $this->assert->equals(json_decode(substr($serialized, 15), true), [
+
+        $decoded = json_decode(substr($serialized, 6), true);
+        $this->assert->equals($decoded[0], CoinSerializer::TOKEN);
+        $this->assert->equals($decoded[1], [
             'v' => $coin->version(),
             'in' => [
                 'iout' => 42,

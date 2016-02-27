@@ -4,7 +4,9 @@ namespace groupcash\php\io\cli;
 use groupcash\php\Groupcash;
 use groupcash\php\io\AuthorizationSerializer;
 use groupcash\php\io\CoinSerializer;
+use groupcash\php\io\transcoders\JsonTranscoder;
 use groupcash\php\io\Serializer;
+use groupcash\php\io\Transcoder;
 use groupcash\php\key\EccKeyService;
 use rtens\domin\delivery\cli\CliApplication;
 use rtens\domin\reflection\GenericMethodAction;
@@ -17,11 +19,17 @@ class Application {
     /** @var Serializer[] */
     private $serializers;
 
+    /** @var Transcoder[] */
+    private $transcoders;
+
     public function __construct() {
         $this->lib = new Groupcash(new EccKeyService());
+        $this->transcoders = [
+            new JsonTranscoder()
+        ];
         $this->serializers = [
-            new CoinSerializer(),
-            new AuthorizationSerializer()
+            new CoinSerializer($this->transcoders),
+            new AuthorizationSerializer($this->transcoders)
         ];
     }
 
@@ -52,7 +60,21 @@ class Application {
 
     private function addDecodeAction(CliApplication $app) {
         $app->actions->add('decode',
-            (new GenericMethodAction(new SerializingField([]), 'decode', $app->types, $app->parser))
+            (new GenericMethodAction($this, 'decode', $app->types, $app->parser))
                 ->generic()->setCaption('Decode'));
+    }
+
+    /**
+     * @param string $encoded
+     * @return mixed
+     * @throws \Exception
+     */
+    public function decode($encoded) {
+        foreach ($this->transcoders as $transcoder) {
+            if ($transcoder->hasEncoded($encoded)) {
+                return json_encode($transcoder->decode($encoded)[1], JSON_PRETTY_PRINT);
+            }
+        }
+        throw new \Exception('Could not find transcoder');
     }
 }

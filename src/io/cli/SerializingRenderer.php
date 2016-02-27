@@ -38,17 +38,9 @@ class SerializingRenderer implements Renderer {
     public function render($value) {
         foreach ($this->serializers as $serializer) {
             if (is_a($value, $serializer->serializes())) {
-                return $this->encode($serializer->serialize($value));
+                return $serializer->serialize($value);
             }
         }
         throw new \Exception('No serializer found.');
-    }
-
-    /**
-     * @param string $serialized
-     * @return string
-     */
-    public function encode($serialized) {
-        return base64_encode($serialized);
     }
 }

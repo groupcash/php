@@ -2,11 +2,10 @@
 namespace groupcash\php\io;
 
 use groupcash\php\model\Authorization;
-use groupcash\php\model\Signature;
 
 class AuthorizationSerializer extends Serializer {
 
-    const TOKEN = '__AUTH_JSON_A__';
+    const TOKEN = '_AUTH_';
 
     /**
      * @return string Name of class that is serialized and inflated
@@ -29,7 +28,8 @@ class AuthorizationSerializer extends Serializer {
     protected function inflateObject($serialized) {
         return new Authorization(
             $serialized['issuer'],
-            $this->inflateSignature($serialized['sig'])
+            $serialized['currency'],
+            $serialized['sig']
         );
     }
 
@@ -40,18 +40,8 @@ class AuthorizationSerializer extends Serializer {
     protected function serializeObject($object) {
         return [
             'issuer' => $object->getIssuerAddress(),
-            'sig' => $this->serializeSignature($object->getSignature())
-        ];
-    }
-
-    private function inflateSignature(array $array) {
-        return new Signature($array['by'], $array['sign']);
-    }
-
-    private function serializeSignature(Signature $signature) {
-        return [
-            'by' => $signature->getSigner(),
-            'sign' => $signature->getSign()
+            'currency' => $object->getCurrencyAddress(),
+            'sig' => $object->getSignature()
         ];
     }
 }

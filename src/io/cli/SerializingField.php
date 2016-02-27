@@ -39,10 +39,9 @@ class SerializingField implements CliField {
      * @throws \Exception
      */
     public function inflate(Parameter $parameter, $serialized) {
-        $decoded = $this->decode($serialized);
         foreach ($this->serializers as $serializer) {
-            if ($serializer->inflates($decoded)) {
-                return $serializer->inflate($decoded);
+            if ($serializer->inflates($serialized)) {
+                return $serializer->inflate($serialized);
             }
         }
         throw new \Exception('No serializer found.');
@@ -54,22 +53,5 @@ class SerializingField implements CliField {
      */
     public function getDescription(Parameter $parameter) {
         return null;
-    }
-
-    /**
-     * Presents a coin in a human-readable format.
-     *
-     * @param string $encoded
-     * @param bool $pretty
-     * @return string
-     */
-    public function decode($encoded, $pretty = false) {
-        $decoded = base64_decode($encoded);
-        if (!$pretty) {
-            return $decoded;
-        }
-
-        $decoded = substr($decoded, strpos($decoded, '{'));
-        return json_encode(json_decode($decoded, true), JSON_PRETTY_PRINT);
     }
 }

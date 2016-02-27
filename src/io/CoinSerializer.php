@@ -12,7 +12,7 @@ use groupcash\php\model\Transaction;
 
 class CoinSerializer extends Serializer {
 
-    const TOKEN = '__COIN_JSON_A__';
+    const TOKEN = '_COIN_';
 
     private static $SUPPORTED_VERSIONS = ['dev'];
 
