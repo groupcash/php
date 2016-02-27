@@ -27,8 +27,8 @@ class Application {
     public function __construct() {
         $this->lib = new Groupcash(new EccKeyService());
         $this->transcoders = [
+            'json64' => new Base64Transcoder(new JsonTranscoder()),
             'json' => new JsonTranscoder(),
-            'json64' => new Base64Transcoder(new JsonTranscoder())
         ];
         $this->serializers = [
             new CoinSerializer($this->transcoders),
