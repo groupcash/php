@@ -9,7 +9,6 @@ use groupcash\php\model\Coin;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
-use groupcash\php\model\Signature;
 use rtens\scrut\Assert;
 
 /**
@@ -83,41 +82,34 @@ class VerifyCoinSpec {
 
     function invalidAuthorization() {
         $this->assertNotAuthorized('Invalid authorization: [issuer]', $this->base, [
-            new Authorization('issuer', new Signature('coin', 'invalid'))
+            new Authorization('issuer', 'coin', 'invalid')
         ]);
     }
 
     function inconsistentCurrencies() {
         $this->assertFail('Inconsistent currencies: [coin], [not coin]', $this->one, function ($tx) {
             $tx->ins[1]->tx->promise[0] = 'not coin';
-            $this->replaceSign(['coin//p2' => 'not coin//p2'], [$tx->ins[1]->tx->sig, $tx->sig]);
+            $this->replaceSigs(['coin//p2' => 'not coin//p2'], [$tx->ins[1]->tx, $tx]);
         });
     }
 
     function noInputs() {
         $this->assertFail('No inputs', $this->two, function ($tx) {
             $tx->ins[2]->tx->ins = [];
-            $this->replaceSign(['coin//p1//backer//1|1//0//coin//p2//backer//2|1//0' => ''], [$tx->ins[2]->tx->sig, $tx->sig]);
+            $this->replaceSigs(['coin//p1//backer//1|1//0//coin//p2//backer//2|1//0' => ''], [$tx->ins[2]->tx, $tx]);
         });
     }
 
     function differentOwners() {
         $this->assertFail('Inconsistent owners: [one], [not one]', $this->two, function ($tx) {
             $tx->ins[1]->tx->outs[0]->to = 'not one';
-            $this->replaceSign(['one//10' => 'not one//10'], [$tx->ins[1]->tx->sig, $tx->sig]);
-        });
-    }
-
-    function signedByNonOwner() {
-        $this->assertFail('Signed by non-owner: [not b]', $this->two, function ($tx) {
-            $tx->ins[1]->tx->sig->by = 'not b';
-            $this->replaceSign(['b key' => 'not b key'], [$tx->ins[1]->tx->sig]);
+            $this->replaceSigs(['one//10' => 'not one//10'], [$tx->ins[1]->tx, $tx]);
         });
     }
 
     function invalidSignature() {
-        $this->assertFail('Invalid signature by [b]', $this->two, function ($tx) {
-            $tx->ins[1]->tx->sig->sign = 'invalid';
+        $this->assertFail('Not signed by owner [b]', $this->two, function ($tx) {
+            $tx->ins[1]->tx->sig = 'invalid';
         });
     }
 
@@ -125,10 +117,10 @@ class VerifyCoinSpec {
         $this->assertFail('Zero output value', $this->two, function ($tx) {
             $tx->ins[1]->tx->outs[1]->val = 0;
             $tx->ins[1]->tx->ins[0]->tx->out->val -= 5;
-            $this->replaceSign(['x//5|1' => 'x//0|1', '//13|1' => '//8|1'], [
-                $tx->ins[1]->tx->ins[0]->tx->sig,
-                $tx->ins[1]->tx->sig,
-                $tx->sig
+            $this->replaceSigs(['x//5|1' => 'x//0|1', '//13|1' => '//8|1'], [
+                $tx->ins[1]->tx->ins[0]->tx,
+                $tx->ins[1]->tx,
+                $tx
             ]);
         });
     }
@@ -137,10 +129,10 @@ class VerifyCoinSpec {
         $this->assertFail('Negative output value', $this->two, function ($tx) {
             $tx->ins[1]->tx->outs[1]->val = -1;
             $tx->ins[1]->tx->ins[0]->tx->out->val -= 6;
-            $this->replaceSign(['x//5|1' => 'x//-1|1', '//13|1' => '//7|1'], [
-                $tx->ins[1]->tx->ins[0]->tx->sig,
-                $tx->ins[1]->tx->sig,
-                $tx->sig
+            $this->replaceSigs(['x//5|1' => 'x//-1|1', '//13|1' => '//7|1'], [
+                $tx->ins[1]->tx->ins[0]->tx,
+                $tx->ins[1]->tx,
+                $tx
             ]);
         });
     }
@@ -148,10 +140,10 @@ class VerifyCoinSpec {
     function overspending() {
         $this->assertFail('Output sum greater than input sum', $this->two, function ($tx) {
             $tx->ins[1]->tx->outs[1]->val += 1;
-            $this->replaceSign(['x//5|1' => 'x//6|1'], [
-                $tx->ins[1]->tx->ins[0]->tx->sig,
-                $tx->ins[1]->tx->sig,
-                $tx->sig
+            $this->replaceSigs(['x//5|1' => 'x//6|1'], [
+                $tx->ins[1]->tx->ins[0]->tx,
+                $tx->ins[1]->tx,
+                $tx
             ]);
         });
     }
@@ -159,10 +151,10 @@ class VerifyCoinSpec {
     function underspending() {
         $this->assertFail('Output sum less than input sum', $this->two, function ($tx) {
             $tx->ins[1]->tx->outs[1]->val -= 1;
-            $this->replaceSign(['x//5|1' => 'x//4|1'], [
-                $tx->ins[1]->tx->ins[0]->tx->sig,
-                $tx->ins[1]->tx->sig,
-                $tx->sig
+            $this->replaceSigs(['x//5|1' => 'x//4|1'], [
+                $tx->ins[1]->tx->ins[0]->tx,
+                $tx->ins[1]->tx,
+                $tx
             ]);
         });
     }
@@ -170,7 +162,7 @@ class VerifyCoinSpec {
     function notExistingOutput() {
         $this->assertFail('Invalid output index', $this->two, function ($tx) {
             $tx->ins[3]->iout = 42;
-            $this->replaceSign(['1//two' => '42//two'], [$tx->sig]);
+            $this->replaceSigs(['1//two' => '42//two'], [$tx]);
         });
     }
 
@@ -178,7 +170,7 @@ class VerifyCoinSpec {
         $this->assertFail('Output already used', $this->two, function ($tx) {
             $tx->ins[3]->iout = 0;
             $tx->outs[0]->val -= 2;
-            $this->replaceSign(['1//two//23|1' => '0//two//21|1'], [$tx->sig]);
+            $this->replaceSigs(['1//two//23|1' => '0//two//21|1'], [$tx]);
         });
     }
 
@@ -187,17 +179,17 @@ class VerifyCoinSpec {
             $tx->ins[1]->tx->ins[1]->iout = 0;
             $tx->ins[1]->tx->ins[1]->tx->outs[0]->to = 'b';
             $tx->ins[1]->tx->outs[1]->val += 2;
-            $this->replaceSign([
+            $this->replaceSigs([
                 '0//one//4|1//one//6|1//b//2|1//2//one//10|1//x//5' => '0//b//4|1//one//6|1//b//2|1//0//one//10|1//x//7'
-            ], [$tx->sig, $tx->ins[1]->tx->sig]);
-            $this->replaceSign(['0//one//4' => '0//b//4'], [$tx->ins[1]->tx->ins[1]->tx->sig]);
+            ], [$tx, $tx->ins[1]->tx]);
+            $this->replaceSigs(['0//one//4' => '0//b//4'], [$tx->ins[1]->tx->ins[1]->tx]);
         });
     }
 
     function multipleErrors() {
         $this->assertFail(
-            'Invalid signature by [one]; ' .
-            'Invalid signature by [a]; ' .
+            'Not signed by owner [one]; ' .
+            'Not signed by owner [a]; ' .
             'Zero output value; ' .
             'Output sum less than input sum; ' .
             'Output already used',
@@ -228,12 +220,12 @@ class VerifyCoinSpec {
         $this->assertNotAuthorized($message, $inflated, null);
     }
 
-    private function replaceSign($replace, $sigs) {
-        foreach ($sigs as $sig) {
-            $sig->sign = str_replace(
+    private function replaceSigs($replace, $txs) {
+        foreach ($txs as $tx) {
+            $tx->sig = str_replace(
                 str_replace("//", "\0", array_keys($replace)),
                 str_replace('//', "\0", array_values($replace)),
-                $sig->sign);
+                $tx->sig);
         }
     }
 }

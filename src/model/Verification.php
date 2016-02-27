@@ -26,13 +26,12 @@ class Verification {
         $this->consistentCurrencies($coin);
         $this->traverseTransactions($coin->getInput()->getTransaction(),
             function (Transaction $transaction, $acc) {
-                $this->verifySignature($transaction);
 
                 if ($transaction instanceof Base) {
-                    return $acc;
+                    $this->verifyBaseSignature($transaction);
                 } else if ($this->hasInputs($transaction) && $this->outputsExist($transaction)) {
+                    $this->verifySignature($transaction);
                     $this->consistentOwners($transaction);
-                    $this->signedByOwner($transaction);
                     $this->inputOutputParity($transaction);
                     $acc = $this->uniqueInput($transaction, $acc);
                 }
@@ -64,16 +63,21 @@ class Verification {
         $bases = $coin->getBases();
         $currency = $bases[0]->getPromise()->getCurrency();
 
-        foreach ($authorizations as $authorization) {
+        /** @var Authorization[] $authorizedByCurrency */
+        $authorizedByCurrency = array_filter($authorizations, function (Authorization $authorization) use ($currency) {
+            return $authorization->getCurrencyAddress() == $currency;
+        });
+
+        foreach ($authorizedByCurrency as $authorization) {
             $hash = $this->key->hash(Signer::squash($authorization));
-            if (!$this->key->verify($hash, $authorization->getSignature())) {
+            if (!$this->key->verify($hash, $currency, $authorization->getSignature())) {
                 $this->errors[] = "Invalid authorization: [{$authorization->getPrint()}]";
             }
         }
 
         foreach ($bases as $base) {
-            $issuer = $base->getSignature()->getSigner();
-            if (!$this->isAuthorized($issuer, $currency, $authorizations)) {
+            $issuer = $base->getIssuerAddress();
+            if (!$this->isAuthorized($issuer, $authorizedByCurrency)) {
                 $this->errors[] = "Not authorized: [$issuer]";
             }
         }
@@ -83,13 +87,12 @@ class Verification {
 
     /**
      * @param string $issuer
-     * @param string $currency
      * @param Authorization[] $authorizations
      * @return bool
      */
-    private function isAuthorized($issuer, $currency, $authorizations) {
+    private function isAuthorized($issuer, $authorizations) {
         foreach ($authorizations as $authorization) {
-            if ($authorization->authorizes($issuer, $currency)) {
+            if ($authorization->getIssuerAddress() == $issuer) {
                 return true;
             }
         }
@@ -153,16 +156,6 @@ class Verification {
         }
     }
 
-    private function signedByOwner(Transaction $transaction) {
-        $inputs = $transaction->getInputs();
-        $owner = $inputs[0]->getOutput()->getTarget();
-
-        $signer = $transaction->getSignature()->getSigner();
-        if ($signer != $owner) {
-            $this->errors[] = "Signed by non-owner: [$signer]";
-        }
-    }
-
     private function inputOutputParity(Transaction $transaction) {
         $outputSum = new Fraction(0);
         foreach ($transaction->getOutputs() as $output) {
@@ -187,9 +180,20 @@ class Verification {
     }
 
     private function verifySignature(Transaction $transaction) {
+        $owner = $transaction->getInputs()[0]->getOutput()->getTarget();
+
         $hash = $this->key->hash(Signer::squash($transaction));
-        if (!$this->key->verify($hash, $transaction->getSignature())) {
-            $this->errors[] = "Invalid signature by [{$transaction->getSignature()->getSigner()}]";
+        if (!$this->key->verify($hash, $owner, $transaction->getSignature())) {
+            $this->errors[] = "Not signed by owner [{$owner}]";
+        }
+    }
+
+    private function verifyBaseSignature(Base $transaction) {
+        $issuer = $transaction->getIssuerAddress();
+
+        $hash = $this->key->hash(Signer::squash($transaction));
+        if (!$this->key->verify($hash, $issuer, $transaction->getSignature())) {
+            $this->errors[] = "Invalid signature by [{$issuer}]";
         }
     }
 

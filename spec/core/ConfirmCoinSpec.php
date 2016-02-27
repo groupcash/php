@@ -46,8 +46,7 @@ class ConfirmCoinSpec {
         $this->assert->isInstanceOf($confirmation, Confirmation::class);
         $this->assert->equals($confirmation->getInputs(), [new Input($base->getInput()->getTransaction(), 0)]);
         $this->assert->equals($confirmation->getHash(), '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1)');
-        $this->assert->equals($confirmation->getSignature()->getSigner(), 'bart');
-        $this->assert->equals($confirmation->getSignature()->getSign(),
+        $this->assert->equals($confirmation->getSignature(),
             '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . 'bart' . "\0" . '1|1' . "\0" .
             '#(coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1))' .
             ' signed with bart key');

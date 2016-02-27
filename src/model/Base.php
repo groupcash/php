@@ -11,14 +11,19 @@ class Base extends Transaction {
     /** @var Promise */
     private $promise;
 
+    /** @var string */
+    private $issuerAddress;
+
     /**
      * @param Promise $promise
      * @param Output $output
-     * @param Signature $signature
+     * @param string $signature
+     * @param string $issuerAddress
      */
-    public function __construct(Promise $promise, Output $output, Signature $signature) {
+    public function __construct(Promise $promise, Output $output, $issuerAddress, $signature) {
         parent::__construct([], [$output], $signature);
         $this->promise = $promise;
+        $this->issuerAddress = $issuerAddress;
     }
 
     /**
@@ -28,7 +33,7 @@ class Base extends Transaction {
      * @return Base
      */
     public static function signedBase(Promise $promise, Output $output, Signer $signer) {
-        return new Base($promise, $output, $signer->sign([$promise, $output]));
+        return new Base($promise, $output, $signer->getAddress(), $signer->sign([$promise, $output]));
     }
 
     /**
@@ -50,5 +55,12 @@ class Base extends Transaction {
      */
     public function getOutput() {
         return $this->getOutputs()[0];
+    }
+
+    /**
+     * @return string
+     */
+    public function getIssuerAddress() {
+        return $this->issuerAddress;
     }
 }

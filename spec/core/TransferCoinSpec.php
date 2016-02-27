@@ -118,7 +118,7 @@ class TransferCoinSpec {
                 new Output('b key', new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Signed by non-owner: [not a]');
+        $this->try->thenTheException_ShouldBeThrown('Not signed by owner [a]');
     }
 
     function noOutput() {
@@ -148,8 +148,7 @@ class TransferCoinSpec {
         $inputTx = $input->getTransaction();
         $this->assert->equals($inputTx->getInputs(), [$base->getInput()]);
         $this->assert->equals($inputTx->getOutputs(), [new Output('lisa', new Fraction(1))]);
-        $this->assert->equals($inputTx->getSignature()->getSigner(), 'bart');
-        $this->assert->equals($inputTx->getSignature()->getSign(),
+        $this->assert->equals($inputTx->getSignature(),
             '#(c' . "\0" . 'p' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1)' .
             ' signed with bart key');
     }

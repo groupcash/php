@@ -6,16 +6,31 @@ class Authorization implements Finger{
     /** @var string */
     private $issuerAddress;
 
-    /** @var Signature */
+    /** @var string */
     private $signature;
+
+    /** @var string */
+    private $currencyAddress;
 
     /**
      * @param string $issuerAddress
+     * @param string $currencyAddress
+     * @param string $signature
+     */
+    public function __construct($issuerAddress, $currencyAddress, $signature) {
+        $this->issuerAddress = $issuerAddress;
+        $this->signature = $signature;
+        $this->currencyAddress = $currencyAddress;
+    }
+
+    /**
+     * @param string $issuerAddress
+     * @param string $currencyAddress
      * @param Signer $signer
      * @return Authorization
      */
     public static function signed($issuerAddress, Signer $signer) {
-        return new Authorization($issuerAddress, $signer->sign($issuerAddress));
+        return new Authorization($issuerAddress, $signer->getAddress(), $signer->sign($issuerAddress));
     }
 
     /**
@@ -26,15 +41,6 @@ class Authorization implements Finger{
     }
 
     /**
-     * @param string $issuerAddress
-     * @param Signature $signature
-     */
-    public function __construct($issuerAddress, Signature $signature) {
-        $this->issuerAddress = $issuerAddress;
-        $this->signature = $signature;
-    }
-
-    /**
      * @return string
      */
     public function getIssuerAddress() {
@@ -42,18 +48,16 @@ class Authorization implements Finger{
     }
 
     /**
-     * @return Signature
+     * @return string
      */
     public function getSignature() {
         return $this->signature;
     }
 
     /**
-     * @param string $issuerAddress
-     * @param string $currencyAddress
-     * @return bool
+     * @return string
      */
-    public function authorizes($issuerAddress, $currencyAddress) {
-        return $this->issuerAddress == $issuerAddress && $currencyAddress == $this->signature->getSigner();
+    public function getCurrencyAddress() {
+        return $this->currencyAddress;
     }
 }

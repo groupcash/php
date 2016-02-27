@@ -9,7 +9,6 @@ use groupcash\php\model\Input;
 use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
-use groupcash\php\model\Signature;
 use groupcash\php\model\Transaction;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
@@ -46,7 +45,7 @@ class SerializationSpec {
                     new Base(
                         new Promise('coin', 'My Promise'),
                         new Output('the backer', new Fraction(1)),
-                        new Signature('the issuer', 'el issuero')
+                        'the issuer', 'el issuero'
                     ),
                     0
                 ), new Input(
@@ -55,19 +54,19 @@ class SerializationSpec {
                             new Base(
                                 new Promise('foo', 'Her Promise'),
                                 new Output('the backress', new Fraction(1)),
-                                new Signature('the issuress', 'la issuera')
+                                'the issuress', 'la issuera'
                             )
                         ],
                         new Output('apu', new Fraction(42)),
                         'my print',
-                        new Signature('lisa', 'la lisa')),
+                        'la lisa'),
                     0
                 )],
                 [
                     new Output('homer', new Fraction(3, 13)),
                     new Output('marge', new Fraction(0, 7)),
                 ],
-                new Signature('bart', 'el barto')
+                'el barto'
             ),
             42
         ));
@@ -93,10 +92,8 @@ class SerializationSpec {
                                     'to' => 'the backer',
                                     'val' => 1
                                 ],
-                                'sig' => [
-                                    'by' => 'the issuer',
-                                    'sign' => 'el issuero'
-                                ]
+                                'by' => 'the issuer',
+                                'sig' => 'el issuero'
                             ]
                         ],
                         [
@@ -113,20 +110,15 @@ class SerializationSpec {
                                             'to' => 'the backress',
                                             'val' => 1
                                         ],
-                                        'sig' => [
-                                            'by' => 'the issuress',
-                                            'sign' => 'la issuera'
-                                        ]
+                                        'by' => 'the issuress',
+                                        'sig' => 'la issuera'
                                     ]
                                 ],
                                 'out' => [
                                     'to' => 'apu',
                                     'val' => 42
                                 ],
-                                'sig' => [
-                                    'by' => 'lisa',
-                                    'sign' => 'la lisa'
-                                ]
+                                'sig' => 'la lisa'
                             ]
                         ]
                     ],
@@ -140,10 +132,7 @@ class SerializationSpec {
                             'val' => 0
                         ]
                     ],
-                    'sig' => [
-                        'by' => 'bart',
-                        'sign' => 'el barto'
-                    ]
+                    'sig' => 'el barto'
                 ]
             ]
         ]);

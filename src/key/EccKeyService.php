@@ -2,7 +2,6 @@
 namespace groupcash\php\key;
 
 use groupcash\php\KeyService;
-use groupcash\php\model\Signature as ModelSignature;
 use Mdanter\Ecc\Crypto\Key\PrivateKeyInterface;
 use Mdanter\Ecc\Crypto\Key\PublicKeyInterface;
 use Mdanter\Ecc\Crypto\Signature\Signature;
@@ -72,18 +71,16 @@ class EccKeyService implements KeyService {
 
     /**
      * @param string $content
-     * @param ModelSignature $signature
+     * @param string $publicKey
+     * @param string $signature
      * @return bool
      * @throws \Exception
      */
-    public function verify($content, ModelSignature $signature) {
-        $signed = $signature->getSign();
-        $publicKey = $signature->getSigner();
-
-        if (!strpos($signed, self::SIGNATURE_GLUE)) {
+    public function verify($content, $publicKey, $signature) {
+        if (!strpos($signature, self::SIGNATURE_GLUE)) {
             throw new \Exception('Invalid signature.');
         }
-        list($r, $s) = explode(self::SIGNATURE_GLUE, $signed);
+        list($r, $s) = explode(self::SIGNATURE_GLUE, $signature);
 
         $math = MathAdapterFactory::getAdapter();
 

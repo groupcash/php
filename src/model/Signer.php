@@ -22,14 +22,12 @@ class Signer {
 
     /**
      * @param mixed|Finger $content
-     * @return Signature
+     * @return string
      */
     public function sign($content) {
         $fingerprint = self::squash($content);
         $hash = $this->service->hash($fingerprint);
-        $sign = $this->service->sign($hash, $this->key);
-        
-        return new Signature($this->getAddress(), $sign);
+        return $this->service->sign($hash, $this->key);
     }
 
     /**

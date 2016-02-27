@@ -2,7 +2,6 @@
 namespace spec\groupcash\php\io;
 
 use groupcash\php\key\EccKeyService;
-use groupcash\php\model\Signature;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
 
@@ -36,14 +35,14 @@ class EccSignatureSpec {
 
     function verifyWithInvalidSignature() {
         $this->try->tryTo(function () {
-            $this->ecc->verify('foo', new Signature('invalid', 'bar'));
+            $this->ecc->verify('foo', 'invalid', 'bar');
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid signature.');
     }
 
     function verifyWithInvalidPublicKey() {
         $this->try->tryTo(function () {
-            $this->ecc->verify('foo', new Signature('invalid', 'foo#bar'));
+            $this->ecc->verify('foo', 'invalid', 'foo#bar');
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid key.');
     }
@@ -53,19 +52,19 @@ class EccSignatureSpec {
         $wrong = $this->ecc->generatePrivateKey();
 
         $signed = $this->ecc->sign('foo', $key);
-        $this->assert->not($this->ecc->verify('foo', new Signature($this->ecc->publicKey($wrong), $signed)));
+        $this->assert->not($this->ecc->verify('foo', $this->ecc->publicKey($wrong), $signed));
     }
 
     function verifyWithWrongSignature() {
         $key = $this->ecc->generatePrivateKey();
 
         $signed = $this->ecc->sign('bar', $key);
-        $this->assert->not($this->ecc->verify('foo', new Signature($this->ecc->publicKey($key), $signed)));
+        $this->assert->not($this->ecc->verify('foo', $this->ecc->publicKey($key), $signed));
     }
 
     function verifySignature() {
         $key = $this->ecc->generatePrivateKey();
         $signed = $this->ecc->sign('foo', $key);
-        $this->assert->isTrue($this->ecc->verify('foo', new Signature($this->ecc->publicKey($key), $signed)));
+        $this->assert->isTrue($this->ecc->verify('foo', $this->ecc->publicKey($key), $signed));
     }
 }

@@ -8,7 +8,6 @@ use groupcash\php\model\Input;
 use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
-use groupcash\php\model\Signature;
 use groupcash\php\model\Transaction;
 
 class CoinSerializer extends Serializer {
@@ -88,7 +87,7 @@ class CoinSerializer extends Serializer {
         return [
             'ins' => array_map([$this, 'serializeInput'], $transaction->getInputs()),
             'outs' => array_map([$this, 'serializeOutput'], $transaction->getOutputs()),
-            'sig' => $this->serializeSignature($transaction->getSignature())
+            'sig' => $transaction->getSignature()
         ];
     }
 
@@ -102,7 +101,7 @@ class CoinSerializer extends Serializer {
         return new Transaction(
             array_map([$this, 'inflateInput'], $array['ins']),
             array_map([$this, 'inflateOutput'], $array['outs']),
-            $this->inflateSignature($array['sig'])
+            $array['sig']
         );
     }
 
@@ -110,7 +109,8 @@ class CoinSerializer extends Serializer {
         return [
             'promise' => $this->serializePromise($base->getPromise()),
             'out' => $this->serializeOutput($base->getOutput()),
-            'sig' => $this->serializeSignature($base->getSignature())
+            'by' => $base->getIssuerAddress(),
+            'sig' => $base->getSignature()
         ];
     }
 
@@ -118,7 +118,8 @@ class CoinSerializer extends Serializer {
         return new Base(
             $this->inflatePromise($array['promise']),
             $this->inflateOutput($array['out']),
-            $this->inflateSignature($array['sig'])
+            $array['by'],
+            $array['sig']
         );
     }
 
@@ -127,7 +128,7 @@ class CoinSerializer extends Serializer {
             'finger' => $confirmation->getHash(),
             'bases' => array_map([$this, 'serializeBase'], $confirmation->getBases()),
             'out' => $this->serializeOutput($confirmation->getOutput()),
-            'sig' => $this->serializeSignature($confirmation->getSignature())
+            'sig' => $confirmation->getSignature()
         ];
     }
 
@@ -136,7 +137,7 @@ class CoinSerializer extends Serializer {
             array_map([$this, 'inflateBase'], $array['bases']),
             $this->inflateOutput($array['out']),
             $array['finger'],
-            $this->inflateSignature($array['sig'])
+            $array['sig']
         );
     }
 
@@ -184,19 +185,5 @@ class CoinSerializer extends Serializer {
             $den = 1;
         }
         return new Fraction($nom, $den);
-    }
-
-    private function serializeSignature(Signature $signature) {
-        return [
-            'by' => $signature->getSigner(),
-            'sign' => $signature->getSign()
-        ];
-    }
-
-    private function inflateSignature($array) {
-        return new Signature(
-            $array['by'],
-            $array['sign']
-        );
     }
 }

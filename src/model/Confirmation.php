@@ -10,9 +10,9 @@ class Confirmation extends Transaction {
      * @param Base[] $bases
      * @param Output $output
      * @param string $hash
-     * @param Signature $signature
+     * @param string $signature
      */
-    public function __construct(array $bases, Output $output, $hash, Signature $signature) {
+    public function __construct(array $bases, Output $output, $hash, $signature) {
         parent::__construct(
             array_map([$this, 'makeInput'], $bases),
             $this->keepChange($bases, $output),

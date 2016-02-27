@@ -12,15 +12,15 @@ class Transaction implements Finger {
     /** @var Output[] */
     private $outputs = [];
 
-    /** @var Signature */
+    /** @var string */
     private $signature;
 
     /**
      * @param Input[] $inputs
      * @param Output[] $outputs
-     * @param Signature $signature
+     * @param string $signature
      */
-    public function __construct(array $inputs, array $outputs, Signature $signature) {
+    public function __construct(array $inputs, array $outputs, $signature) {
         $this->inputs = $inputs;
         $this->outputs = $outputs;
         $this->signature = $signature;
@@ -58,7 +58,7 @@ class Transaction implements Finger {
     }
 
     /**
-     * @return Signature
+     * @return string
      */
     public function getSignature() {
         return $this->signature;

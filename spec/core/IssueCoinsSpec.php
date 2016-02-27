@@ -24,16 +24,16 @@ class IssueCoinsSpec {
     function singleCoin() {
         $coin = $this->lib->issueCoin('issuer key', new Promise('foo', 'my promise'), new Output('backer', new Fraction(42)));
 
-        /** @var Base $issue */
-        $issue = $coin->getInput()->getTransaction();
+        /** @var Base $base */
+        $base = $coin->getInput()->getTransaction();
 
-        $this->assert->isInstanceOf($issue, Base::class);
-        $this->assert->equals($issue->getPromise(), new Promise('foo', 'my promise'));
-        $this->assert->equals($issue->getInputs(), []);
-        $this->assert->equals($issue->getOutput(), new Output('backer', new Fraction(42)));
-        $this->assert->equals($issue->getOutputs(), [new Output('backer', new Fraction(42))]);
-        $this->assert->equals($issue->getSignature()->getSigner(), 'issuer');
-        $this->assert->equals($issue->getSignature()->getSign(),
+        $this->assert->isInstanceOf($base, Base::class);
+        $this->assert->equals($base->getPromise(), new Promise('foo', 'my promise'));
+        $this->assert->equals($base->getInputs(), []);
+        $this->assert->equals($base->getOutput(), new Output('backer', new Fraction(42)));
+        $this->assert->equals($base->getOutputs(), [new Output('backer', new Fraction(42))]);
+        $this->assert->equals($base->getIssuerAddress(), 'issuer');
+        $this->assert->equals($base->getSignature(),
             '#(foo' . "\0" . 'my promise' . "\0" . 'backer' . "\0" . '42|1)' .
             ' signed with issuer key');
     }
