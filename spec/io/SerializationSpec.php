@@ -142,7 +142,7 @@ class SerializationSpec {
                     'outs' => [
                         [
                             'to' => 'homer',
-                            'val' => '3|13'
+                            'val' => [3, 13]
                         ],
                         [
                             'to' => 'marge',

@@ -173,17 +173,18 @@ class CoinSerializer extends Serializer {
         if ($fraction->getDenominator() == 1 || $fraction->getNominator() == 0) {
             return $fraction->getNominator();
         } else {
-            return $fraction->getNominator() . '|' . $fraction->getDenominator();
+            return [$fraction->getNominator(), $fraction->getDenominator()];
         }
     }
 
     private function inflateFraction($val) {
-        if (strpos($val, '|')) {
-            list($nom, $den) = explode('|', $val);
+        if (is_array($val)) {
+            list($nom, $den) = $val;
         } else {
-            $nom = intval($val);
+            $nom = $val;
             $den = 1;
         }
+
         return new Fraction($nom, $den);
     }
 }
