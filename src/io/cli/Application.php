@@ -4,11 +4,13 @@ namespace groupcash\php\io\cli;
 use groupcash\php\Groupcash;
 use groupcash\php\io\AuthorizationSerializer;
 use groupcash\php\io\CoinSerializer;
+use groupcash\php\io\transcoders\Base64Transcoder;
 use groupcash\php\io\transcoders\JsonTranscoder;
 use groupcash\php\io\Serializer;
 use groupcash\php\io\Transcoder;
 use groupcash\php\key\EccKeyService;
 use rtens\domin\delivery\cli\CliApplication;
+use rtens\domin\delivery\cli\Console;
 use rtens\domin\reflection\GenericMethodAction;
 
 class Application {
@@ -25,7 +27,8 @@ class Application {
     public function __construct() {
         $this->lib = new Groupcash(new EccKeyService());
         $this->transcoders = [
-            new JsonTranscoder()
+            'json' => new JsonTranscoder(),
+            'json64' => new Base64Transcoder(new JsonTranscoder())
         ];
         $this->serializers = [
             new CoinSerializer($this->transcoders),
@@ -34,14 +37,17 @@ class Application {
     }
 
     public function run() {
-        CliApplication::run(CliApplication::init(function (CliApplication $app) {
-            $this->setUpCliApplication($app);
-        }));
+        global $argv;
+        $console = new Console($argv);
+
+        CliApplication::run(CliApplication::init(function (CliApplication $app) use ($console) {
+            $this->setUpCliApplication($app, $console);
+        }), $console);
     }
 
-    private function setUpCliApplication(CliApplication $app) {
+    private function setUpCliApplication(CliApplication $app, Console $console) {
         $app->fields->add(new SerializingField($this->serializers));
-        $app->renderers->add(new SerializingRenderer($this->serializers));
+        $app->renderers->add(new SerializingRenderer($this->serializers, $console));
         $app->renderers->add(new ArrayRenderer($app->renderers));
 
         $this->addLibraryActions($app);

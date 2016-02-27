@@ -87,4 +87,8 @@ abstract class Serializer {
         }
         throw new \Exception("Transcoder not registered [$transcoderKey]");
     }
+
+    public function getTranscoderKeys() {
+        return array_keys($this->transcoders);
+    }
 }

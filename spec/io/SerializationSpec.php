@@ -33,7 +33,7 @@ class SerializationSpec {
         $this->try->tryTo(function () {
             $this->serializer->inflate('foo');
         });
-        $this->try->thenTheException_ShouldBeThrown('No matching transcoder registered');
+        $this->try->thenTheException_ShouldBeThrown('Unsupported serialization.');
     }
 
     function unsupported() {
