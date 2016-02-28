@@ -42,6 +42,6 @@ class SerializingField implements CliField {
      * @return null|string
      */
     public function getDescription(Parameter $parameter) {
-        return "Supported encodings: " . implode(', ', $this->serializer->getTranscoderKeys());
+        return '(' . implode(', ', $this->serializer->getTranscoderKeys()) . ')';
     }
 }

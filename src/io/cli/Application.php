@@ -25,14 +25,17 @@ class Application {
         $this->lib = new Groupcash(new EccKeyService());
         $this->serializer = (new Serializer())
             ->addTransformer(new CoinTransformer())
-            ->addTransformer(new AuthorizationTransformer())
-            ->registerTranscoder('json64', new Base64Transcoder(new JsonTranscoder()))
-            ->registerTranscoder('json', new JsonTranscoder());
+            ->addTransformer(new AuthorizationTransformer());
 
         if (MsgPackTranscoder::isAvailable()) {
-            $this->serializer->registerTranscoder('msgPack', new MsgPackTranscoder());
-            $this->serializer->registerTranscoder('msgPack64', new Base64Transcoder(new MsgPackTranscoder()));
+            $this->serializer
+                ->registerTranscoder('msgpack64', new Base64Transcoder(new MsgPackTranscoder()))
+                ->registerTranscoder('msgpack', new MsgPackTranscoder());
         }
+
+        $this->serializer
+            ->registerTranscoder('json64', new Base64Transcoder(new JsonTranscoder()))
+            ->registerTranscoder('json', new JsonTranscoder());
     }
 
     public function run() {
@@ -65,8 +68,13 @@ class Application {
 
     private function addDecodeAction(CliApplication $app) {
         $app->actions->add('decode',
-            (new GenericMethodAction($this, 'decode', $app->types, $app->parser))
-                ->generic()->setCaption('Decode'));
+            (new GenericMethodAction($this, 'decode', $app->types, $app->parser))->generic()
+                ->setCaption('Decode')
+                ->setDescription('Displays an object in human-readable form'));
+        $app->actions->add('transcode',
+            (new GenericMethodAction($this, 'transcode', $app->types, $app->parser))->generic()
+                ->setCaption('Transcode')
+                ->setDescription('Changes the encoding of an object'));
     }
 
     /**
@@ -76,5 +84,13 @@ class Application {
      */
     public function decode($encoded) {
         return json_encode($this->serializer->decode($encoded), JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @param string $encoded
+     * @return string
+     */
+    public function transcode($encoded) {
+        return $this->serializer->inflate($encoded);
     }
 }

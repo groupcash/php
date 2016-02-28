@@ -38,8 +38,8 @@ class SerializingRenderer implements Renderer {
      */
     public function render($value) {
         $keys = $this->serializer->getTranscoderKeys();
-        $this->console->writeLine('Transcoders: ' . implode(', ', $keys));
-        $transcoder = $this->console->read("Transcoder [{$keys[0]}]: ");
+        $this->console->writeLine('Available encodings: ' . implode(', ', $keys));
+        $transcoder = $this->console->read("Encoding [{$keys[0]}]: ");
 
         return $this->serializer->serialize($value, $transcoder);
     }
