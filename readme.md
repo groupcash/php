@@ -13,7 +13,7 @@ Download and install the project with [composer]
 
 Execute the specifications to make sure everything works
 
-    vendor/bin/scrut spec
+    vendor/bin/scrut
 
 Run the CLI application
 

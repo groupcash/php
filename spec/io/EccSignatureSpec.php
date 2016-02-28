@@ -13,8 +13,8 @@ use rtens\scrut\fixtures\ExceptionFixture;
 class EccSignatureSpec {
 
     function before() {
-        if (getenv('SKIP_ECC')) {
-            $this->assert->incomplete('ECC spec skipped.');
+        if (!getenv('WITH_ECC')) {
+            $this->assert->incomplete('ECC spec skipped. To enable set WITH_ECC=1');
         }
         $this->ecc = new EccKeyService();
     }
