@@ -19,4 +19,4 @@ Run the CLI application
 
     php groupcash.php
 
-[composer]: http://getcomposer.com
+[composer]: http://getcomposer.org
