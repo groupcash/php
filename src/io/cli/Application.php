@@ -49,6 +49,7 @@ class Application {
 
     private function setUpCliApplication(CliApplication $app, Console $console) {
         $app->fields->add(new SerializingField($this->serializer));
+        $app->fields->add(new FractionField());
         $app->renderers->add(new SerializingRenderer($this->serializer, $console));
         $app->renderers->add(new ArrayRenderer($app->renderers));
 
