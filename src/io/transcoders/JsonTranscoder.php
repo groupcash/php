@@ -5,7 +5,7 @@ use groupcash\php\io\Transcoder;
 
 class JsonTranscoder extends Transcoder {
 
-    const TOKEN = '_JSON_';
+    const TOKEN = 'JSON';
 
     /**
      * @return string

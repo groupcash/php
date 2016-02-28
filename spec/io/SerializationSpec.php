@@ -1,157 +1,99 @@
 <?php
 namespace spec\groupcash\php\io;
 
-use groupcash\php\io\CoinSerializer;
+use groupcash\php\io\Serializer;
+use groupcash\php\io\transcoders\Base64Transcoder;
+use groupcash\php\io\transcoders\CallbackTranscoder;
 use groupcash\php\io\transcoders\JsonTranscoder;
-use groupcash\php\model\Base;
-use groupcash\php\model\Coin;
-use groupcash\php\model\Confirmation;
-use groupcash\php\model\Fraction;
-use groupcash\php\model\Input;
-use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
-use groupcash\php\model\Transaction;
+use groupcash\php\io\transcoders\MsgPackTranscoder;
+use groupcash\php\io\transformers\CallbackTransformer;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
 
 /**
  * A Coin can be serialized and de-serialized for transportation.
  *
- * @property CoinSerializer serializer
+ * @property Serializer serializer
  * @property Assert assert <-
  * @property ExceptionFixture try <-
  */
 class SerializationSpec {
 
     function before() {
-        $this->serializer = new CoinSerializer([
-            new JsonTranscoder()
-        ]);
+        $this->serializer = new Serializer();
+        $this->serializer->registerTranscoder('foo', new CallbackTranscoder(
+            'FOO',
+            function ($array) {
+                return '#' . json_encode($array) . '#';
+            },
+            function ($string) {
+                return json_decode(substr($string, 1, -1));
+            }
+        ));
+        $this->serializer->addTransformer(new CallbackTransformer(
+            \DateTime::class,
+            'BAR',
+            function (\DateTime $dateTime) {
+                return ['date' => $dateTime->format('c')];
+            },
+            function ($array) {
+                return new \DateTime($array['date']);
+            }
+        ));
+    }
+
+    function defaultTranscoder() {
+        $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 14:15:16 UTC'));
+        $this->assert->equals($serialized, 'FOO#["BAR",{"date":"2011-12-13T14:15:16+00:00"}]#');
+    }
+
+    function handles() {
+        $this->assert->isTrue($this->serializer->handles(new \DateTime()));
+        $this->assert->isTrue($this->serializer->handles(\DateTime::class));
+        $this->assert->not($this->serializer->handles(new \DateTimeImmutable()));
+        $this->assert->not($this->serializer->handles(\DateTimeImmutable::class));
     }
 
     function wrongTranscoder() {
         $this->try->tryTo(function () {
-            $this->serializer->inflate('foo');
+            $this->serializer->serialize(new \DateTime(), 'wrong');
         });
-        $this->try->thenTheException_ShouldBeThrown('Unsupported serialization.');
+        $this->try->thenTheException_ShouldBeThrown('Transcoder not registered: [wrong]');
+    }
+
+    function wrongToken() {
+        $this->try->tryTo(function () {
+            $this->serializer->inflate('WRONG');
+        });
+        $this->try->thenTheException_ShouldBeThrown('No matching transcoder registered.');
     }
 
     function unsupported() {
         $this->try->tryTo(function () {
-            $this->serializer->inflate(JsonTranscoder::TOKEN . json_encode(['foo']));
+            $this->serializer->inflate('FOO#["WRONG",{}]#');
         });
-        $this->try->thenTheException_ShouldBeThrown('Unsupported serialization.');
+        $this->try->thenTheException_ShouldBeThrown('New matching transformer available.');
     }
 
-    function unsupportedCoinVersion() {
-        $coin = JsonTranscoder::TOKEN . json_encode([CoinSerializer::TOKEN, ['v' => 'foo']]);
-
-        $this->try->tryTo(function () use ($coin) {
-            $this->serializer->inflate($coin);
-        });
-        $this->try->thenTheException_ShouldBeThrown('Unsupported coin version.');
+    function json() {
+        $this->serializer->registerTranscoder('foo', new JsonTranscoder());
+        $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
+        $this->assert->equals($serialized, 'JSON["BAR",{"date":"2011-12-13T00:00:00+00:00"}]');
     }
 
-    function complete() {
-        $coin = new Coin(new Input(
-            new Transaction(
-                [new Input(
-                    new Base(
-                        new Promise('coin', 'My Promise'),
-                        new Output('the backer', new Fraction(1)),
-                        'the issuer', 'el issuero'
-                    ),
-                    0
-                ), new Input(
-                    new Confirmation(
-                        [
-                            new Base(
-                                new Promise('foo', 'Her Promise'),
-                                new Output('the backress', new Fraction(1)),
-                                'the issuress', 'la issuera'
-                            )
-                        ],
-                        new Output('apu', new Fraction(42)),
-                        'my print',
-                        'la lisa'),
-                    0
-                )],
-                [
-                    new Output('homer', new Fraction(3, 13)),
-                    new Output('marge', new Fraction(0, 7)),
-                ],
-                'el barto'
-            ),
-            42
-        ));
+    function base64() {
+        $this->serializer->registerTranscoder('foo', new Base64Transcoder(new JsonTranscoder()));
+        $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
+        $this->assert->equals($serialized, 'SlNPTg==SlNPTlsiQkFSIix7ImRhdGUiOiIyMDExLTEyLTEzVDAwOjAwOjAwKzAwOjAwIn1d');
+    }
 
-        $serialized = $this->serializer->serialize($coin);
+    function messagePack() {
+        if (!MsgPackTranscoder::isAvailable()) {
+            $this->assert->incomplete('msgpack not installed');
+        }
 
-        $this->assert->equals(substr($serialized, 0, 6), JsonTranscoder::TOKEN);
-        $this->assert->equals($this->serializer->inflate($serialized), $coin);
-
-        $decoded = json_decode(substr($serialized, 6), true);
-        $this->assert->equals($decoded[0], CoinSerializer::TOKEN);
-        $this->assert->equals($decoded[1], [
-            'v' => $coin->version(),
-            'in' => [
-                'iout' => 42,
-                'tx' => [
-                    'ins' => [
-                        [
-                            'iout' => 0,
-                            'tx' => [
-                                'promise' => [
-                                    'coin',
-                                    'My Promise'
-                                ],
-                                'out' => [
-                                    'to' => 'the backer',
-                                    'val' => 1
-                                ],
-                                'by' => 'the issuer',
-                                'sig' => 'el issuero'
-                            ]
-                        ],
-                        [
-                            'iout' => 0,
-                            'tx' => [
-                                'finger' => 'my print',
-                                'bases' => [
-                                    [
-                                        'promise' => [
-                                            'foo',
-                                            'Her Promise'
-                                        ],
-                                        'out' => [
-                                            'to' => 'the backress',
-                                            'val' => 1
-                                        ],
-                                        'by' => 'the issuress',
-                                        'sig' => 'la issuera'
-                                    ]
-                                ],
-                                'out' => [
-                                    'to' => 'apu',
-                                    'val' => 42
-                                ],
-                                'sig' => 'la lisa'
-                            ]
-                        ]
-                    ],
-                    'outs' => [
-                        [
-                            'to' => 'homer',
-                            'val' => [3, 13]
-                        ],
-                        [
-                            'to' => 'marge',
-                            'val' => 0
-                        ]
-                    ],
-                    'sig' => 'el barto'
-                ]
-            ]
-        ]);
+        $this->serializer->registerTranscoder('foo', new Base64Transcoder(new MsgPackTranscoder()));
+        $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
+        $this->assert->equals($serialized, 'TVNHUA==TVNHUJKjQkFSgaRkYXRluTIwMTEtMTItMTNUMDA6MDA6MDArMDA6MDA=');
     }
 }

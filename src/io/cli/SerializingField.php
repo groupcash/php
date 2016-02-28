@@ -2,21 +2,20 @@
 namespace groupcash\php\io\cli;
 
 use groupcash\php\io\Serializer;
-use groupcash\php\model\Coin;
 use rtens\domin\delivery\cli\CliField;
 use rtens\domin\Parameter;
 use watoki\reflect\type\ClassType;
 
 class SerializingField implements CliField {
 
-    /** @var Serializer[] */
-    private $serializers;
+    /** @var Serializer */
+    private $serializer;
 
     /**
-     * @param Serializer[] $serializers
+     * @param Serializer $serializer
      */
-    public function __construct($serializers) {
-        $this->serializers = $serializers;
+    public function __construct(Serializer $serializer) {
+        $this->serializer = $serializer;
     }
 
     /**
@@ -24,27 +23,18 @@ class SerializingField implements CliField {
      * @return bool
      */
     public function handles(Parameter $parameter) {
-        foreach ($this->serializers as $serializer) {
-            if ($parameter->getType() == new ClassType($serializer->serializes())) {
-                return true;
-            }
-        }
-        return false;
+        $type = $parameter->getType();
+        return $type instanceof ClassType && $this->serializer->handles($type->getClass());
     }
 
     /**
      * @param Parameter $parameter
      * @param string $serialized
-     * @return Coin
+     * @return object
      * @throws \Exception
      */
     public function inflate(Parameter $parameter, $serialized) {
-        foreach ($this->serializers as $serializer) {
-            if ($serializer->inflates($serialized)) {
-                return $serializer->inflate($serialized);
-            }
-        }
-        throw new \Exception('No serializer found.');
+        return $this->serializer->inflate($serialized);
     }
 
     /**
@@ -52,6 +42,6 @@ class SerializingField implements CliField {
      * @return null|string
      */
     public function getDescription(Parameter $parameter) {
-        return null;
+        return "Supported encodings: " . implode(', ', $this->serializer->getTranscoderKeys());
     }
 }

@@ -2,8 +2,7 @@
 namespace spec\groupcash\php\lib;
 
 use groupcash\php\Groupcash;
-use groupcash\php\io\CoinSerializer;
-use groupcash\php\io\transcoders\JsonTranscoder;
+use groupcash\php\io\transformers\CoinTransformer;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
@@ -212,15 +211,14 @@ class VerifyCoinSpec {
     }
 
     private function assertFail($message, Coin $coin, callable $modify) {
-        $json = new JsonTranscoder();
-        $serializer = new CoinSerializer([$json]);
+        $transformer = new CoinTransformer();
 
-        $serialized = json_decode(json_encode($json->decode($serializer->serialize($coin))[1]));
+        $serialized = json_decode(json_encode($transformer->objectToArray($coin)[1]));
         $modify($serialized->in->tx);
-        $encoded = $json->encode([CoinSerializer::TOKEN, json_decode(json_encode($serialized), true)]);
+        $array = [CoinTransformer::TOKEN, json_decode(json_encode($serialized), true)];
 
         /** @var Coin $inflated */
-        $inflated = $serializer->inflate($encoded);
+        $inflated = $transformer->arrayToObject($array);
         $this->assertNotAuthorized($message, $inflated, null);
     }
 

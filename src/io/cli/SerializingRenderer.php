@@ -8,18 +8,18 @@ use rtens\domin\delivery\Renderer;
 
 class SerializingRenderer implements Renderer {
 
-    /** @var Serializer[] */
-    private $serializers;
+    /** @var Serializer */
+    private $serializer;
 
     /** @var Console */
     private $console;
 
     /**
-     * @param Serializer[] $serializers
+     * @param Serializer $serializer
      * @param Console $console
      */
-    public function __construct($serializers, Console $console) {
-        $this->serializers = $serializers;
+    public function __construct($serializer, Console $console) {
+        $this->serializer = $serializer;
         $this->console = $console;
     }
 
@@ -28,12 +28,7 @@ class SerializingRenderer implements Renderer {
      * @return bool
      */
     public function handles($value) {
-        foreach ($this->serializers as $serializer) {
-            if (is_a($value, $serializer->serializes())) {
-                return true;
-            }
-        }
-        return false;
+        return $this->serializer->handles($value);
     }
 
     /**
@@ -42,15 +37,10 @@ class SerializingRenderer implements Renderer {
      * @throws \Exception
      */
     public function render($value) {
-        foreach ($this->serializers as $serializer) {
-            if (is_a($value, $serializer->serializes())) {
-                $keys = $serializer->getTranscoderKeys();
-                $this->console->writeLine('Transcoders: ' . implode(', ', $keys));
-                $transcoder = $this->console->read("Transcoder [{$keys[0]}]: ");
+        $keys = $this->serializer->getTranscoderKeys();
+        $this->console->writeLine('Transcoders: ' . implode(', ', $keys));
+        $transcoder = $this->console->read("Transcoder [{$keys[0]}]: ");
 
-                return $serializer->serialize($value, $transcoder);
-            }
-        }
-        throw new \Exception('No serializer found.');
+        return $this->serializer->serialize($value, $transcoder);
     }
 }

@@ -1,60 +1,58 @@
 <?php
 namespace groupcash\php\io;
 
-abstract class Serializer {
+class Serializer {
 
     /** @var Transcoder[] indexed by key */
-    private $transcoders;
+    private $transcoders = [];
+
+    /** @var Transformer[] */
+    private $transformers = [];
 
     /**
-     * @param Transcoder[] $transcoders
+     * @param string $key
+     * @param Transcoder $transcoder
+     * @return Serializer
      */
-    public function __construct(array $transcoders) {
-        $this->transcoders = $transcoders;
+    public function registerTranscoder($key, Transcoder $transcoder) {
+        $this->transcoders[$key] = $transcoder;
+        return $this;
     }
 
     /**
-     * @return string Name of class that is serialized and inflated
+     * @param Transformer $transformer
+     * @return Serializer
      */
-    abstract public function serializes();
-
-    /**
-     * @return string
-     */
-    abstract protected function token();
-
-    /**
-     * @param array $serialized
-     * @return object
-     */
-    abstract protected function inflateObject($serialized);
-
-    /**
-     * @param object $object
-     * @return array
-     */
-    abstract protected function serializeObject($object);
-
-    /**
-     * @param object $object
-     * @param string $transcoder Name of transcoder class
-     * @return string
-     */
-    public function serialize($object, $transcoder = null) {
-        return $this->getTranscoder($transcoder)->encode([$this->token(), $this->serializeObject($object)]);
+    public function addTransformer(Transformer $transformer) {
+        $this->transformers[] = $transformer;
+        return $this;
     }
 
     /**
-     * @param string $serialized
+     * @param string|object $classOrObject
      * @return bool
      */
-    public function inflates($serialized) {
-        foreach ($this->transcoders as $transcoder) {
-            if ($transcoder->hasEncoded($serialized)) {
-                return $transcoder->decode($serialized)[0] == $this->token();
+    public function handles($classOrObject) {
+        $class = is_object($classOrObject) ? get_class($classOrObject) : $classOrObject;
+
+        foreach ($this->transformers as $transformer) {
+            if ($transformer->transforms() == $class) {
+                return true;
             }
         }
         return false;
+    }
+
+    /**
+     * @param object $object
+     * @param null|string $transcoderKey
+     * @return string
+     */
+    public function serialize($object, $transcoderKey = null) {
+        $transcoder = $this->getTranscoder($transcoderKey);
+        $transformer = $this->getTransformerForObject($object);
+
+        return $transcoder->encode($transformer->objectToArray($object));
     }
 
     /**
@@ -63,32 +61,59 @@ abstract class Serializer {
      * @throws \Exception
      */
     public function inflate($serialized) {
-        if (!$this->inflates($serialized)) {
-            throw new \Exception('Unsupported serialization.');
-        }
+        $array = $this->decode($serialized);
+        $transformer = $this->getTransformerForArray($array);
+        return $transformer->arrayToObject($array);
+    }
 
-        foreach ($this->transcoders as $transcoder) {
-            if ($transcoder->hasEncoded($serialized)) {
-                $decoded = $transcoder->decode($serialized);
-                return $this->inflateObject($decoded[1]);
-            }
-        }
-
-        throw new \Exception('No matching transcoder registered');
+    /**
+     * @param string $encoded
+     * @return array
+     * @throws \Exception
+     */
+    public function decode($encoded) {
+        $transcoder = $this->getTranscoderForString($encoded);
+        return $transcoder->decode($encoded);
     }
 
     private function getTranscoder($transcoderKey = null) {
         if (!$transcoderKey && $this->transcoders) {
             return array_values($this->transcoders)[0];
-        }
-
-        if (array_key_exists($transcoderKey, $this->transcoders)) {
+        } else if (array_key_exists($transcoderKey, $this->transcoders)) {
             return $this->transcoders[$transcoderKey];
+        } else {
+            throw new \Exception("Transcoder not registered: [$transcoderKey]");
         }
-        throw new \Exception("Transcoder not registered [$transcoderKey]");
     }
 
     public function getTranscoderKeys() {
         return array_keys($this->transcoders);
+    }
+
+    private function getTransformerForObject($object) {
+        foreach ($this->transformers as $transformer) {
+            if ($transformer->transforms() == get_class($object)) {
+                return $transformer;
+            }
+        }
+        throw new \Exception('Not transformer registered for [' . get_class($object) . '].');
+    }
+
+    private function getTranscoderForString($string) {
+        foreach ($this->transcoders as $transcoder) {
+            if ($transcoder->hasEncoded($string)) {
+                return $transcoder;
+            }
+        }
+        throw new \Exception('No matching transcoder registered.');
+    }
+
+    private function getTransformerForArray($array) {
+        foreach ($this->transformers as $transformer) {
+            if ($transformer->matches($array)) {
+                return $transformer;
+            }
+        }
+        throw new \Exception('New matching transformer available.');
     }
 }

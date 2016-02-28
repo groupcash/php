@@ -2,12 +2,12 @@
 namespace groupcash\php\io\cli;
 
 use groupcash\php\Groupcash;
-use groupcash\php\io\AuthorizationSerializer;
-use groupcash\php\io\CoinSerializer;
+use groupcash\php\io\Serializer;
 use groupcash\php\io\transcoders\Base64Transcoder;
 use groupcash\php\io\transcoders\JsonTranscoder;
-use groupcash\php\io\Serializer;
-use groupcash\php\io\Transcoder;
+use groupcash\php\io\transcoders\MsgPackTranscoder;
+use groupcash\php\io\transformers\AuthorizationTransformer;
+use groupcash\php\io\transformers\CoinTransformer;
 use groupcash\php\key\EccKeyService;
 use rtens\domin\delivery\cli\CliApplication;
 use rtens\domin\delivery\cli\Console;
@@ -18,22 +18,21 @@ class Application {
     /** @var Groupcash */
     private $lib;
 
-    /** @var Serializer[] */
-    private $serializers;
-
-    /** @var Transcoder[] */
-    private $transcoders;
+    /** @var Serializer */
+    private $serializer;
 
     public function __construct() {
         $this->lib = new Groupcash(new EccKeyService());
-        $this->transcoders = [
-            'json64' => new Base64Transcoder(new JsonTranscoder()),
-            'json' => new JsonTranscoder(),
-        ];
-        $this->serializers = [
-            new CoinSerializer($this->transcoders),
-            new AuthorizationSerializer($this->transcoders)
-        ];
+        $this->serializer = (new Serializer())
+            ->addTransformer(new CoinTransformer())
+            ->addTransformer(new AuthorizationTransformer())
+            ->registerTranscoder('json64', new Base64Transcoder(new JsonTranscoder()))
+            ->registerTranscoder('json', new JsonTranscoder());
+
+        if (MsgPackTranscoder::isAvailable()) {
+            $this->serializer->registerTranscoder('msgPack', new MsgPackTranscoder());
+            $this->serializer->registerTranscoder('msgPack64', new Base64Transcoder(new MsgPackTranscoder()));
+        }
     }
 
     public function run() {
@@ -46,8 +45,8 @@ class Application {
     }
 
     private function setUpCliApplication(CliApplication $app, Console $console) {
-        $app->fields->add(new SerializingField($this->serializers));
-        $app->renderers->add(new SerializingRenderer($this->serializers, $console));
+        $app->fields->add(new SerializingField($this->serializer));
+        $app->renderers->add(new SerializingRenderer($this->serializer, $console));
         $app->renderers->add(new ArrayRenderer($app->renderers));
 
         $this->addLibraryActions($app);
@@ -76,11 +75,6 @@ class Application {
      * @throws \Exception
      */
     public function decode($encoded) {
-        foreach ($this->transcoders as $transcoder) {
-            if ($transcoder->hasEncoded($encoded)) {
-                return json_encode($transcoder->decode($encoded)[1], JSON_PRETTY_PRINT);
-            }
-        }
-        throw new \Exception('Could not find transcoder');
+        return json_encode($this->serializer->decode($encoded), JSON_PRETTY_PRINT);
     }
 }

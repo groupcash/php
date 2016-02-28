@@ -21,7 +21,7 @@ class FractionAlgebraSpec {
 
     function reduce() {
         if (!function_exists('gmp_gcd')) {
-            $this->assert->incomplete('Needs gmp');
+            $this->assert->incomplete('gmp not installed');
         }
 
         $this->assert->equals(new Fraction(81, 12), new Fraction(27, 4));

@@ -168,8 +168,8 @@ class ConfirmCoinSpec {
             ->plus($confirmedB->getValue())
             ->plus($confirmedC->getValue()), $g->getValue());
 
-        $this->assert->equals($confirmedA->getValue(), new Fraction(10, 5));
-        $this->assert->equals($confirmedB->getValue(), new Fraction(14, 5));
-        $this->assert->equals($confirmedC->getValue(), new Fraction(16, 5));
+        $this->assert->equals($confirmedA->getValue()->toFloat(), 2);
+        $this->assert->equals($confirmedB->getValue()->toFloat(), 2.8);
+        $this->assert->equals($confirmedC->getValue()->toFloat(), 3.2);
     }
 }

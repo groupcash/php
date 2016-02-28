@@ -1,16 +1,17 @@
 <?php
-namespace groupcash\php\io;
+namespace groupcash\php\io\transformers;
 
+use groupcash\php\io\Transformer;
 use groupcash\php\model\Authorization;
 
-class AuthorizationSerializer extends Serializer {
+class AuthorizationTransformer extends Transformer {
 
-    const TOKEN = '_AUTH_';
+    const TOKEN = 'AUTH';
 
     /**
      * @return string Name of class that is serialized and inflated
      */
-    public function serializes() {
+    public function transforms() {
         return Authorization::class;
     }
 
@@ -22,14 +23,14 @@ class AuthorizationSerializer extends Serializer {
     }
 
     /**
-     * @param array $serialized
+     * @param array $array
      * @return Authorization
      */
-    protected function inflateObject($serialized) {
+    protected function toObject($array) {
         return new Authorization(
-            $serialized['issuer'],
-            $serialized['currency'],
-            $serialized['sig']
+            $array['issuer'],
+            $array['currency'],
+            $array['sig']
         );
     }
 
@@ -37,7 +38,7 @@ class AuthorizationSerializer extends Serializer {
      * @param Authorization $object
      * @return array
      */
-    protected function serializeObject($object) {
+    protected function toArray($object) {
         return [
             'issuer' => $object->getIssuerAddress(),
             'currency' => $object->getCurrencyAddress(),
