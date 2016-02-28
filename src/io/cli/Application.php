@@ -79,7 +79,7 @@ class Application {
 
     /**
      * @param string $encoded
-     * @return mixed
+     * @return string
      * @throws \Exception
      */
     public function decode($encoded) {
@@ -88,7 +88,7 @@ class Application {
 
     /**
      * @param string $encoded
-     * @return string
+     * @return object
      */
     public function transcode($encoded) {
         return $this->serializer->inflate($encoded);
