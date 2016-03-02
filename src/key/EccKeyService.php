@@ -17,7 +17,7 @@ use Mdanter\Ecc\Serializer\PublicKey\PublicKeySerializerInterface;
 
 class EccKeyService implements KeyService {
 
-    const SIGNATURE_GLUE = '#';
+    private static $SIGNATURE_GLUE = '#';
 
     /**
      * @return string
@@ -65,7 +65,7 @@ class EccKeyService implements KeyService {
         $signer = new Signer($math);
         $signature = $signer->sign($privateKey, $hash, $rng->generate($privateKey->getPoint()->getOrder()));
 
-        return $signature->getR() . self::SIGNATURE_GLUE . $signature->getS();
+        return $signature->getR() . self::$SIGNATURE_GLUE . $signature->getS();
     }
 
     /**
@@ -76,10 +76,10 @@ class EccKeyService implements KeyService {
      * @throws \Exception
      */
     public function verify($content, $publicKey, $signature) {
-        if (!strpos($signature, self::SIGNATURE_GLUE)) {
+        if (!strpos($signature, self::$SIGNATURE_GLUE)) {
             throw new \Exception('Invalid signature.');
         }
-        list($r, $s) = explode(self::SIGNATURE_GLUE, $signature);
+        list($r, $s) = explode(self::$SIGNATURE_GLUE, $signature);
 
         $math = MathAdapterFactory::getAdapter();
 
