@@ -1,56 +1,29 @@
 <?php
 namespace groupcash\php\io;
 
-abstract class Transformer {
+interface Transformer {
 
     /**
-     * @return string Name of class that is serialized and inflated
+     * @param string $class
+     * @return bool
      */
-    abstract public function transforms();
-
-    /**
-     * @return string
-     */
-    abstract protected function token();
-
-    /**
-     * @param array $array
-     * @return object
-     */
-    abstract protected function toObject($array);
+    public function canTransform($class);
 
     /**
      * @param object $object
      * @return array
      */
-    abstract protected function toArray($object);
-
-    /**
-     * @param object $object
-     * @return array
-     */
-    public function objectToArray($object) {
-        return [$this->token(), $this->toArray($object)];
-    }
+    public function toArray($object);
 
     /**
      * @param array $array
      * @return bool
      */
-    public function matches($array) {
-        return $array[0] == $this->token();
-    }
+    public function hasTransformed($array);
 
     /**
      * @param array $array
      * @return object
-     * @throws \Exception
      */
-    public function arrayToObject($array) {
-        if (!$this->matches($array)) {
-            throw new \Exception('Unsupported transformation.');
-        }
-
-        return $this->toObject($array[1]);
-    }
+    public function toObject($array);
 }

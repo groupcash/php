@@ -21,30 +21,35 @@ class SerializationSpec {
 
     function before() {
         $this->serializer = new Serializer();
-        $this->serializer->registerTranscoder('foo', new CallbackTranscoder(
-            'FOO',
-            function ($array) {
-                return '#' . json_encode($array) . '#';
-            },
-            function ($string) {
-                return json_decode(substr($string, 1, -1));
-            }
-        ));
-        $this->serializer->addTransformer(new CallbackTransformer(
-            \DateTime::class,
-            'BAR',
-            function (\DateTime $dateTime) {
-                return ['date' => $dateTime->format('c')];
-            },
-            function ($array) {
-                return new \DateTime($array['date']);
-            }
-        ));
+        $this->serializer->registerTranscoder('foo',
+            (new CallbackTranscoder(
+                function ($array) {
+                    return '#' . json_encode($array) . '#';
+                },
+                function ($string) {
+                    return json_decode(substr($string, 1, -1), true);
+                }
+            ))->setHasEncoded(function ($str) {
+                return substr($str, 0, 1) == '#';
+            }));
+        $this->serializer->addTransformer(
+            (new CallbackTransformer(
+                function (\DateTime $dateTime) {
+                    return ['date' => $dateTime->format('c')];
+                },
+                function ($array) {
+                    return new \DateTime($array['date']);
+                }
+            ))->setCanTransform(function ($class) {
+                return $class == \DateTime::class;
+            })->setHasTransformed(function ($array) {
+                return isset($array['date']);
+            }));
     }
 
     function defaultTranscoder() {
         $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 14:15:16 UTC'));
-        $this->assert->equals($serialized, 'FOO#["BAR",{"date":"2011-12-13T14:15:16+00:00"}]#');
+        $this->assert->equals($serialized, '#{"date":"2011-12-13T14:15:16+00:00"}#');
     }
 
     function handles() {
@@ -70,7 +75,7 @@ class SerializationSpec {
 
     function unsupported() {
         $this->try->tryTo(function () {
-            $this->serializer->inflate('FOO#["WRONG",{}]#');
+            $this->serializer->inflate('#{}#');
         });
         $this->try->thenTheException_ShouldBeThrown('New matching transformer available.');
     }
@@ -78,13 +83,15 @@ class SerializationSpec {
     function json() {
         $this->serializer->registerTranscoder('foo', new JsonTranscoder());
         $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
-        $this->assert->equals($serialized, 'JSON["BAR",{"date":"2011-12-13T00:00:00+00:00"}]');
+        $this->assert->equals($serialized, '{"date":"2011-12-13T00:00:00+00:00"}');
+        $this->assert->equals($this->serializer->inflate($serialized), new \DateTime('2011-12-13 UTC'));
     }
 
     function base64() {
         $this->serializer->registerTranscoder('foo', new Base64Transcoder(new JsonTranscoder()));
         $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
-        $this->assert->equals($serialized, 'SlNPTg==SlNPTlsiQkFSIix7ImRhdGUiOiIyMDExLTEyLTEzVDAwOjAwOjAwKzAwOjAwIn1d');
+        $this->assert->equals($serialized, 'eyJkYXRlIjoiMjAxMS0xMi0xM1QwMDowMDowMCswMDowMCJ9');
+        $this->assert->equals($this->serializer->inflate($serialized), new \DateTime('2011-12-13 UTC'));
     }
 
     function messagePack() {
@@ -92,8 +99,9 @@ class SerializationSpec {
             $this->assert->incomplete('msgpack not installed');
         }
 
-        $this->serializer->registerTranscoder('foo', new Base64Transcoder(new MsgPackTranscoder()));
+        $this->serializer->registerTranscoder('foo', new MsgPackTranscoder());
         $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
-        $this->assert->equals($serialized, 'TVNHUA==TVNHUJKjQkFSgaRkYXRluTIwMTEtMTItMTNUMDA6MDA6MDArMDA6MDA=');
+        $this->assert->equals($serialized, MsgPackTranscoder::MARKER . hex2bin('81a4') . 'date' . hex2bin('b9') . '2011-12-13T00:00:00+00:00');
+        $this->assert->equals($this->serializer->inflate($serialized), new \DateTime('2011-12-13 UTC'));
     }
 }

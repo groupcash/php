@@ -11,31 +11,31 @@ use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Transaction;
 
-class CoinTransformer extends Transformer {
-
-    const TOKEN = 'COIN';
+class CoinTransformer implements Transformer {
 
     private static $SUPPORTED_VERSIONS = ['dev'];
 
     /**
-     * @return string Name of class that is dToArray and arrayTod
+     * @param string $class
+     * @return bool
      */
-    public function transforms() {
-        return Coin::class;
+    public function canTransform($class) {
+        return $class == Coin::class;
     }
 
     /**
-     * @return string
+     * @param array $array
+     * @return bool
      */
-    protected function token() {
-        return self::TOKEN;
+    public function hasTransformed($array) {
+        return array_keys($array) == ['v', 'coin'] && in_array($array['v'], self::$SUPPORTED_VERSIONS);
     }
 
     /**
      * @param Coin $object
      * @return array
      */
-    protected function toArray($object) {
+    public function toArray($object) {
         return $this->CoinToArray($object);
     }
 
@@ -43,24 +43,20 @@ class CoinTransformer extends Transformer {
      * @param array $array
      * @return object
      */
-    protected function toObject($array) {
-        return $this->arrayToCoin($array);
+    public function toObject($array) {
+        return $this->arrayToCoin($array['coin']);
     }
 
     private function CoinToArray(Coin $coin) {
         return [
             'v' => $coin->version(),
-            'in' => $this->InputToArray($coin->getInput())
+            'coin' => $this->InputToArray($coin->getInput())
         ];
     }
 
     private function arrayToCoin($array) {
-        if (!in_array($array['v'], self::$SUPPORTED_VERSIONS)) {
-            throw new \Exception('Unsupported coin version.');
-        }
-
         return new Coin(
-            $this->arrayToInput($array['in'])
+            $this->arrayToInput($array)
         );
     }
 

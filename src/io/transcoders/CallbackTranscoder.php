@@ -3,48 +3,55 @@ namespace groupcash\php\io\transcoders;
 
 use groupcash\php\io\Transcoder;
 
-class CallbackTranscoder extends Transcoder {
+class CallbackTranscoder implements Transcoder {
 
-    /** @var callable */
+    private $encode;
+    private $hasEncoded;
     private $decode;
 
-    /** @var callable */
-    private $encode;
-
-    /** @var string */
-    private $token;
-
     /**
-     * @param string $token
      * @param callable $encode
      * @param callable $decode
      */
-    public function __construct($token, callable $encode, callable $decode) {
-        $this->decode = $decode;
+    public function __construct(callable $encode, callable $decode) {
         $this->encode = $encode;
-        $this->token = $token;
+        $this->decode = $decode;
+
+        $this->hasEncoded = function () {
+            return true;
+        };
     }
 
     /**
-     * @return string
+     * @param callable $hasEncoded
+     * @return CallbackTranscoder
      */
-    public function token() {
-        return $this->token;
+    public function setHasEncoded(callable $hasEncoded) {
+        $this->hasEncoded = $hasEncoded;
+        return $this;
     }
 
     /**
      * @param mixed $input
      * @return string
      */
-    protected function doEncode($input) {
+    public function encode($input) {
         return call_user_func($this->encode, $input);
+    }
+
+    /**
+     * @param string $encoded
+     * @return bool
+     */
+    public function hasEncoded($encoded) {
+        return call_user_func($this->hasEncoded, $encoded);
     }
 
     /**
      * @param string $encoded
      * @return mixed
      */
-    protected function doDecode($encoded) {
+    public function decode($encoded) {
         return call_user_func($this->decode, $encoded);
     }
 }

@@ -23,10 +23,12 @@ use rtens\scrut\fixtures\ExceptionFixture;
 class TransformCoinSpec {
 
     function unsupportedCoinVersion() {
-        $this->try->tryTo(function () {
-            $this->transformer->arrayToObject([CoinTransformer::TOKEN, ['v' => 'foo']]);
-        });
-        $this->try->thenTheException_ShouldBeThrown('Unsupported coin version.');
+        $this->assert->not($this->transformer->hasTransformed(['v' => 'foo']));
+    }
+
+    function onlyTransformsCoin() {
+        $this->assert->not($this->transformer->canTransform(\DateTime::class));
+        $this->assert->isTrue($this->transformer->canTransform(Coin::class));
     }
 
     function complete() {
@@ -62,14 +64,12 @@ class TransformCoinSpec {
             42
         ));
 
-        $array = $this->transformer->objectToArray($coin);
+        $array = $this->transformer->toArray($coin);
 
-        $this->assert->equals($this->transformer->arrayToObject($array), $coin);
-
-        $this->assert->equals($array[0], CoinTransformer::TOKEN);
-        $this->assert->equals($array[1], [
+        $this->assert->equals($this->transformer->toObject($array), $coin);
+        $this->assert->equals($array, [
             'v' => $coin->version(),
-            'in' => [
+            'coin' => [
                 'iout' => 42,
                 'tx' => [
                     'ins' => [

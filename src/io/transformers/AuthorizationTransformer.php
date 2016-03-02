@@ -4,29 +4,29 @@ namespace groupcash\php\io\transformers;
 use groupcash\php\io\Transformer;
 use groupcash\php\model\Authorization;
 
-class AuthorizationTransformer extends Transformer {
-
-    const TOKEN = 'AUTH';
+class AuthorizationTransformer implements Transformer {
 
     /**
-     * @return string Name of class that is serialized and inflated
+     * @param string $class
+     * @return bool
      */
-    public function transforms() {
-        return Authorization::class;
+    public function canTransform($class) {
+        return $class == Authorization::class;
     }
 
     /**
-     * @return string
+     * @param array $array
+     * @return bool
      */
-    protected function token() {
-        return self::TOKEN;
+    public function hasTransformed($array) {
+        return array_keys($array) == ['issuer', 'currency', 'sig'];
     }
 
     /**
      * @param array $array
      * @return Authorization
      */
-    protected function toObject($array) {
+    public function toObject($array) {
         return new Authorization(
             $array['issuer'],
             $array['currency'],
@@ -38,7 +38,7 @@ class AuthorizationTransformer extends Transformer {
      * @param Authorization $object
      * @return array
      */
-    protected function toArray($object) {
+    public function toArray($object) {
         return [
             'issuer' => $object->getIssuerAddress(),
             'currency' => $object->getCurrencyAddress(),

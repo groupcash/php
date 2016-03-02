@@ -3,30 +3,29 @@ namespace groupcash\php\io\transcoders;
 
 use groupcash\php\io\Transcoder;
 
-class JsonTranscoder extends Transcoder {
-
-    const TOKEN = 'JSON';
-
-    /**
-     * @return string
-     */
-    public function token() {
-        return self::TOKEN;
-    }
+class JsonTranscoder implements Transcoder {
 
     /**
      * @param mixed $input
      * @return string
      */
-    protected function doEncode($input) {
+    public function encode($input) {
         return json_encode($input);
+    }
+
+    /**
+     * @param string $encoded
+     * @return bool
+     */
+    public function hasEncoded($encoded) {
+        return substr($encoded, 0, 1) == '{' && substr($encoded, -1) == '}';
     }
 
     /**
      * @param string $encoded
      * @return mixed
      */
-    protected function doDecode($encoded) {
+    public function decode($encoded) {
         return json_decode($encoded, true);
     }
 }
