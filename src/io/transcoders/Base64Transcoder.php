@@ -3,7 +3,7 @@ namespace groupcash\php\io\transcoders;
 
 use groupcash\php\io\Transcoder;
 
-class Base64Transcoder extends Transcoder {
+class Base64Transcoder implements Transcoder {
 
     /** @var Transcoder */
     private $inner;
@@ -13,25 +13,26 @@ class Base64Transcoder extends Transcoder {
     }
 
     /**
-     * @return string
-     */
-    public function token() {
-        return base64_encode($this->inner->token());
-    }
-
-    /**
      * @param mixed $input
      * @return string
      */
-    protected function doEncode($input) {
+    public function encode($input) {
         return base64_encode($this->inner->encode($input));
+    }
+
+    /**
+     * @param string $encoded
+     * @return bool
+     */
+    public function hasEncoded($encoded) {
+        return $this->inner->hasEncoded(base64_decode($encoded));
     }
 
     /**
      * @param string $encoded
      * @return mixed
      */
-    protected function doDecode($encoded) {
+    public function decode($encoded) {
         return $this->inner->decode(base64_decode($encoded));
     }
 }

@@ -3,7 +3,9 @@ namespace groupcash\php\io\transcoders;
 
 use groupcash\php\io\Transcoder;
 
-class MsgPackTranscoder extends Transcoder {
+class MsgPackTranscoder implements Transcoder {
+
+    const MARKER = '@';
 
     /**
      * @return bool
@@ -13,22 +15,23 @@ class MsgPackTranscoder extends Transcoder {
     }
 
     /**
-     * @return string
-     */
-    public function token() {
-        return 'MSGP';
-    }
-
-    /**
      * @param mixed $input
      * @return string
      * @throws \Exception
      */
-    protected function doEncode($input) {
+    public function encode($input) {
         if (function_exists('msgpack_pack')) {
-            return msgpack_pack($input);
+            return self::MARKER . msgpack_pack($input);
         }
         throw new \Exception('msgpack not installed');
+    }
+
+    /**
+     * @param string $encoded
+     * @return bool
+     */
+    public function hasEncoded($encoded) {
+        return substr($encoded, 0, 1) == self::MARKER;
     }
 
     /**
@@ -36,9 +39,9 @@ class MsgPackTranscoder extends Transcoder {
      * @return mixed
      * @throws \Exception
      */
-    protected function doDecode($encoded) {
+    public function decode($encoded) {
         if (function_exists('msgpack_unpack')) {
-            return msgpack_unpack($encoded);
+            return msgpack_unpack(substr($encoded, 1));
         }
         throw new \Exception('msgpack not installed');
     }

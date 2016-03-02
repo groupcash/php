@@ -36,7 +36,7 @@ class Serializer {
         $class = is_object($classOrObject) ? get_class($classOrObject) : $classOrObject;
 
         foreach ($this->transformers as $transformer) {
-            if ($transformer->transforms() == $class) {
+            if ($transformer->canTransform($class)) {
                 return true;
             }
         }
@@ -52,7 +52,7 @@ class Serializer {
         $transcoder = $this->getTranscoder($transcoderKey);
         $transformer = $this->getTransformerForObject($object);
 
-        return $transcoder->encode($transformer->objectToArray($object));
+        return $transcoder->encode($transformer->toArray($object));
     }
 
     /**
@@ -63,7 +63,7 @@ class Serializer {
     public function inflate($serialized) {
         $array = $this->decode($serialized);
         $transformer = $this->getTransformerForArray($array);
-        return $transformer->arrayToObject($array);
+        return $transformer->toObject($array);
     }
 
     /**
@@ -92,7 +92,7 @@ class Serializer {
 
     private function getTransformerForObject($object) {
         foreach ($this->transformers as $transformer) {
-            if ($transformer->transforms() == get_class($object)) {
+            if ($transformer->canTransform(get_class($object))) {
                 return $transformer;
             }
         }
@@ -110,7 +110,7 @@ class Serializer {
 
     private function getTransformerForArray($array) {
         foreach ($this->transformers as $transformer) {
-            if ($transformer->matches($array)) {
+            if ($transformer->hasTransformed($array)) {
                 return $transformer;
             }
         }

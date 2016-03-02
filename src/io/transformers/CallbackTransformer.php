@@ -3,60 +3,75 @@ namespace groupcash\php\io\transformers;
 
 use groupcash\php\io\Transformer;
 
-class CallbackTransformer extends Transformer {
+class CallbackTransformer implements Transformer {
 
-    /** @var string */
-    private $class;
-
-    /** @var string */
-    private $token;
-
-    /** @var callable */
+    private $canTransform;
+    private $toArray;
+    private $hasTransformed;
     private $toObject;
 
-    /** @var callable */
-    private $toArray;
-
     /**
-     * @param string $class
-     * @param string $token
      * @param callable $toArray
      * @param callable $toObject
      */
-    public function __construct($class, $token, callable $toArray, callable $toObject) {
-        $this->class = $class;
-        $this->token = $token;
-        $this->toObject = $toObject;
+    public function __construct(callable $toArray, callable $toObject) {
         $this->toArray = $toArray;
+        $this->toObject = $toObject;
+
+        $true = function () {
+            return true;
+        };
+        $this->hasTransformed = $true;
+        $this->canTransform = $true;
     }
 
     /**
-     * @return string Name of class that is serialized and inflated
+     * @param callable $canTransform
+     * @return CallbackTransformer
      */
-    public function transforms() {
-        return $this->class;
+    public function setCanTransform(callable $canTransform) {
+        $this->canTransform = $canTransform;
+        return $this;
     }
 
     /**
-     * @return string
+     * @param callable $hasTransformed
+     * @return CallbackTransformer
      */
-    protected function token() {
-        return $this->token;
+    public function setHasTransformed(callable $hasTransformed) {
+        $this->hasTransformed = $hasTransformed;
+        return $this;
     }
 
     /**
-     * @param array $array
-     * @return object
+     * @param string $class
+     * @return bool
      */
-    protected function toObject($array) {
-        return call_user_func($this->toObject, $array);
+    public function canTransform($class) {
+        return call_user_func($this->canTransform, $class);
     }
 
     /**
      * @param object $object
      * @return array
      */
-    protected function toArray($object) {
+    public function toArray($object) {
         return call_user_func($this->toArray, $object);
+    }
+
+    /**
+     * @param array $array
+     * @return bool
+     */
+    public function hasTransformed($array) {
+        return call_user_func($this->hasTransformed, $array);
+    }
+
+    /**
+     * @param array $array
+     * @return object
+     */
+    public function toObject($array) {
+        return call_user_func($this->toObject, $array);
     }
 }

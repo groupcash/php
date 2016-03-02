@@ -213,12 +213,12 @@ class VerifyCoinSpec {
     private function assertFail($message, Coin $coin, callable $modify) {
         $transformer = new CoinTransformer();
 
-        $serialized = json_decode(json_encode($transformer->objectToArray($coin)[1]));
-        $modify($serialized->in->tx);
-        $array = [CoinTransformer::TOKEN, json_decode(json_encode($serialized), true)];
+        $std = json_decode(json_encode($transformer->toArray($coin)));
+        $modify($std->coin->tx);
+        $array = json_decode(json_encode($std), true);
 
         /** @var Coin $inflated */
-        $inflated = $transformer->arrayToObject($array);
+        $inflated = $transformer->toObject($array);
         $this->assertNotAuthorized($message, $inflated, null);
     }
 
