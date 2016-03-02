@@ -4,6 +4,7 @@ namespace spec\groupcash\php\io;
 use groupcash\php\io\Serializer;
 use groupcash\php\io\transcoders\Base64Transcoder;
 use groupcash\php\io\transcoders\CallbackTranscoder;
+use groupcash\php\io\transcoders\HexadecimalTranscoder;
 use groupcash\php\io\transcoders\JsonTranscoder;
 use groupcash\php\io\transcoders\MsgPackTranscoder;
 use groupcash\php\io\transformers\CallbackTransformer;
@@ -91,6 +92,13 @@ class SerializationSpec {
         $this->serializer->registerTranscoder('foo', new Base64Transcoder(new JsonTranscoder()));
         $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
         $this->assert->equals($serialized, 'eyJkYXRlIjoiMjAxMS0xMi0xM1QwMDowMDowMCswMDowMCJ9');
+        $this->assert->equals($this->serializer->inflate($serialized), new \DateTime('2011-12-13 UTC'));
+    }
+
+    function hexadecimal() {
+        $this->serializer->registerTranscoder('foo', new HexadecimalTranscoder(new JsonTranscoder()));
+        $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
+        $this->assert->equals($serialized, '0x7b2264617465223a22323031312d31322d31335430303a30303a30302b30303a3030227d');
         $this->assert->equals($this->serializer->inflate($serialized), new \DateTime('2011-12-13 UTC'));
     }
 
