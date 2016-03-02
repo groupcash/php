@@ -1,5 +1,6 @@
 <?php
 namespace groupcash\php\model;
+use groupcash\php\key\Binary;
 
 /**
  * A Promise describes the delivery promise of a backer in a certain currency.
@@ -8,23 +9,23 @@ namespace groupcash\php\model;
  */
 class Promise implements Finger {
 
-    /** @var string */
+    /** @var Binary */
     private $currency;
 
     /** @var string */
     private $description;
 
     /**
-     * @param string $currency
+     * @param Binary $currency
      * @param string $description
      */
-    public function __construct($currency, $description) {
+    public function __construct(Binary $currency, $description) {
         $this->currency = $currency;
         $this->description = $description;
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getCurrency() {
         return $this->currency;

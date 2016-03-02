@@ -70,7 +70,7 @@ class Verification {
 
         foreach ($authorizedByCurrency as $authorization) {
             if (!$this->key->verify(Signer::squash($authorization), $currency, $authorization->getSignature())) {
-                $this->errors[] = "Invalid authorization: [{$authorization->getPrint()}]";
+                $this->errors[] = "Invalid authorization: [{$authorization->getIssuerAddress()}]";
             }
         }
 
@@ -150,6 +150,7 @@ class Verification {
         }
 
         $uniqueOwners = array_unique($owners);
+
         if (count($uniqueOwners) != 1) {
             $this->errors[] = 'Inconsistent owners: [' . implode('], [', $uniqueOwners) . ']';
         }
@@ -182,7 +183,7 @@ class Verification {
         $owner = $transaction->getInputs()[0]->getOutput()->getTarget();
 
         if (!$this->key->verify(Signer::squash($transaction), $owner, $transaction->getSignature())) {
-            $this->errors[] = "Not signed by owner [{$owner}]";
+            $this->errors[] = "Not signed by owner [$owner]";
         }
     }
 

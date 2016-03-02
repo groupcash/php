@@ -1,35 +1,36 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\key\Binary;
+
 class Authorization implements Finger{
 
-    /** @var string */
+    /** @var Binary */
     private $issuerAddress;
+
+    /** @var Binary */
+    private $currencyAddress;
 
     /** @var string */
     private $signature;
 
-    /** @var string */
-    private $currencyAddress;
-
     /**
-     * @param string $issuerAddress
-     * @param string $currencyAddress
+     * @param Binary $issuerAddress
+     * @param Binary $currencyAddress
      * @param string $signature
      */
-    public function __construct($issuerAddress, $currencyAddress, $signature) {
+    public function __construct(Binary $issuerAddress, Binary $currencyAddress, $signature) {
         $this->issuerAddress = $issuerAddress;
         $this->signature = $signature;
         $this->currencyAddress = $currencyAddress;
     }
 
     /**
-     * @param string $issuerAddress
-     * @param string $currencyAddress
+     * @param Binary $issuerAddress
      * @param Signer $signer
      * @return Authorization
      */
-    public static function signed($issuerAddress, Signer $signer) {
+    public static function signed(Binary $issuerAddress, Signer $signer) {
         return new Authorization($issuerAddress, $signer->getAddress(), $signer->sign($issuerAddress));
     }
 
@@ -41,10 +42,17 @@ class Authorization implements Finger{
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getIssuerAddress() {
         return $this->issuerAddress;
+    }
+
+    /**
+     * @return Binary
+     */
+    public function getCurrencyAddress() {
+        return $this->currencyAddress;
     }
 
     /**
@@ -52,12 +60,5 @@ class Authorization implements Finger{
      */
     public function getSignature() {
         return $this->signature;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrencyAddress() {
-        return $this->currencyAddress;
     }
 }

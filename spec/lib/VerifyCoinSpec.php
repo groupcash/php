@@ -3,6 +3,7 @@ namespace spec\groupcash\php\lib;
 
 use groupcash\php\Groupcash;
 use groupcash\php\io\transformers\CoinTransformer;
+use groupcash\php\key\Binary;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
@@ -24,37 +25,37 @@ class VerifyCoinSpec {
 
     function before() {
         $this->lib = new Groupcash(new FakeKeyService());
-        $this->base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('backer', new Fraction(1)));
+        $this->base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('backer'), new Fraction(1)));
 
-        $this->one = $this->lib->transferCoins('backer key', [
-            $this->lib->issueCoin('i key', new Promise('coin', 'p1'), new Output('backer', new Fraction(1))),
-            $this->lib->issueCoin('i key', new Promise('coin', 'p2'), new Output('backer', new Fraction(2)))
+        $this->one = $this->lib->transferCoins(new Binary('backer key'), [
+            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p1'), new Output(new Binary('backer'), new Fraction(1))),
+            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p2'), new Output(new Binary('backer'), new Fraction(2)))
         ], [
-            new Output('one', new Fraction(3))
+            new Output(new Binary('one'), new Fraction(3))
         ])[0];
 
-        $a = $this->lib->transferCoins('a key', [
-            $this->lib->issueCoin('i key', new Promise('coin', 'p3'), new Output('a', new Fraction(5))),
-            $this->lib->issueCoin('i key', new Promise('coin', 'p4'), new Output('a', new Fraction(7)))
+        $a = $this->lib->transferCoins(new Binary('a key'), [
+            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p3'), new Output(new Binary('a'), new Fraction(5))),
+            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p4'), new Output(new Binary('a'), new Fraction(7)))
         ], [
-            new Output('one', new Fraction(4)),
-            new Output('one', new Fraction(6)),
-            new Output('b', new Fraction(2))
+            new Output(new Binary('one'), new Fraction(4)),
+            new Output(new Binary('one'), new Fraction(6)),
+            new Output(new Binary('b'), new Fraction(2))
         ]);
 
-        $this->two = $this->lib->transferCoins('one key', [
+        $this->two = $this->lib->transferCoins(new Binary('one key'), [
             $a[0],
-            $this->lib->transferCoins('b key', [
-                $this->lib->issueCoin('i key', new Promise('coin', 'p5'), new Output('b', new Fraction(13))),
+            $this->lib->transferCoins(new Binary('b key'), [
+                $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p5'), new Output(new Binary('b'), new Fraction(13))),
                 $a[2]
             ], [
-                new Output('one', new Fraction(10)),
-                new Output('x', new Fraction(5))
+                new Output(new Binary('one'), new Fraction(10)),
+                new Output(new Binary('x'), new Fraction(5))
             ])[0],
             $this->one,
             $a[1]
         ], [
-            new Output('two', new Fraction(23))
+            new Output(new Binary('two'), new Fraction(23))
         ])[0];
     }
 
@@ -69,20 +70,20 @@ class VerifyCoinSpec {
 
     function authorizedForOtherCurrency() {
         $this->assertNotAuthorized('Not authorized: [issuer]', $this->base, [
-            $this->lib->authorizeIssuer('foo key', 'issuer')
+            $this->lib->authorizeIssuer(new Binary('foo key'), new Binary('issuer'))
         ]);
     }
 
     function authorized() {
         $this->lib->verifyCoin($this->base, [
-            $this->lib->authorizeIssuer('coin key', 'issuer')
+            $this->lib->authorizeIssuer(new Binary('coin key'), new Binary('issuer'))
         ]);
         $this->assert->pass();
     }
 
     function invalidAuthorization() {
         $this->assertNotAuthorized('Invalid authorization: [issuer]', $this->base, [
-            new Authorization('issuer', 'coin', 'invalid')
+            new Authorization(new Binary('issuer'), new Binary('coin'), 'invalid')
         ]);
     }
 

@@ -1,5 +1,6 @@
 <?php
 namespace groupcash\php\model;
+use groupcash\php\key\Binary;
 
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.
@@ -28,7 +29,7 @@ class Coin {
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getOwner() {
         return $this->input->getOutput()->getTarget();
@@ -75,12 +76,12 @@ class Coin {
     }
 
     /**
-     * @param string $backer
+     * @param Binary $backer
      * @param Signer $signer
      * @return Coin
      * @throws \Exception
      */
-    public function confirm($backer, Signer $signer) {
+    public function confirm(Binary $backer, Signer $signer) {
         $allBases = $this->getBases();
         $myBases = array_values(array_filter($allBases, function (Base $base) use ($backer) {
             return $base->getOutput()->getTarget() == $backer;

@@ -2,6 +2,7 @@
 namespace spec\groupcash\php\core;
 
 use groupcash\php\Groupcash;
+use groupcash\php\key\Binary;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\model\Confirmation;
 use groupcash\php\model\Fraction;
@@ -25,20 +26,20 @@ class ConfirmCoinSpec {
     }
 
     function notTheBacker() {
-        $base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
-        $one = $this->lib->transferCoins('bart key', [$base], [new Output('lisa', new Fraction(1))]);
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $one = $this->lib->transferCoins(new Binary('bart key'), [$base], [new Output(new Binary('lisa'), new Fraction(1))]);
 
         $this->try->tryTo(function () use ($one) {
-            $this->lib->confirmCoin('not bart key', $one[0]);
+            $this->lib->confirmCoin(new Binary('not bart key'), $one[0]);
         });
         $this->try->thenTheException_ShouldBeThrown('Not a backer');
     }
 
     function base() {
-        $base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
-        $confirmed = $this->lib->confirmCoin('bart key', $base);
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $base);
 
-        $this->assert->equals($confirmed->getOwner(), 'bart');
+        $this->assert->equals($confirmed->getOwner(), new Binary('bart'));
         $this->assert->equals($confirmed->getValue(), new Fraction(1));
 
         /** @var Confirmation $confirmation */
@@ -53,12 +54,12 @@ class ConfirmCoinSpec {
     }
 
     function singleTransaction() {
-        $base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
-        $one = $this->lib->transferCoins('bart key', [$base], [new Output('lisa', new Fraction(1))]);
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $one = $this->lib->transferCoins(new Binary('bart key'), [$base], [new Output(new Binary('lisa'), new Fraction(1))]);
 
-        $confirmed = $this->lib->confirmCoin('bart key', $one[0]);
+        $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $one[0]);
 
-        $this->assert->equals($confirmed->getOwner(), 'lisa');
+        $this->assert->equals($confirmed->getOwner(), new Binary('lisa'));
         $this->assert->equals($confirmed->getValue(), new Fraction(1));
 
         /** @var Confirmation $confirmation */
@@ -68,27 +69,27 @@ class ConfirmCoinSpec {
     }
 
     function chain() {
-        $base = $this->lib->issueCoin('issuer key', new Promise('coin', 'I promise'), new Output('bart', new Fraction(1)));
-        $one = $this->lib->transferCoins('bart key', [$base], [new Output('lisa', new Fraction(1))]);
-        $two = $this->lib->transferCoins('lisa key', $one, [new Output('marge', new Fraction(1))]);
-        $three = $this->lib->transferCoins('marge key', $two, [new Output('homer', new Fraction(1))]);
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $one = $this->lib->transferCoins(new Binary('bart key'), [$base], [new Output(new Binary('lisa'), new Fraction(1))]);
+        $two = $this->lib->transferCoins(new Binary('lisa key'), $one, [new Output(new Binary('marge'), new Fraction(1))]);
+        $three = $this->lib->transferCoins(new Binary('marge key'), $two, [new Output(new Binary('homer'), new Fraction(1))]);
 
-        $confirmed = $this->lib->confirmCoin('bart key', $three[0]);
+        $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $three[0]);
 
-        $this->assert->equals($confirmed->getOwner(), 'homer');
+        $this->assert->equals($confirmed->getOwner(), new Binary('homer'));
         $this->assert->isInstanceOf($confirmed->getInput()->getTransaction(), Confirmation::class);
         $this->assert->equals($confirmed->getInput()->getTransaction()->getInputs(),
             [new Input($base->getInput()->getTransaction(), 0)]);
     }
 
     function twoBases() {
-        $one = $this->lib->issueCoin('issuer key', new Promise('coin', 'A'), new Output('bart', new Fraction(1)));
-        $two = $this->lib->issueCoin('issuer key', new Promise('coin', 'B'), new Output('bart', new Fraction(2)));
+        $one = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'A'), new Output(new Binary('bart'), new Fraction(1)));
+        $two = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'B'), new Output(new Binary('bart'), new Fraction(2)));
 
-        $transferred = $this->lib->transferCoins('bart key', [$one, $two], [new Output('lisa', new Fraction(3))]);
-        $confirmed = $this->lib->confirmCoin('bart key', $transferred[0]);
+        $transferred = $this->lib->transferCoins(new Binary('bart key'), [$one, $two], [new Output(new Binary('lisa'), new Fraction(3))]);
+        $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $transferred[0]);
 
-        $this->assert->equals($confirmed->getOwner(), 'lisa');
+        $this->assert->equals($confirmed->getOwner(), new Binary('lisa'));
         $this->assert->equals($confirmed->getValue(), new Fraction(3));
         $this->assert->equals($confirmed->getInput()->getTransaction()->getInputs(), [
             new Input($one->getInput()->getTransaction(), 0),
@@ -98,70 +99,70 @@ class ConfirmCoinSpec {
 
     function differentBackers() {
         $bart = [
-            $this->lib->issueCoin('issuer key', new Promise('coin', 'A'), new Output('bart', new Fraction(1))),
-            $this->lib->issueCoin('issuer key', new Promise('coin', 'B'), new Output('bart', new Fraction(2)))
+            $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'A'), new Output(new Binary('bart'), new Fraction(1))),
+            $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'B'), new Output(new Binary('bart'), new Fraction(2)))
         ];
         $homer = [
-            $this->lib->issueCoin('issuer key', new Promise('coin', 'C'), new Output('homer', new Fraction(5)))
+            $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'C'), new Output(new Binary('homer'), new Fraction(5)))
         ];
         $lisa = array_merge(
-            $this->lib->transferCoins('bart key', $bart, [new Output('lisa', new Fraction(3))]),
-            $this->lib->transferCoins('homer key', $homer, [new Output('lisa', new Fraction(5))])
+            $this->lib->transferCoins(new Binary('bart key'), $bart, [new Output(new Binary('lisa'), new Fraction(3))]),
+            $this->lib->transferCoins(new Binary('homer key'), $homer, [new Output(new Binary('lisa'), new Fraction(5))])
         );
 
-        $marge = $this->lib->transferCoins('lisa key', $lisa, [new Output('marge', new Fraction(8))]);
+        $marge = $this->lib->transferCoins(new Binary('lisa key'), $lisa, [new Output(new Binary('marge'), new Fraction(8))]);
 
-        $bartConfirmed = $this->lib->confirmCoin('bart key', $marge[0]);
-        $homerConfirmed = $this->lib->confirmCoin('homer key', $marge[0]);
+        $bartConfirmed = $this->lib->confirmCoin(new Binary('bart key'), $marge[0]);
+        $homerConfirmed = $this->lib->confirmCoin(new Binary('homer key'), $marge[0]);
 
-        $this->assert->equals($bartConfirmed->getOwner(), 'marge');
+        $this->assert->equals($bartConfirmed->getOwner(), new Binary('marge'));
         $this->assert->equals($bartConfirmed->getValue(), new Fraction(3));
-        $this->assert->equals($homerConfirmed->getOwner(), 'marge');
+        $this->assert->equals($homerConfirmed->getOwner(), new Binary('marge'));
         $this->assert->equals($homerConfirmed->getValue(), new Fraction(5));
     }
 
     function tree() {
-        $a = $this->lib->issueCoin('i key', new Promise('c', 'p'), new Output('a', new Fraction(5)));
-        $b = $this->lib->issueCoin('i key', new Promise('c', 'p'), new Output('b', new Fraction(7)));
-        $c = $this->lib->issueCoin('i key', new Promise('c', 'p'), new Output('c', new Fraction(8)));
+        $a = $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('c'), 'p'), new Output(new Binary('a'), new Fraction(5)));
+        $b = $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('c'), 'p'), new Output(new Binary('b'), new Fraction(7)));
+        $c = $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('c'), 'p'), new Output(new Binary('c'), new Fraction(8)));
 
         $d = [
-            $this->lib->transferCoins('a key', [$a], [
-                new Output('d', new Fraction(4)),
-                new Output('x', new Fraction(1))
+            $this->lib->transferCoins(new Binary('a key'), [$a], [
+                new Output(new Binary('d'), new Fraction(4)),
+                new Output(new Binary('x'), new Fraction(1))
             ])[0],
-            $this->lib->transferCoins('b key', [$b], [
-                new Output('d', new Fraction(2)),
-                new Output('x', new Fraction(5))
+            $this->lib->transferCoins(new Binary('b key'), [$b], [
+                new Output(new Binary('d'), new Fraction(2)),
+                new Output(new Binary('x'), new Fraction(5))
             ])[0]
         ];
 
         $e = [
-            $this->lib->transferCoins('c key', [$c], [
-                new Output('e', new Fraction(7)),
-                new Output('x', new Fraction(1))
+            $this->lib->transferCoins(new Binary('c key'), [$c], [
+                new Output(new Binary('e'), new Fraction(7)),
+                new Output(new Binary('x'), new Fraction(1))
             ])[0]
         ];
 
         $f = [
-            $this->lib->transferCoins('d key', $d, [
-                new Output('f', new Fraction(5)),
-                new Output('x', new Fraction(1))
+            $this->lib->transferCoins(new Binary('d key'), $d, [
+                new Output(new Binary('f'), new Fraction(5)),
+                new Output(new Binary('x'), new Fraction(1))
             ])[0],
-            $this->lib->transferCoins('e key', $e, [
-                new Output('f', new Fraction(4)),
-                new Output('x', new Fraction(3)),
+            $this->lib->transferCoins(new Binary('e key'), $e, [
+                new Output(new Binary('f'), new Fraction(4)),
+                new Output(new Binary('x'), new Fraction(3)),
             ])[0]
         ];
 
-        $g = $this->lib->transferCoins('f key', $f, [
-            new Output('g', new Fraction(8)),
-            new Output('x', new Fraction(1))
+        $g = $this->lib->transferCoins(new Binary('f key'), $f, [
+            new Output(new Binary('g'), new Fraction(8)),
+            new Output(new Binary('x'), new Fraction(1))
         ])[0];
 
-        $confirmedA = $this->lib->confirmCoin('a key', $g);
-        $confirmedB = $this->lib->confirmCoin('b key', $g);
-        $confirmedC = $this->lib->confirmCoin('c key', $g);
+        $confirmedA = $this->lib->confirmCoin(new Binary('a key'), $g);
+        $confirmedB = $this->lib->confirmCoin(new Binary('b key'), $g);
+        $confirmedC = $this->lib->confirmCoin(new Binary('c key'), $g);
 
         $this->assert->equals(
             $confirmedA->getValue()

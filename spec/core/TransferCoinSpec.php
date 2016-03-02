@@ -2,6 +2,7 @@
 namespace spec\groupcash\php\core;
 
 use groupcash\php\Groupcash;
+use groupcash\php\key\Binary;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\model\Fraction;
 use groupcash\php\model\Output;
@@ -26,10 +27,10 @@ class TransferCoinSpec {
 
     function noCoins() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
+            $this->lib->transferCoins(new Binary('a key'), [
                 // Empty
             ], [
-                new Output('', new Fraction(0))
+                new Output(new Binary(''), new Fraction(0))
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('No inputs');
@@ -37,11 +38,11 @@ class TransferCoinSpec {
 
     function emptyOutput() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
+            $this->lib->transferCoins(new Binary('a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(1))),
             ], [
-                new Output('', new Fraction(0)),
-                new Output('', new Fraction(1)),
+                new Output(new Binary(''), new Fraction(0)),
+                new Output(new Binary(''), new Fraction(1)),
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Zero output value');
@@ -49,11 +50,11 @@ class TransferCoinSpec {
 
     function negativeOutput() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
+            $this->lib->transferCoins(new Binary('a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(1))),
             ], [
-                new Output('', new Fraction(-1)),
-                new Output('', new Fraction(2)),
+                new Output(new Binary(''), new Fraction(-1)),
+                new Output(new Binary(''), new Fraction(2)),
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Negative output value');
@@ -61,12 +62,12 @@ class TransferCoinSpec {
 
     function outputOverflow() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(3))),
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(2))),
+            $this->lib->transferCoins(new Binary('a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(3))),
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(2))),
             ], [
-                new Output('', new Fraction(2)),
-                new Output('', new Fraction(4))
+                new Output(new Binary(''), new Fraction(2)),
+                new Output(new Binary(''), new Fraction(4))
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Output sum greater than input sum');
@@ -74,12 +75,12 @@ class TransferCoinSpec {
 
     function outputUnderflow() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(3))),
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(2))),
+            $this->lib->transferCoins(new Binary('a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(3))),
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(2))),
             ], [
-                new Output('', new Fraction(1)),
-                new Output('', new Fraction(3))
+                new Output(new Binary(''), new Fraction(1)),
+                new Output(new Binary(''), new Fraction(3))
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Output sum less than input sum');
@@ -87,11 +88,11 @@ class TransferCoinSpec {
 
     function differentOwners() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('i key', new Promise('', ''), new Output('b', new Fraction(1))),
+            $this->lib->transferCoins(new Binary('a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('a'), new Fraction(1))),
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('b'), new Fraction(1))),
             ], [
-                new Output('', new Fraction(2))
+                new Output(new Binary(''), new Fraction(2))
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Inconsistent owners: [a], [b]');
@@ -99,11 +100,11 @@ class TransferCoinSpec {
 
     function differentCurrencies() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('a key', [
-                $this->lib->issueCoin('i key', new Promise('a', ''), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('i key', new Promise('b', ''), new Output('a', new Fraction(1))),
+            $this->lib->transferCoins(new Binary('a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary('a'), ''), new Output(new Binary('a'), new Fraction(1))),
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary('b'), ''), new Output(new Binary('a'), new Fraction(1))),
             ], [
-                new Output('', new Fraction(2))
+                new Output(new Binary(''), new Fraction(2))
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Inconsistent currencies: [a], [b]');
@@ -111,19 +112,19 @@ class TransferCoinSpec {
 
     function wrongKey() {
         $this->try->tryTo(function () {
-            $this->lib->transferCoins('not a key', [
-                $this->lib->issueCoin('i key', new Promise('', '1'), new Output('a', new Fraction(1))),
-                $this->lib->issueCoin('i key', new Promise('', '2'), new Output('a', new Fraction(1))),
+            $this->lib->transferCoins(new Binary('not a key'), [
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), '1'), new Output(new Binary('a'), new Fraction(1))),
+                $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), '2'), new Output(new Binary('a'), new Fraction(1))),
             ], [
-                new Output('b key', new Fraction(2))
+                new Output(new Binary('b key'), new Fraction(2))
             ]);
         });
         $this->try->thenTheException_ShouldBeThrown('Not signed by owner [a]');
     }
 
     function noOutput() {
-        $transferred = $this->lib->transferCoins('', [
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('', new Fraction(1))),
+        $transferred = $this->lib->transferCoins(new Binary(''), [
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary(''), new Fraction(1))),
         ], [
             // Empty
         ]);
@@ -131,88 +132,88 @@ class TransferCoinSpec {
     }
 
     function base() {
-        $base = $this->lib->issueCoin('i key', new Promise('c', 'p'), new Output('bart', new Fraction(1)));
-        $transferred = $this->lib->transferCoins('bart key', [
+        $base = $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary('c'), 'p'), new Output(new Binary('bart'), new Fraction(1)));
+        $transferred = $this->lib->transferCoins(new Binary('bart key'), [
             $base
         ], [
-            new Output('lisa', new Fraction(1))
+            new Output(new Binary('lisa'), new Fraction(1))
         ]);
 
         $this->assert->size($transferred, 1);
-        $this->assert->equals($transferred[0]->getOwner(), 'lisa');
+        $this->assert->equals($transferred[0]->getOwner(), new Binary('lisa'));
         $this->assert->equals($transferred[0]->getValue(), new Fraction(1));
 
         $input = $transferred[0]->getInput();
-        $this->assert->equals($input->getOutput(), new Output('lisa', new Fraction(1)));
+        $this->assert->equals($input->getOutput(), new Output(new Binary('lisa'), new Fraction(1)));
 
         $inputTx = $input->getTransaction();
         $this->assert->equals($inputTx->getInputs(), [$base->getInput()]);
-        $this->assert->equals($inputTx->getOutputs(), [new Output('lisa', new Fraction(1))]);
+        $this->assert->equals($inputTx->getOutputs(), [new Output(new Binary('lisa'), new Fraction(1))]);
         $this->assert->equals($inputTx->getSignature(),
             'c' . "\0" . 'p' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1' .
             ' signed with bart key');
     }
 
     function multipleOutputs() {
-        $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(6)))
+        $transferred = $this->lib->transferCoins(new Binary('bart key'), [
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(6)))
         ], [
-            new Output('lisa', new Fraction(1)),
-            new Output('marge', new Fraction(2)),
-            new Output('homer', new Fraction(3)),
+            new Output(new Binary('lisa'), new Fraction(1)),
+            new Output(new Binary('marge'), new Fraction(2)),
+            new Output(new Binary('homer'), new Fraction(3)),
         ]);
 
         $this->assert->size($transferred, 3);
-        $this->assert->equals($transferred[0]->getOwner(), 'lisa');
-        $this->assert->equals($transferred[1]->getOwner(), 'marge');
-        $this->assert->equals($transferred[2]->getOwner(), 'homer');
+        $this->assert->equals($transferred[0]->getOwner(), new Binary('lisa'));
+        $this->assert->equals($transferred[1]->getOwner(), new Binary('marge'));
+        $this->assert->equals($transferred[2]->getOwner(), new Binary('homer'));
         $this->assert->equals($transferred[0]->getValue(), new Fraction(1));
         $this->assert->equals($transferred[1]->getValue(), new Fraction(2));
         $this->assert->equals($transferred[2]->getValue(), new Fraction(3));
     }
 
     function multipleInputs() {
-        $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(1))),
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(2))),
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(3)))
+        $transferred = $this->lib->transferCoins(new Binary('bart key'), [
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(1))),
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(2))),
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(3)))
         ], [
-            new Output('lisa', new Fraction(6))
+            new Output(new Binary('lisa'), new Fraction(6))
         ]);
 
         $this->assert->size($transferred, 1);
-        $this->assert->equals($transferred[0]->getOwner(), 'lisa');
+        $this->assert->equals($transferred[0]->getOwner(), new Binary('lisa'));
         $this->assert->equals($transferred[0]->getValue(), new Fraction(6));
     }
 
     function multipleInputsAndOutputs() {
-        $transferred = $this->lib->transferCoins('bart key', [
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(1))),
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(2))),
-            $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(3)))
+        $transferred = $this->lib->transferCoins(new Binary('bart key'), [
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(1))),
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(2))),
+            $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(3)))
         ], [
-            new Output('lisa', new Fraction(3)),
-            new Output('homer', new Fraction(1)),
-            new Output('bart', new Fraction(2)),
+            new Output(new Binary('lisa'), new Fraction(3)),
+            new Output(new Binary('homer'), new Fraction(1)),
+            new Output(new Binary('bart'), new Fraction(2)),
         ]);
 
         $this->assert->size($transferred, 3);
-        $this->assert->equals($transferred[0]->getOwner(), 'lisa');
+        $this->assert->equals($transferred[0]->getOwner(), new Binary('lisa'));
         $this->assert->equals($transferred[0]->getValue(), new Fraction(3));
-        $this->assert->equals($transferred[1]->getOwner(), 'homer');
+        $this->assert->equals($transferred[1]->getOwner(), new Binary('homer'));
         $this->assert->equals($transferred[1]->getValue(), new Fraction(1));
-        $this->assert->equals($transferred[2]->getOwner(), 'bart');
+        $this->assert->equals($transferred[2]->getOwner(), new Binary('bart'));
         $this->assert->equals($transferred[2]->getValue(), new Fraction(2));
     }
 
     function chaining() {
-        $coin = $this->lib->issueCoin('i key', new Promise('', ''), new Output('bart', new Fraction(1)));
-        $one = $this->lib->transferCoins('bart key', [$coin], [new Output('lisa', new Fraction(1))]);
-        $two = $this->lib->transferCoins('lisa key', [$one[0]], [new Output('marge', new Fraction(1))]);
-        $three = $this->lib->transferCoins('marge key', [$two[0]], [new Output('homer', new Fraction(1))]);
+        $coin = $this->lib->issueCoin(new Binary('i key'),new Promise(new Binary(''), ''), new Output(new Binary('bart'), new Fraction(1)));
+        $one = $this->lib->transferCoins(new Binary('bart key'), [$coin], [new Output(new Binary('lisa'), new Fraction(1))]);
+        $two = $this->lib->transferCoins(new Binary('lisa key'), [$one[0]], [new Output(new Binary('marge'), new Fraction(1))]);
+        $three = $this->lib->transferCoins(new Binary('marge key'), [$two[0]], [new Output(new Binary('homer'), new Fraction(1))]);
 
         $this->assert->size($three, 1);
-        $this->assert->equals($three[0]->getOwner(), 'homer');
+        $this->assert->equals($three[0]->getOwner(), new Binary('homer'));
 
         $tx = $three[0]->getInput()->getTransaction();
         $this->assert->equals($tx->getInputs(), [$two[0]->getInput()]);

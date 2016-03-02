@@ -1,6 +1,7 @@
 <?php
 namespace spec\groupcash\php\core;
 
+use groupcash\php\key\Binary;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\Groupcash;
 use groupcash\php\model\Fraction;
@@ -22,17 +23,17 @@ class IssueCoinsSpec {
     }
 
     function singleCoin() {
-        $coin = $this->lib->issueCoin('issuer key', new Promise('foo', 'my promise'), new Output('backer', new Fraction(42)));
+        $coin = $this->lib->issueCoin(new Binary('issuer key'),new Promise(new Binary('foo'), 'my promise'), new Output(new Binary('backer'), new Fraction(42)));
 
         /** @var Base $base */
         $base = $coin->getInput()->getTransaction();
 
         $this->assert->isInstanceOf($base, Base::class);
-        $this->assert->equals($base->getPromise(), new Promise('foo', 'my promise'));
+        $this->assert->equals($base->getPromise(),new Promise(new Binary('foo'), 'my promise'));
         $this->assert->equals($base->getInputs(), []);
-        $this->assert->equals($base->getOutput(), new Output('backer', new Fraction(42)));
-        $this->assert->equals($base->getOutputs(), [new Output('backer', new Fraction(42))]);
-        $this->assert->equals($base->getIssuerAddress(), 'issuer');
+        $this->assert->equals($base->getOutput(), new Output(new Binary('backer'), new Fraction(42)));
+        $this->assert->equals($base->getOutputs(), [new Output(new Binary('backer'), new Fraction(42))]);
+        $this->assert->equals($base->getIssuerAddress(), new Binary('issuer'));
         $this->assert->equals($base->getSignature(),
             'foo' . "\0" . 'my promise' . "\0" . 'backer' . "\0" . '42|1' .
             ' signed with issuer key');

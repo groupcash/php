@@ -2,6 +2,7 @@
 namespace groupcash\php\io\transformers;
 
 use groupcash\php\io\Transformer;
+use groupcash\php\key\Binary;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Confirmation;
 use groupcash\php\model\Fraction;
@@ -106,7 +107,7 @@ class CoinTransformer implements Transformer {
         return [
             'promise' => $this->PromiseToArray($base->getPromise()),
             'out' => $this->OutputToArray($base->getOutput()),
-            'by' => $base->getIssuerAddress(),
+            'by' => $base->getIssuerAddress()->getData(),
             'sig' => $base->getSignature()
         ];
     }
@@ -115,7 +116,7 @@ class CoinTransformer implements Transformer {
         return new Base(
             $this->arrayToPromise($array['promise']),
             $this->arrayToOutput($array['out']),
-            $array['by'],
+            new Binary($array['by']),
             $array['sig']
         );
     }
@@ -140,28 +141,28 @@ class CoinTransformer implements Transformer {
 
     private function PromiseToArray(Promise $promise) {
         return [
-            $promise->getCurrency(),
+            $promise->getCurrency()->getData(),
             $promise->getDescription()
         ];
     }
 
     private function arrayToPromise($array) {
         return new Promise(
-            $array[0],
+            new Binary($array[0]),
             $array[1]
         );
     }
 
     private function OutputToArray(Output $output) {
         return [
-            'to' => $output->getTarget(),
+            'to' => $output->getTarget()->getData(),
             'val' => $this->FractionToArray($output->getValue())
         ];
     }
 
     private function arrayToOutput($array) {
         return new Output(
-            $array['to'],
+            new Binary($array['to']),
             $this->arrayToFraction($array['val'])
         );
     }

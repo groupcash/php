@@ -20,7 +20,7 @@ class EccKeyService implements KeyService {
     private static $SIGNATURE_GLUE = '#';
 
     /**
-     * @return string
+     * @return Binary
      */
     public function generatePrivateKey() {
         $generator = EccFactory::getNistCurves()->generator256();
@@ -29,52 +29,52 @@ class EccKeyService implements KeyService {
         $serializer = new DerPrivateKeySerializer();
         $serialized = $serializer->serialize($key);
 
-        return $serialized;
+        return new Binary($serialized);
     }
 
     /**
-     * @param string $privateKey
-     * @return string
+     * @param Binary $privateKey
+     * @return Binary
      */
-    public function publicKey($privateKey) {
+    public function publicKey(Binary $privateKey) {
         $math = MathAdapterFactory::getAdapter();
-        $privateKey = $this->deserializePrivate($privateKey, $math);
+        $inflatedPrivateKey = $this->deserializePrivate($privateKey->getData(), $math);
 
-        $publicKey = $privateKey->getPublicKey();
+        $publicKey = $inflatedPrivateKey->getPublicKey();
 
         $publicSerializer = new DerPublicKeySerializer();
         $serialized = $publicSerializer->serialize($publicKey);
 
-        return $serialized;
+        return new Binary($serialized);
     }
 
     /**
      * @param string $content
-     * @param string $privateKey
+     * @param Binary $privateKey
      * @return string
      */
-    public function sign($content, $privateKey) {
+    public function sign($content, Binary $privateKey) {
         $math = MathAdapterFactory::getAdapter();
-        $privateKey = $this->deserializePrivate($privateKey, $math);
+        $inflatedPrivateKey = $this->deserializePrivate($privateKey->getData(), $math);
 
         $rng = RandomGeneratorFactory::getRandomGenerator();
 
         $hash = $this->hash($content);
 
         $signer = new Signer($math);
-        $signature = $signer->sign($privateKey, $hash, $rng->generate($privateKey->getPoint()->getOrder()));
+        $signature = $signer->sign($inflatedPrivateKey, $hash, $rng->generate($inflatedPrivateKey->getPoint()->getOrder()));
 
         return $signature->getR() . self::$SIGNATURE_GLUE . $signature->getS();
     }
 
     /**
      * @param string $content
-     * @param string $publicKey
+     * @param Binary $publicKey
      * @param string $signature
      * @return bool
      * @throws \Exception
      */
-    public function verify($content, $publicKey, $signature) {
+    public function verify($content, Binary $publicKey, $signature) {
         if (!strpos($signature, self::$SIGNATURE_GLUE)) {
             throw new \Exception('Invalid signature.');
         }
@@ -83,12 +83,12 @@ class EccKeyService implements KeyService {
         $math = MathAdapterFactory::getAdapter();
 
         $serializer = new DerPublicKeySerializer($math);
-        $publicKey = $this->deserialize($publicKey, $serializer);
+        $inflatedPublicKey = $this->deserialize($publicKey->getData(), $serializer);
 
         $hash = $this->hash($content);
 
         $signer = new Signer($math);
-        return $signer->verify($publicKey, new Signature($r, $s), $hash);
+        return $signer->verify($inflatedPublicKey, new Signature($r, $s), $hash);
     }
 
     private function deserializePrivate($privateKey, MathAdapterInterface $math) {

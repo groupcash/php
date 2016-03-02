@@ -2,6 +2,7 @@
 namespace spec\groupcash\php\io;
 
 use groupcash\php\io\transformers\CoinTransformer;
+use groupcash\php\key\Binary;
 use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Confirmation;
@@ -36,28 +37,28 @@ class TransformCoinSpec {
             new Transaction(
                 [new Input(
                     new Base(
-                        new Promise('coin', 'My Promise'),
-                        new Output('the backer', new Fraction(1)),
-                        'the issuer', 'el issuero'
+                        new Promise(new Binary('coin'), 'My Promise'),
+                        new Output(new Binary('the backer'), new Fraction(1)),
+                        new Binary('the issuer'), 'el issuero'
                     ),
                     0
                 ), new Input(
                     new Confirmation(
                         [
                             new Base(
-                                new Promise('foo', 'Her Promise'),
-                                new Output('the backress', new Fraction(1)),
-                                'the issuress', 'la issuera'
+                                new Promise(new Binary('foo'), 'Her Promise'),
+                                new Output(new Binary('the backress'), new Fraction(1)),
+                                new Binary('the issuress'), 'la issuera'
                             )
                         ],
-                        new Output('apu', new Fraction(42)),
+                        new Output(new Binary('apu'), new Fraction(42)),
                         'my print',
                         'la lisa'),
                     0
                 )],
                 [
-                    new Output('homer', new Fraction(3, 13)),
-                    new Output('marge', new Fraction(0, 7)),
+                    new Output(new Binary('homer'), new Fraction(3, 13)),
+                    new Output(new Binary('marge'), new Fraction(0, 7)),
                 ],
                 'el barto'
             ),
@@ -66,7 +67,6 @@ class TransformCoinSpec {
 
         $array = $this->transformer->toArray($coin);
 
-        $this->assert->equals($this->transformer->toObject($array), $coin);
         $this->assert->equals($array, [
             'v' => $coin->version(),
             'coin' => [
@@ -128,5 +128,6 @@ class TransformCoinSpec {
                 ]
             ]
         ]);
+        $this->assert->equals($this->transformer->toObject($array), $coin);
     }
 }

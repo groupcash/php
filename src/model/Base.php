@@ -1,5 +1,6 @@
 <?php
 namespace groupcash\php\model;
+use groupcash\php\key\Binary;
 
 /**
  * The first Transaction of a Coin.
@@ -11,16 +12,16 @@ class Base extends Transaction {
     /** @var Promise */
     private $promise;
 
-    /** @var string */
+    /** @var Binary */
     private $issuerAddress;
 
     /**
      * @param Promise $promise
      * @param Output $output
      * @param string $signature
-     * @param string $issuerAddress
+     * @param Binary $issuerAddress
      */
-    public function __construct(Promise $promise, Output $output, $issuerAddress, $signature) {
+    public function __construct(Promise $promise, Output $output, Binary $issuerAddress, $signature) {
         parent::__construct([], [$output], $signature);
         $this->promise = $promise;
         $this->issuerAddress = $issuerAddress;
@@ -58,7 +59,7 @@ class Base extends Transaction {
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getIssuerAddress() {
         return $this->issuerAddress;

@@ -4,28 +4,28 @@ namespace groupcash\php\key;
 interface KeyService {
 
     /**
-     * @return string
+     * @return Binary
      */
     public function generatePrivateKey();
 
     /**
-     * @param string $privateKey
-     * @return string
+     * @param Binary $privateKey
+     * @return Binary
      */
-    public function publicKey($privateKey);
+    public function publicKey(Binary $privateKey);
 
     /**
      * @param string $content
-     * @param string $privateKey
+     * @param Binary $privateKey
      * @return string
      */
-    public function sign($content, $privateKey);
+    public function sign($content, Binary$privateKey);
 
     /**
      * @param string $content
-     * @param string $publicKey
+     * @param Binary $publicKey
      * @param string $signature
      * @return bool
      */
-    public function verify($content, $publicKey, $signature);
+    public function verify($content, Binary $publicKey, $signature);
 }

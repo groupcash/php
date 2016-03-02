@@ -8,41 +8,41 @@ class FakeKeyService implements KeyService {
     public $nextKey;
 
     /**
-     * @return string
+     * @return Binary
      */
     public function generatePrivateKey() {
         $key = $this->nextKey ?: 'fake';
         $this->nextKey = null;
-        return $key . ' key';
+        return new Binary($key . ' key');
     }
 
     /**
-     * @param string $privateKey
-     * @return string
+     * @param Binary $privateKey
+     * @return Binary
      */
-    public function publicKey($privateKey) {
-        return str_replace(' key', '', $privateKey);
+    public function publicKey(Binary $privateKey) {
+        return new Binary(str_replace(' key', '', $privateKey->getData()));
     }
 
     /**
      * @param string $content
-     * @param string $privateKey
+     * @param Binary $privateKey
      * @return string
      */
-    public function sign($content, $privateKey) {
-        $sign = $this->nextSign ?: "$content signed with $privateKey";
+    public function sign($content, Binary $privateKey) {
+        $sign = $this->nextSign ?: "$content signed with {$privateKey->getData()}";
         $this->nextSign = null;
         return $sign;
     }
 
     /**
      * @param string $content
-     * @param string $publicKey
+     * @param Binary $publicKey
      * @param string $signature
      * @return bool
      */
-    public function verify($content, $publicKey, $signature) {
-        $signed = $this->sign($content, $publicKey . ' key');
+    public function verify($content, Binary $publicKey, $signature) {
+        $signed = $this->sign($content, new Binary($publicKey->getData() . ' key'));
         return $signed == $signature;
     }
 }

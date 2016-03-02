@@ -2,6 +2,7 @@
 namespace spec\groupcash\php;
 
 use groupcash\php\Groupcash;
+use groupcash\php\key\Binary;
 use groupcash\php\key\FakeKeyService;
 use rtens\scrut\Assert;
 
@@ -20,10 +21,10 @@ class GenerateKeySpec {
 
     function generate() {
         $key = $this->lib->generateKey();
-        $this->assert->equals($key, 'fake key');
+        $this->assert->equals($key, new Binary('fake key'));
     }
 
     function getAddress() {
-        $this->assert->equals($this->lib->getAddress('my key'), 'my');
+        $this->assert->equals($this->lib->getAddress(new Binary('my key')), new Binary('my'));
     }
 }

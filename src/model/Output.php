@@ -1,5 +1,6 @@
 <?php
 namespace groupcash\php\model;
+use groupcash\php\key\Binary;
 
 /**
  * An Output specifies how much of a Transaction is transferred to a specific target.
@@ -8,23 +9,23 @@ namespace groupcash\php\model;
  */
 class Output implements Finger {
 
-    /** @var string */
+    /** @var Binary */
     private $target;
 
     /** @var Fraction */
     private $value;
 
     /**
-     * @param string $target
+     * @param Binary $target
      * @param Fraction $value
      */
-    public function __construct($target, Fraction $value) {
+    public function __construct(Binary $target, Fraction $value) {
         $this->target = $target;
         $this->value = $value;
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getTarget() {
         return $this->target;

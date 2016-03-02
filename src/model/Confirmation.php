@@ -1,6 +1,8 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\key\Binary;
+
 class Confirmation extends Transaction {
 
     /** @var string */
@@ -94,7 +96,7 @@ class Confirmation extends Transaction {
 
         return [
             $output,
-            new Output(null, $sum->minus($output->getValue()))
+            new Output(new Binary(null), $sum->minus($output->getValue()))
         ];
     }
 }

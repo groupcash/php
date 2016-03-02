@@ -1,6 +1,7 @@
 <?php
 namespace spec\groupcash\php\io;
 
+use groupcash\php\key\Binary;
 use groupcash\php\key\EccKeyService;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
@@ -21,28 +22,28 @@ class EccSignatureSpec {
 
     function publicKeyOfInvalidPrivateKey() {
         $this->try->tryTo(function () {
-            $this->ecc->publicKey('invalid');
+            $this->ecc->publicKey(new Binary('invalid'));
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid key.');
     }
 
     function signWithInvalidPrivateKey() {
         $this->try->tryTo(function () {
-            $this->ecc->sign('foo', 'invalid');
+            $this->ecc->sign('foo', new Binary('invalid'));
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid key.');
     }
 
     function verifyWithInvalidSignature() {
         $this->try->tryTo(function () {
-            $this->ecc->verify('foo', 'invalid', 'bar');
+            $this->ecc->verify('foo', new Binary('invalid'), 'bar');
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid signature.');
     }
 
     function verifyWithInvalidPublicKey() {
         $this->try->tryTo(function () {
-            $this->ecc->verify('foo', 'invalid', 'foo#bar');
+            $this->ecc->verify('foo', new Binary('invalid'), 'foo#bar');
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid key.');
     }

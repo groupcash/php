@@ -1,6 +1,7 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\key\Binary;
 use groupcash\php\key\KeyService;
 
 class Signer {
@@ -8,14 +9,14 @@ class Signer {
     /** @var KeyService */
     private $service;
 
-    /** @var string */
+    /** @var Binary */
     private $key;
 
     /**
      * @param KeyService $service
-     * @param string $key
+     * @param Binary $key
      */
-    public function __construct(KeyService $service, $key) {
+    public function __construct(KeyService $service, Binary $key) {
         $this->key = $key;
         $this->service = $service;
     }
@@ -29,7 +30,7 @@ class Signer {
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getAddress() {
         return $this->service->publicKey($this->key);
