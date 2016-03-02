@@ -1,7 +1,6 @@
 <?php
 namespace groupcash\php\key;
 
-use groupcash\php\KeyService;
 use Mdanter\Ecc\Crypto\Key\PrivateKeyInterface;
 use Mdanter\Ecc\Crypto\Key\PublicKeyInterface;
 use Mdanter\Ecc\Crypto\Signature\Signature;

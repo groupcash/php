@@ -1,5 +1,5 @@
 <?php
-namespace groupcash\php;
+namespace groupcash\php\key;
 
 interface KeyService {
 

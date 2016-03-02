@@ -1,7 +1,7 @@
 <?php
 namespace groupcash\php\model;
 
-use groupcash\php\KeyService;
+use groupcash\php\key\KeyService;
 
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.

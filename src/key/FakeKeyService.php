@@ -1,8 +1,6 @@
 <?php
 namespace groupcash\php\key;
 
-use groupcash\php\KeyService;
-
 class FakeKeyService implements KeyService {
 
     public $nextSign;
