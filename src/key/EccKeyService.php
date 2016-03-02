@@ -29,7 +29,7 @@ class EccKeyService implements KeyService {
         $serializer = new DerPrivateKeySerializer();
         $serialized = $serializer->serialize($key);
 
-        return base64_encode($serialized);
+        return $serialized;
     }
 
     /**
@@ -45,7 +45,7 @@ class EccKeyService implements KeyService {
         $publicSerializer = new DerPublicKeySerializer();
         $serialized = $publicSerializer->serialize($publicKey);
 
-        return base64_encode($serialized);
+        return $serialized;
     }
 
     /**
@@ -59,8 +59,7 @@ class EccKeyService implements KeyService {
 
         $rng = RandomGeneratorFactory::getRandomGenerator();
 
-        $messages = new MessageFactory($math);
-        $hash = $messages->plaintext($content, 'sha256')->getHash();
+        $hash = $this->hash($content);
 
         $signer = new Signer($math);
         $signature = $signer->sign($privateKey, $hash, $rng->generate($privateKey->getPoint()->getOrder()));
@@ -86,8 +85,7 @@ class EccKeyService implements KeyService {
         $serializer = new DerPublicKeySerializer($math);
         $publicKey = $this->deserialize($publicKey, $serializer);
 
-        $messages = new MessageFactory($math);
-        $hash = $messages->plaintext($content, 'sha256')->getHash();
+        $hash = $this->hash($content);
 
         $signer = new Signer($math);
         return $signer->verify($publicKey, new Signature($r, $s), $hash);
@@ -106,9 +104,18 @@ class EccKeyService implements KeyService {
      */
     private function deserialize($key, $serializer) {
         try {
-            return $serializer->parse(base64_decode($key));
+            return $serializer->parse($key);
         } catch (\Exception $e) {
             throw new \Exception('Invalid key.');
         }
+    }
+
+    /**
+     * @param $content
+     * @return int|string
+     */
+    private function hash($content) {
+        $messages = new MessageFactory(MathAdapterFactory::getAdapter());
+        return $messages->plaintext($content, 'sha256')->getHash();
     }
 }

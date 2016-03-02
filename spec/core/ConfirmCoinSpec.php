@@ -45,10 +45,10 @@ class ConfirmCoinSpec {
         $confirmation = $confirmed->getInput()->getTransaction();
         $this->assert->isInstanceOf($confirmation, Confirmation::class);
         $this->assert->equals($confirmation->getInputs(), [new Input($base->getInput()->getTransaction(), 0)]);
-        $this->assert->equals($confirmation->getHash(), hash('sha256', 'coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1'));
+        $this->assert->equals($confirmation->getHash(),  Confirmation::hash('coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1'));
         $this->assert->equals($confirmation->getSignature(),
             'coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . 'bart' . "\0" . '1|1' . "\0" .
-            hash('sha256', 'coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1') .
+            Confirmation::hash('coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1') .
             ' signed with bart key');
     }
 
@@ -64,7 +64,7 @@ class ConfirmCoinSpec {
         /** @var Confirmation $confirmation */
         $confirmation = $confirmed->getInput()->getTransaction();
         $this->assert->isInstanceOf($confirmation, Confirmation::class);
-        $this->assert->equals($confirmation->getHash(), hash('sha256', 'coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1'));
+        $this->assert->equals($confirmation->getHash(), Confirmation::hash('coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1'));
     }
 
     function chain() {
