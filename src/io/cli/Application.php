@@ -4,6 +4,7 @@ namespace groupcash\php\io\cli;
 use groupcash\php\Groupcash;
 use groupcash\php\io\Serializer;
 use groupcash\php\io\transcoders\Base64Transcoder;
+use groupcash\php\io\transcoders\HexadecimalTranscoder;
 use groupcash\php\io\transcoders\JsonTranscoder;
 use groupcash\php\io\transcoders\MsgPackTranscoder;
 use groupcash\php\io\transformers\AuthorizationTransformer;
@@ -30,6 +31,7 @@ class Application {
         if (MsgPackTranscoder::isAvailable()) {
             $this->serializer
                 ->registerTranscoder('msgpack64', new Base64Transcoder(new MsgPackTranscoder()))
+                ->registerTranscoder('msgpack16', new HexadecimalTranscoder(new MsgPackTranscoder()))
                 ->registerTranscoder('msgpack', new MsgPackTranscoder());
         }
 
