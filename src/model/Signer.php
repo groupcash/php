@@ -25,9 +25,7 @@ class Signer {
      * @return string
      */
     public function sign($content) {
-        $fingerprint = self::squash($content);
-        $hash = $this->service->hash($fingerprint);
-        return $this->service->sign($hash, $this->key);
+        return $this->service->sign(self::squash($content), $this->key);
     }
 
     /**

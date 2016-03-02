@@ -24,11 +24,13 @@ class Confirmation extends Transaction {
     /**
      * @param Base[] $bases
      * @param Output $output
-     * @param string $hash
+     * @param Transaction $confirmed
      * @param Signer $signer
      * @return Confirmation
      */
-    public static function signedConfirmation($bases, Output $output, $hash, Signer $signer) {
+    public static function signedConfirmation($bases, Output $output, Transaction $confirmed, Signer $signer) {
+        $hash = hash('sha256', Signer::squash($confirmed));
+
         return new Confirmation($bases, $output, $hash,
             $signer->sign([$bases, $output, $hash]));
     }

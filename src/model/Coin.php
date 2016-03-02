@@ -1,8 +1,6 @@
 <?php
 namespace groupcash\php\model;
 
-use groupcash\php\key\KeyService;
-
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.
  */
@@ -79,11 +77,10 @@ class Coin {
     /**
      * @param string $backer
      * @param Signer $signer
-     * @param KeyService $service
      * @return Coin
      * @throws \Exception
      */
-    public function confirm($backer, Signer $signer, KeyService $service) {
+    public function confirm($backer, Signer $signer) {
         $allBases = $this->getBases();
         $myBases = array_values(array_filter($allBases, function (Base $base) use ($backer) {
             return $base->getOutput()->getTarget() == $backer;
@@ -100,9 +97,8 @@ class Coin {
                 ->dividedBy($this->baseSum($allBases))
         );
 
-        $hash = $service->hash(Signer::squash($this->input->getTransaction()));
-
-        return new Coin(new Input(Confirmation::signedConfirmation($myBases, $output, $hash, $signer), 0));
+        $confirmed = $this->input->getTransaction();
+        return new Coin(new Input(Confirmation::signedConfirmation($myBases, $output, $confirmed, $signer), 0));
     }
 
     private function baseSum($bases) {

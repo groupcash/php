@@ -81,7 +81,7 @@ class Groupcash {
      */
     public function confirmCoin($backerKey, Coin $coin) {
         $backer = $this->key->publicKey($backerKey);
-        $confirmed = $coin->confirm($backer, new Signer($this->key, $backerKey), $this->key);
+        $confirmed = $coin->confirm($backer, new Signer($this->key, $backerKey));
 
         (new Verification($this->key))->verify($confirmed)->mustBeOk();
         return $confirmed;

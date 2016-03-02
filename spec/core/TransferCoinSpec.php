@@ -149,7 +149,7 @@ class TransferCoinSpec {
         $this->assert->equals($inputTx->getInputs(), [$base->getInput()]);
         $this->assert->equals($inputTx->getOutputs(), [new Output('lisa', new Fraction(1))]);
         $this->assert->equals($inputTx->getSignature(),
-            '#(c' . "\0" . 'p' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1)' .
+            'c' . "\0" . 'p' . "\0" . 'bart' . "\0" . '1|1' . "\0" . '0' . "\0" . 'lisa' . "\0" . '1|1' .
             ' signed with bart key');
     }
 

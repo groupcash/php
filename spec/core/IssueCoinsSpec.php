@@ -34,7 +34,7 @@ class IssueCoinsSpec {
         $this->assert->equals($base->getOutputs(), [new Output('backer', new Fraction(42))]);
         $this->assert->equals($base->getIssuerAddress(), 'issuer');
         $this->assert->equals($base->getSignature(),
-            '#(foo' . "\0" . 'my promise' . "\0" . 'backer' . "\0" . '42|1)' .
+            'foo' . "\0" . 'my promise' . "\0" . 'backer' . "\0" . '42|1' .
             ' signed with issuer key');
     }
 }

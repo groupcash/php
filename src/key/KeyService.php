@@ -28,10 +28,4 @@ interface KeyService {
      * @return bool
      */
     public function verify($content, $publicKey, $signature);
-
-    /**
-     * @param string $content
-     * @return string
-     */
-    public function hash($content);
 }

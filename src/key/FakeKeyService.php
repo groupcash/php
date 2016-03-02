@@ -45,12 +45,4 @@ class FakeKeyService implements KeyService {
         $signed = $this->sign($content, $publicKey . ' key');
         return $signed == $signature;
     }
-
-    /**
-     * @param string $content
-     * @return string
-     */
-    public function hash($content) {
-        return "#($content)";
-    }
 }

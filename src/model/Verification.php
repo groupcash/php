@@ -69,8 +69,7 @@ class Verification {
         });
 
         foreach ($authorizedByCurrency as $authorization) {
-            $hash = $this->key->hash(Signer::squash($authorization));
-            if (!$this->key->verify($hash, $currency, $authorization->getSignature())) {
+            if (!$this->key->verify(Signer::squash($authorization), $currency, $authorization->getSignature())) {
                 $this->errors[] = "Invalid authorization: [{$authorization->getPrint()}]";
             }
         }
@@ -182,8 +181,7 @@ class Verification {
     private function verifySignature(Transaction $transaction) {
         $owner = $transaction->getInputs()[0]->getOutput()->getTarget();
 
-        $hash = $this->key->hash(Signer::squash($transaction));
-        if (!$this->key->verify($hash, $owner, $transaction->getSignature())) {
+        if (!$this->key->verify(Signer::squash($transaction), $owner, $transaction->getSignature())) {
             $this->errors[] = "Not signed by owner [{$owner}]";
         }
     }
@@ -191,8 +189,7 @@ class Verification {
     private function verifyBaseSignature(Base $transaction) {
         $issuer = $transaction->getIssuerAddress();
 
-        $hash = $this->key->hash(Signer::squash($transaction));
-        if (!$this->key->verify($hash, $issuer, $transaction->getSignature())) {
+        if (!$this->key->verify(Signer::squash($transaction), $issuer, $transaction->getSignature())) {
             $this->errors[] = "Invalid signature by [{$issuer}]";
         }
     }
