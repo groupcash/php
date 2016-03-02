@@ -1,6 +1,7 @@
 <?php
 namespace groupcash\php\io\transformers;
 
+use groupcash\php\io\Transcoder;
 use groupcash\php\io\Transformer;
 
 class CallbackTransformer implements Transformer {
@@ -53,10 +54,11 @@ class CallbackTransformer implements Transformer {
 
     /**
      * @param object $object
+     * @param Transcoder $transcoder
      * @return array
      */
-    public function toArray($object) {
-        return call_user_func($this->toArray, $object);
+    public function toArray($object, Transcoder $transcoder) {
+        return call_user_func($this->toArray, $object, $transcoder);
     }
 
     /**
@@ -69,9 +71,10 @@ class CallbackTransformer implements Transformer {
 
     /**
      * @param array $array
+     * @param Transcoder $transcoder
      * @return object
      */
-    public function toObject($array) {
-        return call_user_func($this->toObject, $array);
+    public function toObject($array, Transcoder $transcoder) {
+        return call_user_func($this->toObject, $array, $transcoder);
     }
 }

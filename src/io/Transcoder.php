@@ -20,4 +20,9 @@ interface Transcoder {
      * @return mixed
      */
     public function decode($encoded);
+
+    /**
+     * @return Transcoder
+     */
+    public function getBinaryTranscoder();
 }

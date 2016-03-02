@@ -5,6 +5,8 @@ use groupcash\php\io\Transcoder;
 
 class Base64Transcoder implements Transcoder {
 
+    const MARKER = '@';
+
     /** @var Transcoder */
     private $inner;
 
@@ -17,7 +19,7 @@ class Base64Transcoder implements Transcoder {
      * @return string
      */
     public function encode($input) {
-        return base64_encode($this->inner->encode($input));
+        return self::MARKER . base64_encode($this->inner->encode($input));
     }
 
     /**
@@ -25,7 +27,7 @@ class Base64Transcoder implements Transcoder {
      * @return bool
      */
     public function hasEncoded($encoded) {
-        return $this->inner->hasEncoded(base64_decode($encoded));
+        return substr($encoded, 0, 1) == self::MARKER && $this->inner->hasEncoded(base64_decode(substr($encoded, 1)));
     }
 
     /**
@@ -34,5 +36,12 @@ class Base64Transcoder implements Transcoder {
      */
     public function decode($encoded) {
         return $this->inner->decode(base64_decode($encoded));
+    }
+
+    /**
+     * @return Transcoder
+     */
+    public function getBinaryTranscoder() {
+        return $this->inner->getBinaryTranscoder();
     }
 }

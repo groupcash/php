@@ -4,6 +4,7 @@ namespace groupcash\php\io\cli;
 use groupcash\php\Groupcash;
 use groupcash\php\io\Serializer;
 use groupcash\php\io\transcoders\Base64Transcoder;
+use groupcash\php\io\transcoders\NoneTranscoder;
 use groupcash\php\io\transcoders\HexadecimalTranscoder;
 use groupcash\php\io\transcoders\JsonTranscoder;
 use groupcash\php\io\transcoders\MsgPackTranscoder;
@@ -36,8 +37,8 @@ class Application {
         }
 
         $this->serializer
-            ->registerTranscoder('json64', new Base64Transcoder(new JsonTranscoder()))
-            ->registerTranscoder('json', new JsonTranscoder());
+            ->registerTranscoder('json', new JsonTranscoder())
+            ->registerTranscoder('hexJson', new JsonTranscoder(new HexadecimalTranscoder(new NoneTranscoder())));
     }
 
     public function run() {
@@ -54,6 +55,14 @@ class Application {
         $app->fields->add(new FractionField());
         $app->renderers->add(new SerializingRenderer($this->serializer, $console));
         $app->renderers->add(new ArrayRenderer($app->renderers));
+
+        $transcoders = [
+            'base64' => new Base64Transcoder(new NoneTranscoder()),
+            'hex' => new HexadecimalTranscoder(new NoneTranscoder()),
+            'none' => new NoneTranscoder(),
+        ];
+        $app->fields->add(new BinaryField($transcoders));
+        $app->renderers->add(new BinaryRenderer($console, $transcoders));
 
         $this->addLibraryActions($app);
         $this->addDecodeAction($app);

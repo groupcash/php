@@ -45,4 +45,11 @@ class MsgPackTranscoder implements Transcoder {
         }
         throw new \Exception('msgpack not installed');
     }
+
+    /**
+     * @return Transcoder
+     */
+    public function getBinaryTranscoder() {
+        return new NoneTranscoder();
+    }
 }

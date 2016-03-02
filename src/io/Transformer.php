@@ -11,9 +11,10 @@ interface Transformer {
 
     /**
      * @param object $object
+     * @param Transcoder $transcoder
      * @return array
      */
-    public function toArray($object);
+    public function toArray($object, Transcoder $transcoder);
 
     /**
      * @param array $array
@@ -23,7 +24,8 @@ interface Transformer {
 
     /**
      * @param array $array
+     * @param Transcoder $transcoder
      * @return object
      */
-    public function toObject($array);
+    public function toObject($array, Transcoder $transcoder);
 }

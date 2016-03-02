@@ -54,4 +54,11 @@ class CallbackTranscoder implements Transcoder {
     public function decode($encoded) {
         return call_user_func($this->decode, $encoded);
     }
+
+    /**
+     * @return Transcoder
+     */
+    public function getBinaryTranscoder() {
+        return new NoneTranscoder();
+    }
 }

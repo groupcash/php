@@ -45,14 +45,14 @@ class Serializer {
 
     /**
      * @param object $object
-     * @param null|string $transcoderKey
+     * @param string $transcoderKey
      * @return string
      */
-    public function serialize($object, $transcoderKey = null) {
+    public function serialize($object, $transcoderKey) {
         $transcoder = $this->getTranscoder($transcoderKey);
         $transformer = $this->getTransformerForObject($object);
 
-        return $transcoder->encode($transformer->toArray($object));
+        return $transcoder->encode($transformer->toArray($object, $transcoder->getBinaryTranscoder()));
     }
 
     /**
@@ -63,7 +63,7 @@ class Serializer {
     public function inflate($serialized) {
         $array = $this->decode($serialized);
         $transformer = $this->getTransformerForArray($array);
-        return $transformer->toObject($array);
+        return $transformer->toObject($array, $this->getTranscoderForString($serialized)->getBinaryTranscoder());
     }
 
     /**
@@ -76,14 +76,12 @@ class Serializer {
         return $transcoder->decode($encoded);
     }
 
-    private function getTranscoder($transcoderKey = null) {
-        if (!$transcoderKey && $this->transcoders) {
-            return array_values($this->transcoders)[0];
-        } else if (array_key_exists($transcoderKey, $this->transcoders)) {
-            return $this->transcoders[$transcoderKey];
-        } else {
+    private function getTranscoder($transcoderKey) {
+        if (!array_key_exists($transcoderKey, $this->transcoders)) {
             throw new \Exception("Transcoder not registered: [$transcoderKey]");
         }
+
+        return $this->transcoders[$transcoderKey];
     }
 
     public function getTranscoderKeys() {

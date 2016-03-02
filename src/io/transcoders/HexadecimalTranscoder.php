@@ -27,7 +27,7 @@ class HexadecimalTranscoder implements Transcoder {
      * @return bool
      */
     public function hasEncoded($encoded) {
-        return substr($encoded, 0, 2) == self::MARKER;
+        return substr($encoded, 0, 2) == self::MARKER && $this->inner->hasEncoded(hex2bin(substr($encoded, 2)));
     }
 
     /**
@@ -36,5 +36,12 @@ class HexadecimalTranscoder implements Transcoder {
      */
     public function decode($encoded) {
         return $this->inner->decode(hex2bin(substr($encoded, 2)));
+    }
+
+    /**
+     * @return Transcoder
+     */
+    public function getBinaryTranscoder() {
+        return $this->inner->getBinaryTranscoder();
     }
 }

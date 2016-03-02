@@ -1,6 +1,7 @@
 <?php
 namespace spec\groupcash\php\io;
 
+use groupcash\php\io\transcoders\CallbackTranscoder;
 use groupcash\php\io\transformers\CoinTransformer;
 use groupcash\php\key\Binary;
 use groupcash\php\model\Base;
@@ -65,7 +66,13 @@ class TransformCoinSpec {
             42
         ));
 
-        $array = $this->transformer->toArray($coin);
+        $transcoder = new CallbackTranscoder(function ($data) {
+            return '#' . $data;
+        }, function ($encoded) {
+            return substr($encoded, 1);
+        });
+
+        $array = $this->transformer->toArray($coin, $transcoder);
 
         $this->assert->equals($array, [
             'v' => $coin->version(),
@@ -77,14 +84,14 @@ class TransformCoinSpec {
                             'iout' => 0,
                             'tx' => [
                                 'promise' => [
-                                    'coin',
+                                    '#coin',
                                     'My Promise'
                                 ],
                                 'out' => [
-                                    'to' => 'the backer',
+                                    'to' => '#the backer',
                                     'val' => 1
                                 ],
-                                'by' => 'the issuer',
+                                'by' => '#the issuer',
                                 'sig' => 'el issuero'
                             ]
                         ],
@@ -95,19 +102,19 @@ class TransformCoinSpec {
                                 'bases' => [
                                     [
                                         'promise' => [
-                                            'foo',
+                                            '#foo',
                                             'Her Promise'
                                         ],
                                         'out' => [
-                                            'to' => 'the backress',
+                                            'to' => '#the backress',
                                             'val' => 1
                                         ],
-                                        'by' => 'the issuress',
+                                        'by' => '#the issuress',
                                         'sig' => 'la issuera'
                                     ]
                                 ],
                                 'out' => [
-                                    'to' => 'apu',
+                                    'to' => '#apu',
                                     'val' => 42
                                 ],
                                 'sig' => 'la lisa'
@@ -116,11 +123,11 @@ class TransformCoinSpec {
                     ],
                     'outs' => [
                         [
-                            'to' => 'homer',
+                            'to' => '#homer',
                             'val' => [3, 13]
                         ],
                         [
-                            'to' => 'marge',
+                            'to' => '#marge',
                             'val' => 0
                         ]
                     ],
@@ -128,6 +135,6 @@ class TransformCoinSpec {
                 ]
             ]
         ]);
-        $this->assert->equals($this->transformer->toObject($array), $coin);
+        $this->assert->equals($this->transformer->toObject($array, $transcoder), $coin);
     }
 }

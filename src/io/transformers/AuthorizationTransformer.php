@@ -1,7 +1,9 @@
 <?php
 namespace groupcash\php\io\transformers;
 
+use groupcash\php\io\Transcoder;
 use groupcash\php\io\Transformer;
+use groupcash\php\key\Binary;
 use groupcash\php\model\Authorization;
 
 class AuthorizationTransformer implements Transformer {
@@ -24,24 +26,26 @@ class AuthorizationTransformer implements Transformer {
 
     /**
      * @param array $array
+     * @param Transcoder $transcoder
      * @return Authorization
      */
-    public function toObject($array) {
+    public function toObject($array, Transcoder $transcoder) {
         return new Authorization(
-            $array['issuer'],
-            $array['currency'],
+            new Binary($transcoder->decode($array['issuer'])),
+            new Binary($transcoder->decode($array['currency'])),
             $array['sig']
         );
     }
 
     /**
      * @param Authorization $object
+     * @param Transcoder $transcoder
      * @return array
      */
-    public function toArray($object) {
+    public function toArray($object, Transcoder $transcoder) {
         return [
-            'issuer' => $object->getIssuerAddress(),
-            'currency' => $object->getCurrencyAddress(),
+            'issuer' => $transcoder->encode($object->getIssuerAddress()->getData()),
+            'currency' => $transcoder->encode($object->getCurrencyAddress()->getData()),
             'sig' => $object->getSignature()
         ];
     }

@@ -1,26 +1,26 @@
 <?php
 namespace groupcash\php\io\cli;
 
-use groupcash\php\io\Serializer;
-use groupcash\php\model\Coin;
+use groupcash\php\io\Transcoder;
+use groupcash\php\key\Binary;
 use rtens\domin\delivery\cli\Console;
 use rtens\domin\delivery\Renderer;
 
-class SerializingRenderer implements Renderer {
-
-    /** @var Serializer */
-    private $serializer;
+class BinaryRenderer implements Renderer {
 
     /** @var Console */
     private $console;
 
+    /** @var Transcoder[] */
+    private $transcoders;
+
     /**
-     * @param Serializer $serializer
      * @param Console $console
+     * @param Transcoder[] $transcoders with keys
      */
-    public function __construct($serializer, Console $console) {
-        $this->serializer = $serializer;
+    public function __construct(Console $console, array $transcoders) {
         $this->console = $console;
+        $this->transcoders = $transcoders;
     }
 
     /**
@@ -28,24 +28,22 @@ class SerializingRenderer implements Renderer {
      * @return bool
      */
     public function handles($value) {
-        return $this->serializer->handles($value);
+        return $value instanceof Binary;
     }
 
     /**
-     * @param Coin $value
+     * @param Binary $value
      * @return mixed
-     * @throws \Exception
      */
     public function render($value) {
-        $transcoder = $this->getTranscoderKey();
-        return $this->serializer->serialize($value, $transcoder);
+        return $this->transcoders[$this->getTranscoderKey()]->encode($value->getData());
     }
 
     /**
      * @return string
      */
     private function getTranscoderKey() {
-        $keys = $this->serializer->getTranscoderKeys();
+        $keys = array_keys($this->transcoders);
 
         if ($this->console->getArguments() == ['!']) {
             $this->console->writeLine('Available encodings: ' . implode(', ', $keys));
