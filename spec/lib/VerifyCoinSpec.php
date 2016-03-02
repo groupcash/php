@@ -65,11 +65,11 @@ class VerifyCoinSpec {
     }
 
     function notAuthorized() {
-        $this->assertNotAuthorized('Not authorized: [issuer]', $this->base, []);
+        $this->assertNotAuthorized('Not authorized: [aXNzdWVy]', $this->base, []);
     }
 
     function authorizedForOtherCurrency() {
-        $this->assertNotAuthorized('Not authorized: [issuer]', $this->base, [
+        $this->assertNotAuthorized('Not authorized: [aXNzdWVy]', $this->base, [
             $this->lib->authorizeIssuer(new Binary('foo key'), new Binary('issuer'))
         ]);
     }
@@ -82,13 +82,13 @@ class VerifyCoinSpec {
     }
 
     function invalidAuthorization() {
-        $this->assertNotAuthorized('Invalid authorization: [issuer]', $this->base, [
+        $this->assertNotAuthorized('Invalid authorization: [aXNzdWVy]', $this->base, [
             new Authorization(new Binary('issuer'), new Binary('coin'), 'invalid')
         ]);
     }
 
     function inconsistentCurrencies() {
-        $this->assertFail('Inconsistent currencies: [coin], [not coin]', $this->one, function ($tx) {
+        $this->assertFail('Inconsistent currencies: [Y29pbg==], [bm90IGNvaW4=]', $this->one, function ($tx) {
             $tx->ins[1]->tx->promise[0] = 'not coin';
             $this->replaceSigs(['coin//p2' => 'not coin//p2'], [$tx->ins[1]->tx, $tx]);
         });
@@ -102,14 +102,14 @@ class VerifyCoinSpec {
     }
 
     function differentOwners() {
-        $this->assertFail('Inconsistent owners: [one], [not one]', $this->two, function ($tx) {
+        $this->assertFail('Inconsistent owners: [b25l], [bm90IG9uZQ==]', $this->two, function ($tx) {
             $tx->ins[1]->tx->outs[0]->to = 'not one';
             $this->replaceSigs(['one//10' => 'not one//10'], [$tx->ins[1]->tx, $tx]);
         });
     }
 
     function invalidSignature() {
-        $this->assertFail('Not signed by owner [b]', $this->two, function ($tx) {
+        $this->assertFail('Not signed by owner [Yg==]', $this->two, function ($tx) {
             $tx->ins[1]->tx->sig = 'invalid';
         });
     }
@@ -189,8 +189,8 @@ class VerifyCoinSpec {
 
     function multipleErrors() {
         $this->assertFail(
-            'Not signed by owner [one]; ' .
-            'Not signed by owner [a]; ' .
+            'Not signed by owner [b25l]; ' .
+            'Not signed by owner [YQ==]; ' .
             'Zero output value; ' .
             'Output sum less than input sum; ' .
             'Output already used',

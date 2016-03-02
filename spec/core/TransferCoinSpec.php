@@ -95,7 +95,7 @@ class TransferCoinSpec {
                 new Output(new Binary(''), new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Inconsistent owners: [a], [b]');
+        $this->try->thenTheException_ShouldBeThrown('Inconsistent owners: [YQ==], [Yg==]');
     }
 
     function differentCurrencies() {
@@ -107,7 +107,7 @@ class TransferCoinSpec {
                 new Output(new Binary(''), new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Inconsistent currencies: [a], [b]');
+        $this->try->thenTheException_ShouldBeThrown('Inconsistent currencies: [YQ==], [Yg==]');
     }
 
     function wrongKey() {
@@ -119,7 +119,7 @@ class TransferCoinSpec {
                 new Output(new Binary('b key'), new Fraction(2))
             ]);
         });
-        $this->try->thenTheException_ShouldBeThrown('Not signed by owner [a]');
+        $this->try->thenTheException_ShouldBeThrown('Not signed by owner [YQ==]');
     }
 
     function noOutput() {

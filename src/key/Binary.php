@@ -30,6 +30,6 @@ class Binary implements Finger {
     }
 
     function __toString() {
-        return $this->data ?: '';
+        return base64_encode($this->data);
     }
 }
