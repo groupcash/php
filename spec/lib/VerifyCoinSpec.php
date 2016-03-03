@@ -5,7 +5,7 @@ use groupcash\php\Groupcash;
 use groupcash\php\io\transcoders\NoneTranscoder;
 use groupcash\php\io\transformers\CoinTransformer;
 use groupcash\php\model\signing\Binary;
-use groupcash\php\key\FakeKeyService;
+use groupcash\php\algorithms\FakeAlgorithm;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\value\Fraction;
@@ -25,7 +25,7 @@ use rtens\scrut\Assert;
 class VerifyCoinSpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService());
+        $this->lib = new Groupcash(new FakeAlgorithm());
         $this->base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('backer'), new Fraction(1)));
 
         $this->one = $this->lib->transferCoins(new Binary('backer key'), [

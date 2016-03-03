@@ -3,7 +3,7 @@ namespace spec\groupcash\php\core;
 
 use groupcash\php\Groupcash;
 use groupcash\php\model\signing\Binary;
-use groupcash\php\key\FakeKeyService;
+use groupcash\php\algorithms\FakeAlgorithm;
 use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
@@ -22,7 +22,7 @@ use rtens\scrut\fixtures\ExceptionFixture;
 class TransferCoinSpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService());
+        $this->lib = new Groupcash(new FakeAlgorithm());
     }
 
     function noCoins() {

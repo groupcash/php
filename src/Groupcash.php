@@ -6,18 +6,18 @@ use groupcash\php\model\Coin;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\signing\Binary;
-use groupcash\php\model\signing\KeyService;
+use groupcash\php\model\signing\Algorithm;
 use groupcash\php\model\signing\Signer;
 
 class Groupcash {
 
-    /** @var KeyService */
+    /** @var Algorithm */
     private $key;
 
     /**
-     * @param KeyService $key
+     * @param Algorithm $key
      */
-    public function __construct(KeyService $key) {
+    public function __construct(Algorithm $key) {
         $this->key = $key;
     }
 
@@ -27,7 +27,7 @@ class Groupcash {
      * @return \groupcash\php\model\signing\Binary
      */
     public function generateKey() {
-        return $this->key->generatePrivateKey();
+        return $this->key->generateKey();
     }
 
     /**
@@ -37,7 +37,7 @@ class Groupcash {
      * @return \groupcash\php\model\signing\Binary
      */
     public function getAddress(Binary $key) {
-        return $this->key->publicKey($key);
+        return $this->key->getAddress($key);
     }
 
     /**
@@ -80,7 +80,7 @@ class Groupcash {
      * @throws \Exception
      */
     public function confirmCoin(Binary $backerKey, Coin $coin) {
-        $backer = $this->key->publicKey($backerKey);
+        $backer = $this->key->getAddress($backerKey);
         $confirmed = $coin->confirm($backer, new Signer($this->key, $backerKey));
 
         (new Verification($this->key))->verify($confirmed)->mustBeOk();

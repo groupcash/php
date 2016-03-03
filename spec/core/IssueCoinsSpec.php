@@ -2,7 +2,7 @@
 namespace spec\groupcash\php\core;
 
 use groupcash\php\model\signing\Binary;
-use groupcash\php\key\FakeKeyService;
+use groupcash\php\algorithms\FakeAlgorithm;
 use groupcash\php\Groupcash;
 use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Base;
@@ -19,7 +19,7 @@ use rtens\scrut\Assert;
 class IssueCoinsSpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService());
+        $this->lib = new Groupcash(new FakeAlgorithm());
     }
 
     function singleCoin() {

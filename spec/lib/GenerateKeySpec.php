@@ -3,7 +3,7 @@ namespace spec\groupcash\php;
 
 use groupcash\php\Groupcash;
 use groupcash\php\model\signing\Binary;
-use groupcash\php\key\FakeKeyService;
+use groupcash\php\algorithms\FakeAlgorithm;
 use rtens\scrut\Assert;
 
 /**
@@ -16,7 +16,7 @@ use rtens\scrut\Assert;
 class GenerateKeySpec {
 
     function before() {
-        $this->lib = new Groupcash(new FakeKeyService());
+        $this->lib = new Groupcash(new FakeAlgorithm());
     }
 
     function generate() {

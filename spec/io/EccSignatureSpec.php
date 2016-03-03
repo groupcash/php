@@ -2,14 +2,14 @@
 namespace spec\groupcash\php\io;
 
 use groupcash\php\model\signing\Binary;
-use groupcash\php\key\EccKeyService;
+use groupcash\php\algorithms\EccAlgorithm;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
 
 /**
  * @property Assert assert <-
  * @property ExceptionFixture try <-
- * @property EccKeyService $ecc
+ * @property EccAlgorithm $ecc
  */
 class EccSignatureSpec {
 
@@ -17,12 +17,12 @@ class EccSignatureSpec {
         if (!getenv('WITH_ECC')) {
             $this->assert->incomplete('ECC spec skipped. To enable set WITH_ECC=1');
         }
-        $this->ecc = new EccKeyService();
+        $this->ecc = new EccAlgorithm();
     }
 
     function publicKeyOfInvalidPrivateKey() {
         $this->try->tryTo(function () {
-            $this->ecc->publicKey(new Binary('invalid'));
+            $this->ecc->getAddress(new Binary('invalid'));
         });
         $this->try->thenTheException_ShouldBeThrown('Invalid key.');
     }
@@ -49,23 +49,23 @@ class EccSignatureSpec {
     }
 
     function verifyWithWrongKey() {
-        $key = $this->ecc->generatePrivateKey();
-        $wrong = $this->ecc->generatePrivateKey();
+        $key = $this->ecc->generateKey();
+        $wrong = $this->ecc->generateKey();
 
         $signed = $this->ecc->sign('foo', $key);
-        $this->assert->not($this->ecc->verify('foo', $this->ecc->publicKey($wrong), $signed));
+        $this->assert->not($this->ecc->verify('foo', $this->ecc->getAddress($wrong), $signed));
     }
 
     function verifyWithWrongSignature() {
-        $key = $this->ecc->generatePrivateKey();
+        $key = $this->ecc->generateKey();
 
         $signed = $this->ecc->sign('bar', $key);
-        $this->assert->not($this->ecc->verify('foo', $this->ecc->publicKey($key), $signed));
+        $this->assert->not($this->ecc->verify('foo', $this->ecc->getAddress($key), $signed));
     }
 
     function verifySignature() {
-        $key = $this->ecc->generatePrivateKey();
+        $key = $this->ecc->generateKey();
         $signed = $this->ecc->sign('foo', $key);
-        $this->assert->isTrue($this->ecc->verify('foo', $this->ecc->publicKey($key), $signed));
+        $this->assert->isTrue($this->ecc->verify('foo', $this->ecc->getAddress($key), $signed));
     }
 }
