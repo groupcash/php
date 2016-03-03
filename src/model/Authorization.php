@@ -1,7 +1,9 @@
 <?php
 namespace groupcash\php\model;
 
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
+use groupcash\php\model\signing\Finger;
+use groupcash\php\model\signing\Signer;
 
 class Authorization implements Finger{
 

@@ -2,7 +2,7 @@
 namespace spec\groupcash\php\io;
 
 use groupcash\php\io\FractionParser;
-use groupcash\php\model\Fraction;
+use groupcash\php\model\value\Fraction;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
 

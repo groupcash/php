@@ -1,7 +1,5 @@
 <?php
-namespace groupcash\php\key;
-
-use groupcash\php\model\Finger;
+namespace groupcash\php\model\signing;
 
 class Binary implements Finger {
 

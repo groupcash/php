@@ -1,6 +1,8 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\model\signing\Finger;
+
 /**
  * An Input references one Output of another Transaction.
  */

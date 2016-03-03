@@ -1,8 +1,5 @@
 <?php
-namespace groupcash\php\model;
-
-use groupcash\php\key\Binary;
-use groupcash\php\key\KeyService;
+namespace groupcash\php\model\signing;
 
 class Signer {
 

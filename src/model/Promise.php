@@ -1,6 +1,8 @@
 <?php
 namespace groupcash\php\model;
-use groupcash\php\key\Binary;
+
+use groupcash\php\model\signing\Binary;
+use groupcash\php\model\signing\Finger;
 
 /**
  * A Promise describes the delivery promise of a backer in a certain currency.

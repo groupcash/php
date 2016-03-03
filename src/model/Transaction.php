@@ -1,6 +1,9 @@
 <?php
 namespace groupcash\php\model;
 
+use groupcash\php\model\signing\Finger;
+use groupcash\php\model\signing\Signer;
+
 /**
  * A Transaction distributes its Inputs to its Outputs, signed by the target of its inputs.
  */

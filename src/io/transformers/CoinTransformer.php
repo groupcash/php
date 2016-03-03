@@ -3,10 +3,10 @@ namespace groupcash\php\io\transformers;
 
 use groupcash\php\io\Transcoder;
 use groupcash\php\io\Transformer;
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Confirmation;
-use groupcash\php\model\Fraction;
+use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Base;
 use groupcash\php\model\Output;

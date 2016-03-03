@@ -1,7 +1,7 @@
 <?php
 namespace groupcash\php\io;
 
-use groupcash\php\model\Fraction;
+use groupcash\php\model\value\Fraction;
 
 class FractionParser {
 

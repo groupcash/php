@@ -3,7 +3,7 @@ namespace spec\groupcash\php\io;
 
 use groupcash\php\io\transcoders\CallbackTranscoder;
 use groupcash\php\io\transformers\AuthorizationTransformer;
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\model\Authorization;
 use rtens\scrut\Assert;
 

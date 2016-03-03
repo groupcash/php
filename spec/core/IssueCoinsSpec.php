@@ -1,10 +1,10 @@
 <?php
 namespace spec\groupcash\php\core;
 
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\key\FakeKeyService;
 use groupcash\php\Groupcash;
-use groupcash\php\model\Fraction;
+use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Base;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;

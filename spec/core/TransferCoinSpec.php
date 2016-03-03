@@ -2,9 +2,9 @@
 namespace spec\groupcash\php\core;
 
 use groupcash\php\Groupcash;
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\key\FakeKeyService;
-use groupcash\php\model\Fraction;
+use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use rtens\scrut\Assert;

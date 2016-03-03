@@ -3,11 +3,11 @@ namespace spec\groupcash\php\io;
 
 use groupcash\php\io\transcoders\CallbackTranscoder;
 use groupcash\php\io\transformers\CoinTransformer;
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Confirmation;
-use groupcash\php\model\Fraction;
+use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;

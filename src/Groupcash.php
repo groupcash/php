@@ -1,14 +1,13 @@
 <?php
 namespace groupcash\php;
 
-use groupcash\php\key\Binary;
-use groupcash\php\key\KeyService;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
-use groupcash\php\model\Signer;
-use groupcash\php\model\Verification;
+use groupcash\php\model\signing\Binary;
+use groupcash\php\model\signing\KeyService;
+use groupcash\php\model\signing\Signer;
 
 class Groupcash {
 
@@ -25,7 +24,7 @@ class Groupcash {
     /**
      * Generates a new private key.
      *
-     * @return Binary
+     * @return \groupcash\php\model\signing\Binary
      */
     public function generateKey() {
         return $this->key->generatePrivateKey();
@@ -35,7 +34,7 @@ class Groupcash {
      * Displays the public key corresponding to the given private key.
      *
      * @param Binary $key
-     * @return Binary
+     * @return \groupcash\php\model\signing\Binary
      */
     public function getAddress(Binary $key) {
         return $this->key->publicKey($key);
@@ -44,7 +43,7 @@ class Groupcash {
     /**
      * Creates a new coin based on a delivery promise.
      *
-     * @param Binary $issuerKey
+     * @param \groupcash\php\model\signing\Binary $issuerKey
      * @param Promise $promise
      * @param Output $output
      * @return Coin
@@ -56,10 +55,10 @@ class Groupcash {
     /**
      * Transfers the values of one or more coins to one or more targets.
      *
-     * @param Binary $ownerKey
+     * @param \groupcash\php\model\signing\Binary $ownerKey
      * @param Coin[] $coins
      * @param Output[] $outputs
-     * @return model\Coin[]
+     * @return \groupcash\php\model\Coin[]
      * @throws \Exception
      */
     public function transferCoins(Binary $ownerKey, array $coins, array $outputs) {
@@ -75,7 +74,7 @@ class Groupcash {
     /**
      * Creates a new coin with a value proportional to the bases of the backer.
      *
-     * @param Binary $backerKey
+     * @param \groupcash\php\model\signing\Binary $backerKey
      * @param Coin $coin
      * @return Coin
      * @throws \Exception
@@ -91,8 +90,8 @@ class Groupcash {
     /**
      * Signs an Authorization for the given issuer with the currency's key
      *
-     * @param Binary $currencyKey
-     * @param Binary $issuerAddress
+     * @param \groupcash\php\model\signing\Binary $currencyKey
+     * @param \groupcash\php\model\signing\Binary $issuerAddress
      * @return Authorization
      */
     public function authorizeIssuer(Binary $currencyKey, Binary $issuerAddress) {

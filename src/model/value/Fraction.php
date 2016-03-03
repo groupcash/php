@@ -1,5 +1,6 @@
 <?php
-namespace groupcash\php\model;
+namespace groupcash\php\model\value;
+use groupcash\php\model\signing\Finger;
 
 /**
  * Representation of a numerical value with nominator and denominator.

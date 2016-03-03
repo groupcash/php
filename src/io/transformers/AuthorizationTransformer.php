@@ -3,7 +3,7 @@ namespace groupcash\php\io\transformers;
 
 use groupcash\php\io\Transcoder;
 use groupcash\php\io\Transformer;
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\model\Authorization;
 
 class AuthorizationTransformer implements Transformer {

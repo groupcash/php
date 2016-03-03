@@ -1,5 +1,5 @@
 <?php
-namespace groupcash\php\model;
+namespace groupcash\php\model\signing;
 
 interface Finger {
 

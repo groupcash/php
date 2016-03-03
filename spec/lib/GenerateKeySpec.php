@@ -2,7 +2,7 @@
 namespace spec\groupcash\php;
 
 use groupcash\php\Groupcash;
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\key\FakeKeyService;
 use rtens\scrut\Assert;
 

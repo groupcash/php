@@ -1,7 +1,7 @@
 <?php
 namespace spec\groupcash\php\io;
 
-use groupcash\php\key\Binary;
+use groupcash\php\model\signing\Binary;
 use groupcash\php\key\EccKeyService;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;

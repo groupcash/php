@@ -1,5 +1,5 @@
 <?php
-namespace groupcash\php\key;
+namespace groupcash\php\model\signing;
 
 interface KeyService {
 
@@ -19,7 +19,7 @@ interface KeyService {
      * @param Binary $privateKey
      * @return string
      */
-    public function sign($content, Binary$privateKey);
+    public function sign($content, Binary $privateKey);
 
     /**
      * @param string $content

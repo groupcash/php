@@ -1,6 +1,9 @@
 <?php
 namespace groupcash\php\model;
-use groupcash\php\key\Binary;
+
+use groupcash\php\model\signing\Binary;
+use groupcash\php\model\signing\Finger;
+use groupcash\php\model\value\Fraction;
 
 /**
  * An Output specifies how much of a Transaction is transferred to a specific target.

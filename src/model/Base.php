@@ -1,6 +1,8 @@
 <?php
 namespace groupcash\php\model;
-use groupcash\php\key\Binary;
+
+use groupcash\php\model\signing\Binary;
+use groupcash\php\model\signing\Signer;
 
 /**
  * The first Transaction of a Coin.

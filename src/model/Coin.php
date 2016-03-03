@@ -1,6 +1,9 @@
 <?php
 namespace groupcash\php\model;
-use groupcash\php\key\Binary;
+
+use groupcash\php\model\signing\Binary;
+use groupcash\php\model\signing\Signer;
+use groupcash\php\model\value\Fraction;
 
 /**
  * A Coin is a tree of Transactions with Promises at its leafs.
