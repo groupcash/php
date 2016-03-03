@@ -13,14 +13,12 @@ use groupcash\php\model\Output;
 use groupcash\php\model\Promise;
 use groupcash\php\model\Transaction;
 use rtens\scrut\Assert;
-use rtens\scrut\fixtures\ExceptionFixture;
 
 /**
  * For interoperability, coins are transformed to a standardized structure
  *
  * @property CoinTransformer transformer <-
  * @property Assert assert <-
- * @property ExceptionFixture try <-
  */
 class TransformCoinSpec {
 
@@ -33,7 +31,7 @@ class TransformCoinSpec {
         $this->assert->isTrue($this->transformer->canTransform(Coin::class));
     }
 
-    function complete() {
+    function roundTrip() {
         $coin = new Coin(new Input(
             new Transaction(
                 [new Input(
