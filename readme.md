@@ -2,7 +2,7 @@
 
 Implementation of the [*groupcash* design][design] in PHP with command line interface.
 
-[design]: https://github.com/groupcash/core/blob/master/design.md
+[design]: https://github.com/groupcash/core/blob/master/specifications/design.md
 
 ## Usage
 
