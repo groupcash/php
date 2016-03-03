@@ -1,22 +1,20 @@
 # groupcash PHP [![Build Status](https://travis-ci.org/groupcash/php.png?branch=master)](https://travis-ci.org/groupcash/php)
 
-Implementation of the [*groupcash* design][design] in PHP with command line interface.
+Implementation of the [*groupcash* design][design] in PHP.
 
 [design]: https://github.com/groupcash/core/blob/master/specifications/design.md
 
-## Usage
+## Usag
 
-Download and install the project with [composer]
+To use the library in your own projects, require it with [composer]
 
-    php composer.phar create-project groupcash/php groupcash-php -sdev
+    composer require groupcash/php
+
+For development, download it with [composer] and execute the specification with [scrut]
+
+    composer create-project groupcash/php groupcash-php -sdev
     cd groupcash-php
-
-Execute the specifications to make sure everything works
-
     vendor/bin/scrut
 
-Run the CLI application
-
-    php groupcash.php
-
 [composer]: http://getcomposer.org
+[scrut]: https://github.com/rtens/scrut
