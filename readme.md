@@ -4,7 +4,7 @@ Implementation of the [*groupcash* design][design] in PHP.
 
 [design]: https://github.com/groupcash/core/blob/master/specifications/design.md
 
-## Usag
+## Usage
 
 To use the library in your own projects, require it with [composer]
 
