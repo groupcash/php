@@ -4,7 +4,6 @@ namespace groupcash\php;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
 use groupcash\php\model\signing\Binary;
 use groupcash\php\model\signing\Algorithm;
 use groupcash\php\model\signing\Signer;
@@ -43,13 +42,14 @@ class Groupcash {
     /**
      * Creates a new coin based on a delivery promise.
      *
-     * @param \groupcash\php\model\signing\Binary $issuerKey
-     * @param Promise $promise
+     * @param Binary $issuerKey
+     * @param Binary $currency
+     * @param string $description
      * @param Output $output
      * @return Coin
      */
-    public function issueCoin(Binary $issuerKey, Promise $promise, Output $output) {
-        return Coin::issue($promise, $output, new Signer($this->key, $issuerKey));
+    public function issueCoin(Binary $issuerKey, Binary $currency, $description, Output $output) {
+        return Coin::issue($description, $currency, $output, new Signer($this->key, $issuerKey));
     }
 
     /**

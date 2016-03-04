@@ -5,52 +5,66 @@ use groupcash\php\model\signing\Binary;
 use groupcash\php\model\signing\Signer;
 
 /**
- * The first Transaction of a Coin.
+ * The first Transaction of a Coin defining its backing and currency.
  *
- * A Base is signed by an issuer, has a Promise as its only Input which is transferred to its backer.
+ * The currency, description and a single output with a backer as target is signed by an issuer.
  */
 class Base extends Transaction {
-
-    /** @var Promise */
-    private $promise;
 
     /** @var Binary */
     private $issuerAddress;
 
+    /** @var string */
+    private $description;
+
+    /** @var Binary */
+    private $currency;
+
     /**
-     * @param Promise $promise
+     * @param Binary $currency
+     * @param string $description
      * @param Output $output
-     * @param string $signature
      * @param Binary $issuerAddress
+     * @param string $signature
      */
-    public function __construct(Promise $promise, Output $output, Binary $issuerAddress, $signature) {
+    public function __construct(Binary $currency, $description, Output $output, Binary $issuerAddress, $signature) {
         parent::__construct([], [$output], $signature);
-        $this->promise = $promise;
+        $this->description = $description;
+        $this->currency = $currency;
         $this->issuerAddress = $issuerAddress;
     }
 
     /**
-     * @param Promise $promise
+     * @param string $description
+     * @param Binary $currency
      * @param Output $output
      * @param Signer $signer
      * @return Base
      */
-    public static function signedBase(Promise $promise, Output $output, Signer $signer) {
-        return new Base($promise, $output, $signer->getAddress(), $signer->sign([$promise, $output]));
+    public static function signedBase($description, Binary $currency, Output $output, Signer $signer) {
+        return new Base($currency, $description, $output, $signer->getAddress(),
+            $signer->sign([$currency, $description, $output]));
     }
 
     /**
      * @return array
      */
     public function getPrint() {
-        return [$this->getPromise(), $this->getOutput()];
+        return [$this->currency, $this->description, $this->getOutput()];
     }
 
     /**
-     * @return Promise
+     * @return string
      */
-    public function getPromise() {
-        return $this->promise;
+    public function getDescription() {
+        return $this->description;
+    }
+
+    /**
+     * @return Binary
+     */
+    public function getCurrency() {
+        return $this->currency;
     }
 
     /**

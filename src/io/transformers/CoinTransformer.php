@@ -10,7 +10,6 @@ use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Base;
 use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
 use groupcash\php\model\Transaction;
 
 class CoinTransformer implements Transformer {
@@ -97,7 +96,7 @@ class CoinTransformer implements Transformer {
     }
 
     private function arrayToTransaction($array, Transcoder $transcoder) {
-        if (array_key_exists('promise', $array)) {
+        if (array_key_exists('that', $array)) {
             return $this->arrayToBase($array, $transcoder);
         } else if (array_key_exists('finger', $array)) {
             return $this->arrayToConfirmation($array, $transcoder);
@@ -116,7 +115,8 @@ class CoinTransformer implements Transformer {
 
     private function BaseToArray(Base $base, Transcoder $transcoder) {
         return [
-            'promise' => $this->PromiseToArray($base->getPromise(), $transcoder),
+            'in' => $transcoder->encode($base->getCurrency()->getData()),
+            'that' => $base->getDescription(),
             'out' => $this->OutputToArray($base->getOutput(), $transcoder),
             'by' => $transcoder->encode($base->getIssuerAddress()->getData()),
             'sig' => $base->getSignature()
@@ -125,7 +125,8 @@ class CoinTransformer implements Transformer {
 
     private function arrayToBase($array, Transcoder $transcoder) {
         return new Base(
-            $this->arrayToPromise($array['promise'], $transcoder),
+            new Binary($transcoder->decode($array['in'])),
+            $array['that'],
             $this->arrayToOutput($array['out'], $transcoder),
             new Binary($transcoder->decode($array['by'])),
             $array['sig']
@@ -151,20 +152,6 @@ class CoinTransformer implements Transformer {
             $this->arrayToOutput($array['out'], $transcoder),
             $array['finger'],
             $array['sig']
-        );
-    }
-
-    private function PromiseToArray(Promise $promise, Transcoder $transcoder) {
-        return [
-            $transcoder->encode($promise->getCurrency()->getData()),
-            $promise->getDescription()
-        ];
-    }
-
-    private function arrayToPromise($array, Transcoder $transcoder) {
-        return new Promise(
-            new Binary($transcoder->decode($array[0])),
-            $array[1]
         );
     }
 

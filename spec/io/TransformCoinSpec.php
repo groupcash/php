@@ -10,7 +10,6 @@ use groupcash\php\model\Confirmation;
 use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
 use groupcash\php\model\Transaction;
 use rtens\scrut\Assert;
 
@@ -36,7 +35,7 @@ class TransformCoinSpec {
             new Transaction(
                 [new Input(
                     new Base(
-                        new Promise(new Binary('coin'), 'My Promise'),
+                        new Binary('coin'), 'My Promise',
                         new Output(new Binary('the backer'), new Fraction(1)),
                         new Binary('the issuer'), 'el issuero'
                     ),
@@ -45,7 +44,7 @@ class TransformCoinSpec {
                     new Confirmation(
                         [
                             new Base(
-                                new Promise(new Binary('foo'), 'Her Promise'),
+                                new Binary('foo'), 'Her Promise',
                                 new Output(new Binary('the backress'), new Fraction(1)),
                                 new Binary('the issuress'), 'la issuera'
                             )
@@ -81,10 +80,8 @@ class TransformCoinSpec {
                         [
                             'iout' => 0,
                             'tx' => [
-                                'promise' => [
-                                    '#coin',
-                                    'My Promise'
-                                ],
+                                'in' => '#coin',
+                                'that' => 'My Promise',
                                 'out' => [
                                     'to' => '#the backer',
                                     'val' => 1
@@ -99,10 +96,8 @@ class TransformCoinSpec {
                                 'finger' => 'my print',
                                 'bases' => [
                                     [
-                                        'promise' => [
-                                            '#foo',
-                                            'Her Promise'
-                                        ],
+                                        'in' => '#foo',
+                                        'that' => 'Her Promise',
                                         'out' => [
                                             'to' => '#the backress',
                                             'val' => 1

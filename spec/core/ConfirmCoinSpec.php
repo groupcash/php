@@ -8,7 +8,6 @@ use groupcash\php\model\Confirmation;
 use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Input;
 use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
 use rtens\scrut\Assert;
 use rtens\scrut\fixtures\ExceptionFixture;
 
@@ -26,7 +25,7 @@ class ConfirmCoinSpec {
     }
 
     function notTheBacker() {
-        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'I promise', new Output(new Binary('bart'), new Fraction(1)));
         $one = $this->lib->transferCoins(new Binary('bart key'), [$base], [new Output(new Binary('lisa'), new Fraction(1))]);
 
         $this->try->tryTo(function () use ($one) {
@@ -36,7 +35,7 @@ class ConfirmCoinSpec {
     }
 
     function base() {
-        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'I promise', new Output(new Binary('bart'), new Fraction(1)));
         $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $base);
 
         $this->assert->equals($confirmed->getOwner(), new Binary('bart'));
@@ -54,7 +53,7 @@ class ConfirmCoinSpec {
     }
 
     function singleTransaction() {
-        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'I promise', new Output(new Binary('bart'), new Fraction(1)));
         $one = $this->lib->transferCoins(new Binary('bart key'), [$base], [new Output(new Binary('lisa'), new Fraction(1))]);
 
         $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $one[0]);
@@ -69,7 +68,7 @@ class ConfirmCoinSpec {
     }
 
     function chain() {
-        $base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('bart'), new Fraction(1)));
+        $base = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'I promise', new Output(new Binary('bart'), new Fraction(1)));
         $one = $this->lib->transferCoins(new Binary('bart key'), [$base], [new Output(new Binary('lisa'), new Fraction(1))]);
         $two = $this->lib->transferCoins(new Binary('lisa key'), $one, [new Output(new Binary('marge'), new Fraction(1))]);
         $three = $this->lib->transferCoins(new Binary('marge key'), $two, [new Output(new Binary('homer'), new Fraction(1))]);
@@ -83,8 +82,8 @@ class ConfirmCoinSpec {
     }
 
     function twoBases() {
-        $one = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'A'), new Output(new Binary('bart'), new Fraction(1)));
-        $two = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'B'), new Output(new Binary('bart'), new Fraction(2)));
+        $one = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'A', new Output(new Binary('bart'), new Fraction(1)));
+        $two = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'B', new Output(new Binary('bart'), new Fraction(2)));
 
         $transferred = $this->lib->transferCoins(new Binary('bart key'), [$one, $two], [new Output(new Binary('lisa'), new Fraction(3))]);
         $confirmed = $this->lib->confirmCoin(new Binary('bart key'), $transferred[0]);
@@ -99,11 +98,11 @@ class ConfirmCoinSpec {
 
     function differentBackers() {
         $bart = [
-            $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'A'), new Output(new Binary('bart'), new Fraction(1))),
-            $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'B'), new Output(new Binary('bart'), new Fraction(2)))
+            $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'A', new Output(new Binary('bart'), new Fraction(1))),
+            $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'B', new Output(new Binary('bart'), new Fraction(2)))
         ];
         $homer = [
-            $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'C'), new Output(new Binary('homer'), new Fraction(5)))
+            $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'C', new Output(new Binary('homer'), new Fraction(5)))
         ];
         $lisa = array_merge(
             $this->lib->transferCoins(new Binary('bart key'), $bart, [new Output(new Binary('lisa'), new Fraction(3))]),
@@ -122,9 +121,9 @@ class ConfirmCoinSpec {
     }
 
     function tree() {
-        $a = $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('c'), 'p'), new Output(new Binary('a'), new Fraction(5)));
-        $b = $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('c'), 'p'), new Output(new Binary('b'), new Fraction(7)));
-        $c = $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('c'), 'p'), new Output(new Binary('c'), new Fraction(8)));
+        $a = $this->lib->issueCoin(new Binary('i key'), new Binary('c'), 'p', new Output(new Binary('a'), new Fraction(5)));
+        $b = $this->lib->issueCoin(new Binary('i key'), new Binary('c'), 'p', new Output(new Binary('b'), new Fraction(7)));
+        $c = $this->lib->issueCoin(new Binary('i key'), new Binary('c'), 'p', new Output(new Binary('c'), new Fraction(8)));
 
         $d = [
             $this->lib->transferCoins(new Binary('a key'), [$a], [

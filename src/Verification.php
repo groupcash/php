@@ -68,7 +68,7 @@ class Verification {
      */
     public function verifyAuthorizations(Coin $coin, $authorizations) {
         $bases = $coin->getBases();
-        $currency = $bases[0]->getPromise()->getCurrency();
+        $currency = $bases[0]->getCurrency();
 
         /** @var Authorization[] $authorizedByCurrency */
         $authorizedByCurrency = array_filter($authorizations, function (Authorization $authorization) use ($currency) {
@@ -125,7 +125,7 @@ class Verification {
 
     private function consistentCurrencies(Coin $coin) {
         $currencies = array_unique(array_map(function (Base $base) {
-            return $base->getPromise()->getCurrency();
+            return $base->getCurrency();
         }, $coin->getBases()));
 
         if (count($currencies) > 1) {

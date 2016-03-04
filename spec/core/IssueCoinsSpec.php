@@ -7,7 +7,6 @@ use groupcash\php\Groupcash;
 use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Base;
 use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
 use rtens\scrut\Assert;
 
 /**
@@ -23,13 +22,14 @@ class IssueCoinsSpec {
     }
 
     function singleCoin() {
-        $coin = $this->lib->issueCoin(new Binary('issuer key'),new Promise(new Binary('foo'), 'my promise'), new Output(new Binary('backer'), new Fraction(42)));
+        $coin = $this->lib->issueCoin(new Binary('issuer key'),new Binary('foo'), 'my promise', new Output(new Binary('backer'), new Fraction(42)));
 
         /** @var Base $base */
         $base = $coin->getInput()->getTransaction();
 
         $this->assert->isInstanceOf($base, Base::class);
-        $this->assert->equals($base->getPromise(),new Promise(new Binary('foo'), 'my promise'));
+        $this->assert->equals($base->getCurrency(), new Binary('foo'));
+        $this->assert->equals($base->getDescription(), 'my promise');
         $this->assert->equals($base->getInputs(), []);
         $this->assert->equals($base->getOutput(), new Output(new Binary('backer'), new Fraction(42)));
         $this->assert->equals($base->getOutputs(), [new Output(new Binary('backer'), new Fraction(42))]);

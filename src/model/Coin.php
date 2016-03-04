@@ -53,13 +53,14 @@ class Coin {
     }
 
     /**
-     * @param Promise $promise
+     * @param string $description
+     * @param Binary $currency
      * @param Output $output
      * @param Signer $signer
      * @return Coin
      */
-    public static function issue(Promise $promise, Output $output, Signer $signer) {
-        return new Coin(new Input(Base::signedBase($promise, $output, $signer), 0));
+    public static function issue($description, Binary $currency, Output $output, Signer $signer) {
+        return new Coin(new Input(Base::signedBase($description, $currency, $output, $signer), 0));
     }
 
     /**

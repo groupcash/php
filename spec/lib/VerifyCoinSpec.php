@@ -10,7 +10,6 @@ use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
 use groupcash\php\model\value\Fraction;
 use groupcash\php\model\Output;
-use groupcash\php\model\Promise;
 use rtens\scrut\Assert;
 
 /**
@@ -26,18 +25,18 @@ class VerifyCoinSpec {
 
     function before() {
         $this->lib = new Groupcash(new FakeAlgorithm());
-        $this->base = $this->lib->issueCoin(new Binary('issuer key'), new Promise(new Binary('coin'), 'I promise'), new Output(new Binary('backer'), new Fraction(1)));
+        $this->base = $this->lib->issueCoin(new Binary('issuer key'), new Binary('coin'), 'I promise', new Output(new Binary('backer'), new Fraction(1)));
 
         $this->one = $this->lib->transferCoins(new Binary('backer key'), [
-            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p1'), new Output(new Binary('backer'), new Fraction(1))),
-            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p2'), new Output(new Binary('backer'), new Fraction(2)))
+            $this->lib->issueCoin(new Binary('i key'), new Binary('coin'), 'p1', new Output(new Binary('backer'), new Fraction(1))),
+            $this->lib->issueCoin(new Binary('i key'), new Binary('coin'), 'p2', new Output(new Binary('backer'), new Fraction(2)))
         ], [
             new Output(new Binary('one'), new Fraction(3))
         ])[0];
 
         $a = $this->lib->transferCoins(new Binary('a key'), [
-            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p3'), new Output(new Binary('a'), new Fraction(5))),
-            $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p4'), new Output(new Binary('a'), new Fraction(7)))
+            $this->lib->issueCoin(new Binary('i key'), new Binary('coin'), 'p3', new Output(new Binary('a'), new Fraction(5))),
+            $this->lib->issueCoin(new Binary('i key'), new Binary('coin'), 'p4', new Output(new Binary('a'), new Fraction(7)))
         ], [
             new Output(new Binary('one'), new Fraction(4)),
             new Output(new Binary('one'), new Fraction(6)),
@@ -47,7 +46,7 @@ class VerifyCoinSpec {
         $this->two = $this->lib->transferCoins(new Binary('one key'), [
             $a[0],
             $this->lib->transferCoins(new Binary('b key'), [
-                $this->lib->issueCoin(new Binary('i key'), new Promise(new Binary('coin'), 'p5'), new Output(new Binary('b'), new Fraction(13))),
+                $this->lib->issueCoin(new Binary('i key'), new Binary('coin'), 'p5', new Output(new Binary('b'), new Fraction(13))),
                 $a[2]
             ], [
                 new Output(new Binary('one'), new Fraction(10)),
@@ -90,7 +89,7 @@ class VerifyCoinSpec {
 
     function inconsistentCurrencies() {
         $this->assertFail('Inconsistent currencies: [Y29pbg==], [bm90IGNvaW4=]', $this->one, function ($tx) {
-            $tx->ins[1]->tx->promise[0] = 'not coin';
+            $tx->ins[1]->tx->in = 'not coin';
             $this->replaceSigs(['coin//p2' => 'not coin//p2'], [$tx->ins[1]->tx, $tx]);
         });
     }
