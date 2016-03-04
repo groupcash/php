@@ -86,7 +86,7 @@ class SerializationSpec {
     function base64() {
         $this->serializer->registerTranscoder('foo', new Base64Transcoder(new JsonTranscoder()));
         $serialized = $this->serializer->serialize(new \DateTime('2011-12-13 UTC'), 'foo');
-        $this->assert->equals($serialized, '&eyJkYXRlIjoiMjAxMS0xMi0xM1QwMDowMDowMCswMDowMCJ9');
+        $this->assert->equals($serialized, '!eyJkYXRlIjoiMjAxMS0xMi0xM1QwMDowMDowMCswMDowMCJ9');
         $this->assert->equals($this->serializer->inflate($serialized), new \DateTime('2011-12-13 UTC'));
     }
 
