@@ -5,7 +5,7 @@ use groupcash\php\io\Transcoder;
 
 class Base64Transcoder implements Transcoder {
 
-    const MARKER = '@';
+    const MARKER = '&';
 
     /** @var Transcoder */
     private $inner;
