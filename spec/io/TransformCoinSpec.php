@@ -50,7 +50,7 @@ class TransformCoinSpec {
                             )
                         ],
                         new Output(new Binary('apu'), new Fraction(42)),
-                        'my print',
+                        new Binary('my print'),
                         'la lisa'),
                     0
                 )],
@@ -94,7 +94,7 @@ class TransformCoinSpec {
                         [
                             'iout' => 0,
                             'tx' => [
-                                'finger' => 'my print',
+                                'hash' => '#my print',
                                 'bases' => [
                                     [
                                         'in' => '#foo',

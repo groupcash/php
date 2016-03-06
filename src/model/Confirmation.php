@@ -7,16 +7,16 @@ use groupcash\php\model\value\Fraction;
 
 class Confirmation extends Transaction {
 
-    /** @var string */
+    /** @var Binary */
     private $hash;
 
     /**
      * @param Base[] $bases
      * @param Output $output
-     * @param string $hash
+     * @param Binary $hash
      * @param string $signature
      */
-    public function __construct(array $bases, Output $output, $hash, $signature) {
+    public function __construct(array $bases, Output $output, Binary $hash, $signature) {
         parent::__construct(
             array_map([$this, 'makeInput'], $bases),
             $this->keepChange($bases, $output),
@@ -41,10 +41,10 @@ class Confirmation extends Transaction {
 
     /**
      * @param string $content
-     * @return string Raw binary output
+     * @return Binary
      */
     public static function hash($content) {
-        return hash('sha256', $content, true);
+        return new Binary(hash('sha256', $content, true));
     }
 
     /**
@@ -71,7 +71,7 @@ class Confirmation extends Transaction {
     }
 
     /**
-     * @return string
+     * @return Binary
      */
     public function getHash() {
         return $this->hash;

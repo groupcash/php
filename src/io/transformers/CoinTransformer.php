@@ -98,7 +98,7 @@ class CoinTransformer implements Transformer {
     private function arrayToTransaction($array, Transcoder $transcoder) {
         if (array_key_exists('that', $array)) {
             return $this->arrayToBase($array, $transcoder);
-        } else if (array_key_exists('finger', $array)) {
+        } else if (array_key_exists('hash', $array)) {
             return $this->arrayToConfirmation($array, $transcoder);
         }
 
@@ -135,7 +135,7 @@ class CoinTransformer implements Transformer {
 
     private function ConfirmationToArray(Confirmation $confirmation, Transcoder $transcoder) {
         return [
-            'finger' => $confirmation->getHash(),
+            'hash' => $transcoder->encode($confirmation->getHash()->getData()),
             'bases' => array_map(function (Base $base) use ($transcoder) {
                 return $this->BaseToArray($base, $transcoder);
             }, $confirmation->getBases()),
@@ -150,7 +150,7 @@ class CoinTransformer implements Transformer {
                 return $this->arrayToBase($array, $transcoder);
             }, $array['bases']),
             $this->arrayToOutput($array['out'], $transcoder),
-            $array['finger'],
+            new Binary($transcoder->decode($array['hash'])),
             $array['sig']
         );
     }

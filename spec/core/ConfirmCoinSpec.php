@@ -48,7 +48,7 @@ class ConfirmCoinSpec {
         $this->assert->equals($confirmation->getHash(),  Confirmation::hash('coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1'));
         $this->assert->equals($confirmation->getSignature(),
             'coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1' . "\0" . 'bart' . "\0" . '1|1' . "\0" .
-            Confirmation::hash('coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1') .
+            Confirmation::hash('coin' . "\0" . 'I promise' . "\0" . 'bart' . "\0" . '1|1')->getData() .
             ' signed with bart key');
     }
 
