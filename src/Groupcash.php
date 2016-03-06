@@ -3,6 +3,7 @@ namespace groupcash\php;
 
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
+use groupcash\php\model\CurrencyRules;
 use groupcash\php\model\Output;
 use groupcash\php\model\signing\Binary;
 use groupcash\php\model\signing\Algorithm;
@@ -37,6 +38,37 @@ class Groupcash {
      */
     public function getAddress(Binary $key) {
         return $this->key->getAddress($key);
+    }
+
+    /**
+     * @param Binary $currencyKey
+     * @param string $rules
+     * @param null|CurrencyRules $previous
+     * @return CurrencyRules
+     */
+    public function signCurrencyRules(Binary $currencyKey, $rules, CurrencyRules $previous = null) {
+        $address = $this->key->getAddress($currencyKey);
+        $rules = CurrencyRules::sign(new Signer($this->key, $currencyKey),
+            $address, $rules, $previous);
+
+        $allRules = [$rules];
+        if ($previous) {
+            $allRules[] = $previous;
+        }
+
+        (new Verification($this->key))->verifyCurrencyRules($allRules)->mustBeOk();
+        return $rules;
+    }
+
+    /**
+     * Signs an Authorization for the given issuer with the currency's key
+     *
+     * @param \groupcash\php\model\signing\Binary $currencyKey
+     * @param \groupcash\php\model\signing\Binary $issuerAddress
+     * @return Authorization
+     */
+    public function authorizeIssuer(Binary $currencyKey, Binary $issuerAddress) {
+        return Authorization::signed($issuerAddress, new Signer($this->key, $currencyKey));
     }
 
     /**
@@ -88,17 +120,6 @@ class Groupcash {
     }
 
     /**
-     * Signs an Authorization for the given issuer with the currency's key
-     *
-     * @param \groupcash\php\model\signing\Binary $currencyKey
-     * @param \groupcash\php\model\signing\Binary $issuerAddress
-     * @return Authorization
-     */
-    public function authorizeIssuer(Binary $currencyKey, Binary $issuerAddress) {
-        return Authorization::signed($issuerAddress, new Signer($this->key, $currencyKey));
-    }
-
-    /**
      * Verifies that the Coin is internally consistent.
      *
      * @param Coin $coin
@@ -113,5 +134,12 @@ class Groupcash {
             $verification->verifyAuthorizations($coin, $authorizations);
         }
         $verification->mustBeOk();
+    }
+
+    /**
+     * @param CurrencyRules[] $rules
+     */
+    public function verifyCurrencyRules(array $rules) {
+        (new Verification($this->key))->verifyCurrencyRules($rules)->mustBeOk();
     }
 }

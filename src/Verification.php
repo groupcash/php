@@ -4,6 +4,7 @@ namespace groupcash\php;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
+use groupcash\php\model\CurrencyRules;
 use groupcash\php\model\Input;
 use groupcash\php\model\signing\Algorithm;
 use groupcash\php\model\signing\Signer;
@@ -85,6 +86,37 @@ class Verification {
             $issuer = $base->getIssuerAddress();
             if (!$this->isAuthorized($issuer, $authorizedByCurrency)) {
                 $this->errors[] = "Not authorized: [$issuer]";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param CurrencyRules[] $rules
+     * @return Verification
+     */
+    public function verifyCurrencyRules(array $rules) {
+        /** @var CurrencyRules[] $byHash */
+        $byHash = [];
+        foreach ($rules as $rule) {
+            $byHash[(string)$rule->hash()] = $rule;
+        }
+
+        foreach ($rules as $rule) {
+            $address = $rule->getCurrencyAddress();
+            if (!$this->key->verify(Signer::squash($rule), $address, $rule->getSignature())) {
+                throw new \Exception("Invalid signature by [$address]");
+            }
+            if ($rule->getPreviousHash()) {
+                $previousHash = (string)$rule->getPreviousHash();
+                if (!array_key_exists($previousHash, $byHash)) {
+                    throw new \Exception("Previous rules not provided [$previousHash]");
+                }
+                $previousCurrency = $byHash[$previousHash]->getCurrencyAddress();
+                if ($previousCurrency != $address) {
+                    $this->errors[] = 'Not signed by original currency';
+                }
             }
         }
 
