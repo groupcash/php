@@ -71,6 +71,7 @@ class TransformCoinSpec {
 
         $array = $this->transformer->toArray($coin, $transcoder);
 
+        $this->assert->isTrue($this->transformer->hasTransformed($array));
         $this->assert->equals($array, [
             'v' => $coin->version(),
             'coin' => [

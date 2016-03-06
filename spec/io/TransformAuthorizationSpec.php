@@ -35,6 +35,7 @@ class TransformAuthorizationSpec {
 
         $array = $this->transformer->toArray($authorization, $transcoder);
 
+        $this->assert->isTrue($this->transformer->hasTransformed($array));
         $this->assert->equals($array, [
             'issuer' => '#issuer',
             'currency' => '#currency',
