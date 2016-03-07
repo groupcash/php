@@ -46,6 +46,13 @@ class Coin {
     }
 
     /**
+     * @return Binary
+     */
+    public function getCurrency() {
+        return $this->getBases()[0]->getCurrency();
+    }
+
+    /**
      * @return Base[]
      */
     public function getBases() {
