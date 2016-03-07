@@ -4,7 +4,7 @@ namespace groupcash\php;
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Base;
 use groupcash\php\model\Coin;
-use groupcash\php\model\CurrencyRules;
+use groupcash\php\model\RuleBook;
 use groupcash\php\model\Input;
 use groupcash\php\model\signing\Algorithm;
 use groupcash\php\model\signing\Signer;
@@ -93,11 +93,11 @@ class Verification {
     }
 
     /**
-     * @param CurrencyRules[] $rules
+     * @param RuleBook[] $rules
      * @return Verification
      */
     public function verifyCurrencyRules(array $rules) {
-        /** @var CurrencyRules[] $byHash */
+        /** @var RuleBook[] $byHash */
         $byHash = [];
         foreach ($rules as $rule) {
             $byHash[(string)$rule->hash()] = $rule;

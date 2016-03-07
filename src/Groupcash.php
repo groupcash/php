@@ -3,7 +3,7 @@ namespace groupcash\php;
 
 use groupcash\php\model\Authorization;
 use groupcash\php\model\Coin;
-use groupcash\php\model\CurrencyRules;
+use groupcash\php\model\RuleBook;
 use groupcash\php\model\Output;
 use groupcash\php\model\signing\Binary;
 use groupcash\php\model\signing\Algorithm;
@@ -24,7 +24,7 @@ class Groupcash {
     /**
      * Generates a new private key.
      *
-     * @return \groupcash\php\model\signing\Binary
+     * @return Binary
      */
     public function generateKey() {
         return $this->key->generateKey();
@@ -34,7 +34,7 @@ class Groupcash {
      * Displays the public key corresponding to the given private key.
      *
      * @param Binary $key
-     * @return \groupcash\php\model\signing\Binary
+     * @return Binary
      */
     public function getAddress(Binary $key) {
         return $this->key->getAddress($key);
@@ -43,28 +43,28 @@ class Groupcash {
     /**
      * @param Binary $currencyKey
      * @param string $rules
-     * @param null|CurrencyRules $previous
-     * @return CurrencyRules
+     * @param null|RuleBook $previous
+     * @return RuleBook
      */
-    public function signCurrencyRules(Binary $currencyKey, $rules, CurrencyRules $previous = null) {
+    public function signRules(Binary $currencyKey, $rules, RuleBook $previous = null) {
         $address = $this->key->getAddress($currencyKey);
-        $rules = CurrencyRules::sign(new Signer($this->key, $currencyKey),
+        $book = RuleBook::signed(new Signer($this->key, $currencyKey),
             $address, $rules, $previous);
 
-        $allRules = [$rules];
+        $allRules = [$book];
         if ($previous) {
             $allRules[] = $previous;
         }
 
         (new Verification($this->key))->verifyCurrencyRules($allRules)->mustBeOk();
-        return $rules;
+        return $book;
     }
 
     /**
      * Signs an Authorization for the given issuer with the currency's key
      *
-     * @param \groupcash\php\model\signing\Binary $currencyKey
-     * @param \groupcash\php\model\signing\Binary $issuerAddress
+     * @param Binary $currencyKey
+     * @param Binary $issuerAddress
      * @return Authorization
      */
     public function authorizeIssuer(Binary $currencyKey, Binary $issuerAddress) {
@@ -87,10 +87,10 @@ class Groupcash {
     /**
      * Transfers the values of one or more coins to one or more targets.
      *
-     * @param \groupcash\php\model\signing\Binary $ownerKey
+     * @param Binary $ownerKey
      * @param Coin[] $coins
      * @param Output[] $outputs
-     * @return \groupcash\php\model\Coin[]
+     * @return Coin[]
      * @throws \Exception
      */
     public function transferCoins(Binary $ownerKey, array $coins, array $outputs) {
@@ -106,7 +106,7 @@ class Groupcash {
     /**
      * Creates a new coin with a value proportional to the bases of the backer.
      *
-     * @param \groupcash\php\model\signing\Binary $backerKey
+     * @param Binary $backerKey
      * @param Coin $coin
      * @return Coin
      * @throws \Exception
@@ -137,7 +137,7 @@ class Groupcash {
     }
 
     /**
-     * @param CurrencyRules[] $rules
+     * @param RuleBook[] $rules
      */
     public function verifyCurrencyRules(array $rules) {
         (new Verification($this->key))->verifyCurrencyRules($rules)->mustBeOk();

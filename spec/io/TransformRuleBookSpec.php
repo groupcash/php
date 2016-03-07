@@ -2,17 +2,17 @@
 namespace spec\groupcash\php\io;
 use groupcash\php\io\Transcoder;
 use groupcash\php\io\transcoders\CallbackTranscoder;
-use groupcash\php\io\transformers\CurrencyRulesTransformer;
-use groupcash\php\model\CurrencyRules;
+use groupcash\php\io\transformers\RuleBookTransformer;
+use groupcash\php\model\RuleBook;
 use groupcash\php\model\signing\Binary;
 use rtens\scrut\Assert;
 
 /**
- * @property CurrencyRulesTransformer transformer <-
+ * @property RuleBookTransformer transformer <-
  * @property Assert assert <-
  * @property Transcoder transcoder
  */
-class TransformCurrencyRulesSpec {
+class TransformRuleBookSpec {
 
     function before() {
         $this->transcoder = new CallbackTranscoder(function ($data) {
@@ -24,11 +24,11 @@ class TransformCurrencyRulesSpec {
 
     function onlyTransformsCurrencyRUles() {
         $this->assert->not($this->transformer->canTransform(\DateTime::class));
-        $this->assert->isTrue($this->transformer->canTransform(CurrencyRules::class));
+        $this->assert->isTrue($this->transformer->canTransform(RuleBook::class));
     }
 
     function roundTrip() {
-        $rules = new CurrencyRules(
+        $rules = new RuleBook(
             new Binary('coin'),
             'My rules',
             new Binary('the previous'),
@@ -48,7 +48,7 @@ class TransformCurrencyRulesSpec {
     }
 
     function noPrevious() {
-        $rules = new CurrencyRules(
+        $rules = new RuleBook(
             new Binary('coin'),
             'My rules',
             null,

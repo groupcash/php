@@ -3,21 +3,21 @@ namespace groupcash\php\io\transformers;
 
 use groupcash\php\io\Transcoder;
 use groupcash\php\io\Transformer;
-use groupcash\php\model\CurrencyRules;
+use groupcash\php\model\RuleBook;
 use groupcash\php\model\signing\Binary;
 
-class CurrencyRulesTransformer implements Transformer {
+class RuleBookTransformer implements Transformer {
 
     /**
      * @param string $class
      * @return bool
      */
     public function canTransform($class) {
-        return $class == CurrencyRules::class;
+        return $class == RuleBook::class;
     }
 
     /**
-     * @param CurrencyRules $object
+     * @param RuleBook $object
      * @param Transcoder $transcoder
      * @return array
      */
@@ -49,7 +49,7 @@ class CurrencyRulesTransformer implements Transformer {
      * @return object
      */
     public function toObject($array, Transcoder $transcoder) {
-        return new CurrencyRules(
+        return new RuleBook(
             new Binary($transcoder->decode($array['by'])),
             $array['rules'],
             array_key_exists('prev', $array)

@@ -5,7 +5,7 @@ use groupcash\php\model\signing\Binary;
 use groupcash\php\model\signing\Finger;
 use groupcash\php\model\signing\Signer;
 
-class CurrencyRules implements Finger {
+class RuleBook implements Finger {
 
     /** @var Binary */
     private $currencyAddress;
@@ -36,13 +36,13 @@ class CurrencyRules implements Finger {
      * @param Signer $currency
      * @param Binary $address
      * @param string $rules
-     * @param null|CurrencyRules $previous
-     * @return CurrencyRules
+     * @param null|RuleBook $previous
+     * @return RuleBook
      */
-    public static function sign(Signer $currency, Binary $address, $rules, CurrencyRules $previous = null) {
+    public static function signed(Signer $currency, Binary $address, $rules, RuleBook $previous = null) {
         $previousHash = $previous ? $previous->hash() : null;
 
-        return new CurrencyRules($address, $rules, $previousHash,
+        return new RuleBook($address, $rules, $previousHash,
             $currency->sign([$address, $rules, $previousHash]));
     }
 
