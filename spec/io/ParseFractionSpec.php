@@ -40,4 +40,11 @@ class ParseFractionSpec {
         $fraction = $this->parser->parse('4.250');
         $this->assert->equals($fraction, new Fraction(425, 100));
     }
+
+    function limit() {
+        $this->try->tryTo(function () {
+            $this->parser->parse('4.123456789');
+        });
+        $this->try->thenTheException_ShouldBeThrown('Maximum precision of 1/' . PHP_INT_MAX . ' exceeded.');
+    }
 }
