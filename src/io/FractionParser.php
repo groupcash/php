@@ -8,13 +8,15 @@ class FractionParser {
     function parse($str) {
         if (is_numeric($str)) {
             $den = 1;
-            while (intval($str * $den) != $str * $den) {
+            $product = $str * $den;
+            while (intval($product) != $product || strpos(strval($product), '.') !== false) {
                 if ($den > PHP_INT_MAX) {
                     throw new \Exception('Maximum precision of 1/' . PHP_INT_MAX . ' exceeded.');
                 }
                 $den *= 10;
+                $product = $str * $den;
             }
-            return new Fraction($str * $den, $den);
+            return new Fraction($product, $den);
         }
         if (strpos($str, '/')) {
             $nomDen = explode('/', $str);
