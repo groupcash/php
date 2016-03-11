@@ -43,14 +43,14 @@ class ParseFractionSpec {
 
     function exceedingPrecision() {
         $this->try->tryTo(function () {
-            $this->parser->parse('4.123456789');
+            $this->parser->parse('4.123456789123456789123456789123456789');
         });
         $this->try->thenTheException_ShouldBeThrown('Maximum precision of 1/' . PHP_INT_MAX . ' exceeded.');
     }
 
     function tooSmall() {
         $this->try->tryTo(function () {
-            $this->parser->parse('1.0E-14');
+            $this->parser->parse('1.0E-90');
         });
         $this->try->thenTheException_ShouldBeThrown('Maximum precision of 1/' . PHP_INT_MAX . ' exceeded.');
     }
