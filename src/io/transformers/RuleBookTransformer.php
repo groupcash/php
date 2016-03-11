@@ -50,12 +50,9 @@ class RuleBookTransformer implements Transformer {
      */
     public function toObject($array, Transcoder $transcoder) {
         return new RuleBook(
-            new Binary($transcoder->decode($array['by'])),
-            $array['rules'],
-            array_key_exists('prev', $array)
-                ? new Binary($transcoder->decode($array['prev']))
-                : null,
-            $array['sig']
+            new Binary($transcoder->decode($array['by'])), $array['rules'], $array['sig'], array_key_exists('prev', $array)
+            ? new Binary($transcoder->decode($array['prev']))
+            : null
         );
     }
 }

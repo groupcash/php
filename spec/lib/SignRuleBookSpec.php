@@ -51,10 +51,7 @@ class SignRuleBookSpec {
         $this->try->tryTo(function () {
             $this->lib->verifyCurrencyRules([
                 new RuleBook(
-                    new Binary('foo'),
-                    'Rules!',
-                    null,
-                    'foo' . "\0" . 'Rules!' . "\0" . ' signed with bar key'
+                    new Binary('foo'), 'Rules!', 'foo' . "\0" . 'Rules!' . "\0" . ' signed with bar key', null
                 )
             ]);
         });

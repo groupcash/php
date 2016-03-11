@@ -13,7 +13,7 @@ class RuleBook implements Finger {
     /** @var string */
     private $rules;
 
-    /** @var Binary */
+    /** @var Binary|null */
     private $previousHash;
 
     /** @var string */
@@ -22,10 +22,10 @@ class RuleBook implements Finger {
     /**
      * @param Binary $currencyAddress
      * @param string $rules
-     * @param Binary|null $previousHash
      * @param string $signature
+     * @param Binary|null $previousHash
      */
-    public function __construct(Binary $currencyAddress, $rules, $previousHash, $signature) {
+    public function __construct(Binary $currencyAddress, $rules, $signature, Binary $previousHash = null) {
         $this->currencyAddress = $currencyAddress;
         $this->rules = $rules;
         $this->previousHash = $previousHash;
@@ -42,8 +42,7 @@ class RuleBook implements Finger {
     public static function signed(Signer $currency, Binary $address, $rules, RuleBook $previous = null) {
         $previousHash = $previous ? $previous->hash() : null;
 
-        return new RuleBook($address, $rules, $previousHash,
-            $currency->sign([$address, $rules, $previousHash]));
+        return new RuleBook($address, $rules, $currency->sign([$address, $rules, $previousHash]), $previousHash);
     }
 
     /**
@@ -75,7 +74,7 @@ class RuleBook implements Finger {
     }
 
     /**
-     * @return Binary
+     * @return Binary|null
      */
     public function getPreviousHash() {
         return $this->previousHash;

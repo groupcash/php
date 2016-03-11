@@ -29,10 +29,7 @@ class TransformRuleBookSpec {
 
     function roundTrip() {
         $rules = new RuleBook(
-            new Binary('coin'),
-            'My rules',
-            new Binary('the previous'),
-            'the signature'
+            new Binary('coin'), 'My rules', 'the signature', new Binary('the previous')
         );
 
         $array = $this->transformer->toArray($rules, $this->transcoder);
@@ -49,10 +46,7 @@ class TransformRuleBookSpec {
 
     function noPrevious() {
         $rules = new RuleBook(
-            new Binary('coin'),
-            'My rules',
-            null,
-            'the signature'
+            new Binary('coin'), 'My rules', 'the signature', null
         );
 
         $array = $this->transformer->toArray($rules, $this->transcoder);
