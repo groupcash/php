@@ -18,3 +18,7 @@ For development, download it with [composer] and execute the specification with 
 
 [composer]: http://getcomposer.org
 [scrut]: https://github.com/rtens/scrut
+
+## License
+
+The *groupcash* PHP implementation is released under the [MIT License](https://opensource.org/licenses/MIT)
